@@ -1,0 +1,1854 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:math' as math;
+import '../models/app_user.dart';
+import '../providers/theme_provider.dart';
+import '../providers/match_evaluations_provider.dart';
+import '../widgets/help_button.dart';
+import 'shared/profile_edit_screen.dart';
+import 'shared/settings_screen.dart';
+
+// ── Paleta semáforo por rendimiento ──────────────────────────────────────────
+Color _statColor(double v) {
+  if (v >= 8.5) return const Color(0xFF34C759); // verde
+  if (v >= 7.0) return const Color(0xFFFF9F0A); // naranja
+  return const Color(0xFFFF3B30); // rojo
+}
+
+// ── Stats del jugador ─────────────────────────────────────────────────────────
+// TEC, RES, FPL vienen del promedio ponderado de evaluaciones del árbitro.
+// VEL, FUE, TÁC son evaluaciones privadas del entrenador (pendiente integración).
+
+// ── Widget de Carta FIFA (TOTW) ──────────────────────────────────────────────
+class _TOTWPlayerCard extends StatelessWidget {
+  final AppUser? user;
+  final Map<String, double> stats;
+  final bool isDark;
+
+  const _TOTWPlayerCard({
+    required this.user,
+    required this.stats,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Calcular Overall (OVR)
+    final avg = stats.values.reduce((a, b) => a + b) / stats.length;
+    final ovr = (avg * 10).round();
+
+    // Mapear stats de 0-10 a 0-99 estilo FIFA
+    final pac = ((stats['VEL'] ?? 0) * 10).round();
+    final sho = ((stats['FPL'] ?? 0) * 10).round();
+    final pas = ((stats['TÁC'] ?? 0) * 10).round();
+    final dri = ((stats['TEC'] ?? 0) * 10).round();
+    final def = ((stats['RES'] ?? 0) * 10).round();
+    final phy = ((stats['FUE'] ?? 0) * 10).round();
+
+    const goldColor = Color(0xFFF4CA25); // Stitch V5 Gold
+    const darkGold = Color(0xFFB8860B);
+
+    return Container(
+      width: 280,
+      height: 440,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF2C2C2C),
+            Color(0xFF0A0A0A),
+            Color(0xFF1A1A1A),
+            Color(0xFF000000),
+          ],
+          stops: [0.0, 0.4, 0.8, 1.0],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: goldColor.withOpacity(0.4),
+            blurRadius: 30,
+            spreadRadius: -5,
+            offset: const Offset(0, 10),
+          ),
+        ],
+        border: Border.all(color: goldColor.withOpacity(0.9), width: 2),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Stack(
+          children: [
+            // Carbon Fiber Texture
+            Positioned.fill(
+              child: Opacity(
+                opacity: 0.1,
+                child: CustomPaint(painter: _CarbonFiberPainter()),
+              ),
+            ),
+
+            // Premium Glossy Overlay
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.white.withOpacity(0.05),
+                      Colors.white.withOpacity(0.01),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            // Brillo superior
+            Positioned(
+              top: -50,
+              left: -50,
+              child: Container(
+                width: 150,
+                height: 150,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [goldColor.withOpacity(0.15), Colors.transparent],
+                  ),
+                ),
+              ),
+            ),
+
+            // Contenido de la carta
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+              child: Column(
+                children: [
+                  // Parte superior: OVR, Logo, Foto
+                  Expanded(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Columna izquierda: OVR, Posición, País, Club
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              '$ovr',
+                              style: const TextStyle(
+                                color: goldColor,
+                                fontSize: 38,
+                                fontWeight: FontWeight.w900,
+                                height: 1.0,
+                              ),
+                            ),
+                            const Text(
+                              'ST',
+                              style: TextStyle(
+                                color: goldColor,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            // Bandera (Placeholder)
+                            Container(
+                              width: 26,
+                              height: 18,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(2),
+                                border: Border.all(color: darkGold, width: 0.5),
+                              ),
+                              child: const Center(
+                                child: Text(
+                                  '🇪🇸',
+                                  style: TextStyle(fontSize: 12),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            // Escudo (Placeholder)
+                            Icon(Icons.shield, color: goldColor, size: 28),
+                          ],
+                        ),
+
+                        // Silueta/Foto del jugador
+                        Expanded(
+                          child: Container(
+                            alignment: Alignment.bottomCenter,
+                            child: Icon(
+                              Icons.directions_run_rounded,
+                              size: 140,
+                              color: Colors.white.withOpacity(0.9),
+                              shadows: [
+                                Shadow(
+                                  color: goldColor.withOpacity(0.5),
+                                  blurRadius: 20,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Separador dorado
+                  Container(
+                    height: 1,
+                    margin: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.transparent,
+                          goldColor.withOpacity(0.8),
+                          Colors.transparent,
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // Nombre
+                  Text(
+                    (user?.name ?? 'M. SILVA').toUpperCase(),
+                    style: const TextStyle(
+                      color: goldColor,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Stats (2 columnas x 3 filas)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Columna 1
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _StatItem(val: pac, label: 'PAC'),
+                          const SizedBox(height: 6),
+                          _StatItem(val: sho, label: 'SHO'),
+                          const SizedBox(height: 6),
+                          _StatItem(val: pas, label: 'PAS'),
+                        ],
+                      ),
+                      const SizedBox(width: 32),
+                      // Columna 2
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _StatItem(val: dri, label: 'DRI'),
+                          const SizedBox(height: 6),
+                          _StatItem(val: def, label: 'DEF'),
+                          const SizedBox(height: 6),
+                          _StatItem(val: phy, label: 'PHY'),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StatItem extends StatelessWidget {
+  final int val;
+  final String label;
+
+  const _StatItem({required this.val, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text(
+          '$val',
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Color(0xFFFFD700),
+            fontSize: 16,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CarbonFiberPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (!size.width.isFinite || !size.height.isFinite) return;
+
+    final paint = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 1;
+
+    for (double i = 0; i < size.width + size.height; i += 8) {
+      canvas.drawLine(Offset(i, 0), Offset(0, i), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+final athleticCVProvider = Provider.autoDispose
+    .family<
+      ({
+        Map<String, double> global,
+        Map<String, double> referee,
+        Map<String, double> coach,
+        Map<String, double> community,
+      }),
+      String
+    >((ref, playerId) {
+      final allEvals = ref
+          .watch(matchEvaluationsProvider)
+          .where((e) => e.playerId == playerId)
+          .toList();
+
+      final refs = allEvals
+          .where((e) => e.source == EvaluationSource.referee)
+          .toList();
+      final coaches = allEvals
+          .where((e) => e.source == EvaluationSource.coach)
+          .toList();
+      final comms = allEvals
+          .where((e) => e.source == EvaluationSource.community)
+          .toList();
+
+      final refStats = _calcSourceAvg(refs);
+      final coachStats = _calcSourceAvg(coaches);
+      final commStats = _calcSourceAvg(comms);
+
+      final global = {
+        'TEC':
+            (refStats['TEC'] ?? 0) * 0.6 +
+            (coachStats['TEC'] ?? 0) * 0.2 +
+            (commStats['TEC'] ?? 0) * 0.2,
+        'VEL':
+            (refStats['VEL'] ?? 0) * 0.6 +
+            (coachStats['VEL'] ?? 0) * 0.2 +
+            (commStats['VEL'] ?? 0) * 0.2,
+        'RES':
+            (refStats['RES'] ?? 0) * 0.6 +
+            (coachStats['RES'] ?? 0) * 0.2 +
+            (commStats['RES'] ?? 0) * 0.2,
+        'FUE':
+            (refStats['FUE'] ?? 0) * 0.6 +
+            (coachStats['FUE'] ?? 0) * 0.2 +
+            (commStats['FUE'] ?? 0) * 0.2,
+        'TÁC':
+            (refStats['TÁC'] ?? 0) * 0.6 +
+            (coachStats['TÁC'] ?? 0) * 0.2 +
+            (commStats['TÁC'] ?? 0) * 0.2,
+        'FPL':
+            (refStats['FPL'] ?? 0) * 0.6 +
+            (coachStats['FPL'] ?? 0) * 0.2 +
+            (commStats['FPL'] ?? 0) * 0.2,
+      };
+
+      return (
+        global: global,
+        referee: refStats,
+        coach: coachStats,
+        community: commStats,
+      );
+    });
+
+Map<String, double> _calcSourceAvg(List<MatchEvaluation> evals) {
+  if (evals.isEmpty) return {};
+  final n = evals.length;
+  double totalWeight = 0;
+  double sumTec = 0, sumRes = 0, sumFP = 0;
+
+  for (int i = 0; i < n; i++) {
+    final weight = (n - i).toDouble();
+    totalWeight += weight;
+    sumTec += evals[i].tecnica * weight;
+    sumRes += evals[i].resistencia * weight;
+    sumFP += evals[i].fairPlay * weight;
+  }
+  return {
+    'TEC': sumTec / totalWeight,
+    'RES': sumRes / totalWeight,
+    'FPL': sumFP / totalWeight,
+    // VEL, FUE, TÁC se asumen tmb en 0 si no hay evals específicas
+  };
+}
+
+// ── Pantalla principal ────────────────────────────────────────────────────────
+class AthleticCVScreen extends ConsumerWidget {
+  final AppUser? viewedUser;
+  const AthleticCVScreen({super.key, this.viewedUser});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = ref.watch(themeProvider) == ThemeMode.dark;
+    final isLocked = ref.watch(safetyLockProvider);
+    final rawUser = ref.watch(sessionProvider);
+
+    // Aplicamos sanitización
+    final user = viewedUser ?? rawUser?.sanitize(isAuthorized: !isLocked);
+    final isCurrentUser = viewedUser == null || viewedUser!.id == rawUser?.id;
+
+    final targetPlayerId = user?.uniqueId ?? 'SLP-XXXX';
+    final state = ref.watch(athleticCVProvider(targetPlayerId));
+    final stats = state.global;
+
+    final bg = AppColors.bg(isDark);
+    final text = AppColors.text(isDark);
+    final muted = AppColors.textMuted(isDark);
+    final surface = AppColors.surface(isDark);
+    final border = AppColors.border(isDark);
+
+    return Scaffold(
+      backgroundColor: bg,
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: () async =>
+              ref.refresh(athleticCVProvider(targetPlayerId)),
+          color: text,
+          backgroundColor: surface,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // ── Header animado ─────────────────────────────────────────
+                if (isCurrentUser)
+                  _FadeSlide(
+                    delay: 0,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'ATHLETIC-CV',
+                          style: TextStyle(
+                            color: muted,
+                            fontSize: 11,
+                            letterSpacing: 3,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            const HelpButton(screenKey: 'athletic_cv'),
+                            const SizedBox(width: 8),
+                            // Crisis Toggle (Simulación)
+                            GestureDetector(
+                              onTap: () => ref
+                                  .read(safetyLockProvider.notifier)
+                                  .toggle(),
+                              child: Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: isLocked
+                                      ? Colors.red.withOpacity(0.1)
+                                      : surface,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: isLocked ? Colors.red : border,
+                                  ),
+                                ),
+                                child: Icon(
+                                  isLocked
+                                      ? Icons.security
+                                      : Icons.security_outlined,
+                                  size: 14,
+                                  color: isLocked ? Colors.red : text,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => const ProfileEditScreen(),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: surface,
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(color: border),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.edit, size: 14, color: text),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'Editar',
+                                      style: TextStyle(
+                                        color: text,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            GestureDetector(
+                              onTap: () {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Row(
+                                      children: [
+                                        Icon(Icons.share, color: bg, size: 20),
+                                        const SizedBox(width: 12),
+                                        const Text(
+                                          'Generando imagen para Instagram...',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    backgroundColor: AppColors.buttonBg(isDark),
+                                    behavior: SnackBarBehavior.floating,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    duration: const Duration(seconds: 3),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: surface,
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(color: border),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.ios_share,
+                                      size: 14,
+                                      color: text,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'Compartir',
+                                      style: TextStyle(
+                                        color: text,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                                );
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: surface,
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(color: border),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.settings_outlined,
+                                      size: 14,
+                                      color: text,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'Ajustes',
+                                      style: TextStyle(
+                                        color: text,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            if (user?.isVerified ?? false)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 5,
+                                ),
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: const Color(
+                                      0xFFFFD700,
+                                    ).withOpacity(0.5),
+                                  ),
+                                  borderRadius: BorderRadius.circular(20),
+                                  color: const Color(
+                                    0xFFFFD700,
+                                  ).withOpacity(0.07),
+                                ),
+                                child: const Row(
+                                  children: [
+                                    Icon(
+                                      Icons.verified,
+                                      size: 13,
+                                      color: Color(0xFFFFD700),
+                                    ),
+                                    SizedBox(width: 5),
+                                    Text(
+                                      'Verificado',
+                                      style: TextStyle(
+                                        color: Color(0xFFFFD700),
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                if (!isCurrentUser)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.arrow_back, color: text),
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                        Text(
+                          'Perfil del Jugador',
+                          style: TextStyle(
+                            color: text,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                if (isCurrentUser) const SizedBox(height: 24),
+
+                // ── Social Metrics & Follow Button (Phase 1) ───────────────
+                _FadeSlide(
+                  delay: 80,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Followers block
+                      Column(
+                        children: [
+                          Text(
+                            '${user?.followersCount ?? 0}',
+                            style: TextStyle(
+                              color: text,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Seguidores',
+                            style: TextStyle(
+                              color: muted,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      // Divider
+                      Container(
+                        height: 30,
+                        width: 1,
+                        margin: const EdgeInsets.symmetric(horizontal: 24),
+                        color: border,
+                      ),
+
+                      // Following block
+                      Column(
+                        children: [
+                          Text(
+                            '${user?.followingCount ?? 0}',
+                            style: TextStyle(
+                              color: text,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Siguiendo',
+                            style: TextStyle(
+                              color: muted,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(width: 32),
+
+                      // Follow Button (Mock interaction)
+                      GestureDetector(
+                        onTap: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Has empezado a seguir a ${user?.name}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              backgroundColor: const Color(0xFF007AFF),
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(
+                              0xFF007AFF,
+                            ), // Blue follow button
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Text(
+                            'Seguir',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 32),
+
+                // ── Pase VIP / QR Button Rediseñado ────────────────────────
+                if (isCurrentUser)
+                  _FadeSlide(
+                    delay: 120,
+                    child: GestureDetector(
+                      onTap: () => _showQRPass(context, user, isDark),
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 24),
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: isDark 
+                                ? [const Color(0xFF2C2C2C), const Color(0xFF1A1A1A)]
+                                : [const Color(0xFFF0F0F0), const Color(0xFFFFFFFF)],
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: isDark ? const Color(0xFF404040) : const Color(0xFFE0E0E0)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: isDark ? Colors.black26 : Colors.black12,
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: isDark ? Colors.black : Colors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: const Color(0xFFF4CA25).withOpacity(0.5)),
+                                  ),
+                                  child: const Icon(
+                                    Icons.qr_code_scanner,
+                                    color: Color(0xFFF4CA25), // Premium gold
+                                    size: 24,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Pase Digital VIP',
+                                      style: TextStyle(
+                                        color: text,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                    Text(
+                                      'Mostrar código QR',
+                                      style: TextStyle(
+                                        color: muted,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            Icon(Icons.chevron_right, color: muted),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
+                // ── Carta FIFA V5 Showcase ──────────────────────────────────
+                _FadeSlide(
+                  delay: 160,
+                  child: Center(
+                    child: _TOTWPlayerCard(
+                      user: user,
+                      stats: stats,
+                      isDark: isDark,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 48),
+
+                // ── Radar Chart ────────────────────────────────────────────
+                _FadeSlide(
+                  delay: 240,
+                  child: Center(
+                    child: _AnimatedRadarChart(scores: stats, isDark: isDark),
+                  ),
+                ),
+
+                const SizedBox(height: 48),
+
+                // ── Label stats ────────────────────────────────────────────
+                _FadeSlide(
+                  delay: 240,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'HABILIDADES CERTIFICADAS',
+                        style: TextStyle(
+                          color: muted,
+                          fontSize: 10,
+                          letterSpacing: 2.5,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          Icon(Icons.lock_outline, size: 10, color: muted),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Solo lectura',
+                            style: TextStyle(color: muted, fontSize: 10),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // ── Lista limpia de stats (sin barras, solo número con color) ─
+                Column(
+                  children: stats.entries.toList().asMap().entries.map((entry) {
+                    final i = entry.key;
+                    final e = entry.value;
+                    return _FadeSlide(
+                      delay: 300 + i * 55,
+                      child: _StatRow(
+                        label: e.key,
+                        value: e.value,
+                        isDark: isDark,
+                      ),
+                    );
+                  }).toList(),
+                ),
+
+                const SizedBox(height: 36),
+
+                // ── Info certificación ─────────────────────────────────────
+                _FadeSlide(
+                  delay: 640,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      color: surface,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: border),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'FUENTES DE VALIDACIÓN',
+                          style: TextStyle(
+                            color: muted,
+                            fontSize: 9,
+                            letterSpacing: 2,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        _WeightRow(
+                          label: 'Árbitro',
+                          sublabel:
+                              'Evaluación clínica · Hasta 3 nominados/partido',
+                          pct: 60,
+                          score: _avg(state.referee),
+                          color: const Color(0xFF007AFF),
+                          isDark: isDark,
+                        ),
+                        const SizedBox(height: 12),
+                        _WeightRow(
+                          label: 'Entrenador',
+                          sublabel:
+                              'Evaluación privada · Partidos y entrenamientos',
+                          pct: 20,
+                          score: _avg(state.coach),
+                          color: const Color(0xFFFF9F0A),
+                          isDark: isDark,
+                        ),
+                        const SizedBox(height: 12),
+                        _WeightRow(
+                          label: 'Comunidad',
+                          sublabel:
+                              'Certificación pública · Online y presencial',
+                          pct: 20,
+                          score: _avg(state.community),
+                          color: const Color(0xFF34C759),
+                          isDark: isDark,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 36),
+
+                // ── Historial de Partidos ──────────────────────────────────
+                _FadeSlide(
+                  delay: 720,
+                  child: _MatchHistorySection(
+                    playerId: targetPlayerId,
+                    isDark: isDark,
+                  ),
+                ),
+
+                const SizedBox(height: 36),
+
+                // ── Historial de Partidos ──────────────────────────────────
+                _FadeSlide(
+                  delay: 720,
+                  child: _MatchHistorySection(
+                    playerId: targetPlayerId,
+                    isDark: isDark,
+                  ),
+                ),
+
+                const SizedBox(height: 50),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Widget de animación de entrada: fade + deslizamiento hacia arriba ─────────
+class _FadeSlide extends StatefulWidget {
+  final Widget child;
+  final int delay; // ms
+  const _FadeSlide({required this.child, required this.delay});
+  @override
+  State<_FadeSlide> createState() => _FadeSlideState();
+}
+
+class _FadeSlideState extends State<_FadeSlide>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c;
+  late final Animation<double> _opacity;
+  late final Animation<Offset> _slide;
+
+  @override
+  void initState() {
+    super.initState();
+    _c = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 550),
+    );
+    _opacity = CurvedAnimation(parent: _c, curve: Curves.easeOut);
+    _slide = Tween<Offset>(
+      begin: const Offset(0, 0.18),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _c, curve: Curves.easeOutCubic));
+    Future.delayed(Duration(milliseconds: widget.delay), () {
+      if (mounted) _c.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _opacity,
+      child: SlideTransition(position: _slide, child: widget.child),
+    );
+  }
+}
+
+// ── Skeleton mientras carga ───────────────────────────────────────────────────
+class _SkeletonRadar extends StatefulWidget {
+  const _SkeletonRadar();
+  @override
+  State<_SkeletonRadar> createState() => _SkeletonRadarState();
+}
+
+class _SkeletonRadarState extends State<_SkeletonRadar>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c;
+  @override
+  void initState() {
+    super.initState();
+    _c = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return AnimatedBuilder(
+      animation: _c,
+      builder: (_, __) => Container(
+        width: 280,
+        height: 280,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Color.lerp(
+            isDark ? const Color(0xFF111111) : const Color(0xFFF5F5F7),
+            isDark ? const Color(0xFF1C1C1E) : const Color(0xFFE8E8EA),
+            _c.value,
+          ),
+        ),
+        child: Center(
+          child: SizedBox(
+            width: 22,
+            height: 22,
+            child: CircularProgressIndicator(
+              color: const Color(0xFF007AFF).withOpacity(0.5),
+              strokeWidth: 1.5,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// _SkeletonStatsList removed as it is no longer used in the V5 design.
+
+// ── Fila de stat — número + color semáforo, SIN barra ────────────────────────
+class _StatRow extends StatefulWidget {
+  final String label;
+  final double value;
+  final bool isDark;
+  const _StatRow({
+    required this.label,
+    required this.value,
+    required this.isDark,
+  });
+  @override
+  State<_StatRow> createState() => _StatRowState();
+}
+
+class _StatRowState extends State<_StatRow>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c;
+  late final Animation<double> _num;
+
+  @override
+  void initState() {
+    super.initState();
+    _c = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
+    _num = CurvedAnimation(parent: _c, curve: Curves.easeOutCubic);
+    _c.forward();
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final muted = AppColors.textMuted(widget.isDark);
+    final border = AppColors.border(widget.isDark);
+    final vc = _statColor(widget.value);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 2),
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: border, width: 0.5)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Etiqueta + indicador de candado
+          Row(
+            children: [
+              Container(
+                width: 4,
+                height: 4,
+                margin: const EdgeInsets.only(right: 10),
+                decoration: BoxDecoration(color: vc, shape: BoxShape.circle),
+              ),
+              Text(
+                widget.label,
+                style: TextStyle(
+                  color: muted,
+                  fontSize: 12,
+                  letterSpacing: 2,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Icon(Icons.lock_outline, size: 9, color: muted.withOpacity(0.5)),
+            ],
+          ),
+
+          // Número contado animado con color semáforo
+          AnimatedBuilder(
+            animation: _num,
+            builder: (_, __) {
+              final displayed = widget.value * _num.value;
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Text(
+                    displayed.toStringAsFixed(1),
+                    style: TextStyle(
+                      color: vc,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                  Text(
+                    ' /10',
+                    style: TextStyle(
+                      color: muted,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Barra de peso de validación ───────────────────────────────────────────────
+class _WeightRow extends StatefulWidget {
+  final String label;
+  final String? sublabel;
+  final int pct;
+  final double score;
+  final Color color;
+  final bool isDark;
+  const _WeightRow({
+    required this.label,
+    required this.pct,
+    required this.score,
+    required this.color,
+    required this.isDark,
+    this.sublabel,
+  });
+  @override
+  State<_WeightRow> createState() => _WeightRowState();
+}
+
+class _WeightRowState extends State<_WeightRow>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c;
+  late final Animation<double> _w;
+  @override
+  void initState() {
+    super.initState();
+    _c = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    _w = CurvedAnimation(parent: _c, curve: Curves.easeOutCubic);
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (mounted) _c.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final muted = AppColors.textMuted(widget.isDark);
+    final border = AppColors.border(widget.isDark);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      margin: const EdgeInsets.only(right: 8),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: widget.color,
+                      ),
+                    ),
+                    Text(
+                      widget.label,
+                      style: TextStyle(
+                        color: AppColors.text(widget.isDark),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+                if (widget.sublabel != null) ...[
+                  const SizedBox(height: 3),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 16),
+                    child: Text(
+                      widget.sublabel!,
+                      style: TextStyle(
+                        color: muted,
+                        fontSize: 10,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            Row(
+              children: [
+                Text(
+                  widget.score.toStringAsFixed(1),
+                  style: TextStyle(
+                    color: widget.color,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                Text(
+                  ' /10',
+                  style: TextStyle(
+                    color: muted.withOpacity(0.5),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  '${widget.pct}%',
+                  style: TextStyle(
+                    color: widget.color.withOpacity(0.6),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        AnimatedBuilder(
+          animation: _w,
+          builder: (_, __) => ClipRRect(
+            borderRadius: BorderRadius.circular(3),
+            child: LinearProgressIndicator(
+              value: (widget.pct / 100.0) * _w.value,
+              minHeight: 3,
+              backgroundColor: border,
+              valueColor: AlwaysStoppedAnimation(widget.color.withOpacity(0.8)),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Animated Radar Chart ──────────────────────────────────────────────────────
+class _AnimatedRadarChart extends StatefulWidget {
+  final Map<String, double> scores;
+  final bool isDark;
+  const _AnimatedRadarChart({required this.scores, required this.isDark});
+
+  @override
+  State<_AnimatedRadarChart> createState() => _AnimatedRadarChartState();
+}
+
+class _AnimatedRadarChartState extends State<_AnimatedRadarChart>
+    with TickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<double> _anim;
+  // Pulso sutil continuo
+  late final AnimationController _pulse;
+  late final Animation<double> _pulseAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    );
+    _anim = CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic);
+    _ctrl.forward(from: 0);
+
+    _pulse = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2200),
+    )..repeat(reverse: true);
+    _pulseAnim = CurvedAnimation(parent: _pulse, curve: Curves.easeInOut);
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => _ctrl.forward(from: 0),
+      child: AnimatedBuilder(
+        animation: Listenable.merge([_anim, _pulseAnim]),
+        builder: (_, __) => CustomPaint(
+          size: const Size(280, 280),
+          painter: _RadarPainter(
+            scores: widget.scores,
+            progress: _anim.value,
+            pulse: _pulseAnim.value,
+            isDark: widget.isDark,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Radar Painter ─────────────────────────────────────────────────────────────
+class _RadarPainter extends CustomPainter {
+  final Map<String, double> scores;
+  final double progress;
+  final double pulse;
+  final bool isDark;
+  const _RadarPainter({
+    required this.scores,
+    required this.progress,
+    required this.pulse,
+    required this.isDark,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final cx = size.width / 2;
+    final cy = size.height / 2;
+    final r = cx * 0.76;
+    final n = scores.length;
+    final angle = (2 * math.pi) / n;
+
+    final gridColor = isDark
+        ? Colors.white.withOpacity(0.07)
+        : Colors.black.withOpacity(0.06);
+    final spokeColor = isDark
+        ? Colors.white.withOpacity(0.04)
+        : Colors.black.withOpacity(0.05);
+
+    // ── Anillos de cuadrícula ─────────────────────────────────────────────
+    final gridPaint = Paint()
+      ..color = gridColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+    for (int ring = 1; ring <= 5; ring++) {
+      final rr = r * ring / 5;
+      final path = Path();
+      for (int i = 0; i < n; i++) {
+        final a = i * angle - math.pi / 2;
+        final pt = Offset(cx + rr * math.cos(a), cy + rr * math.sin(a));
+        i == 0 ? path.moveTo(pt.dx, pt.dy) : path.lineTo(pt.dx, pt.dy);
+      }
+      path.close();
+      canvas.drawPath(path, gridPaint);
+    }
+
+    // ── Radios (spokes) ───────────────────────────────────────────────────
+    for (int i = 0; i < n; i++) {
+      final a = i * angle - math.pi / 2;
+      canvas.drawLine(
+        Offset(cx, cy),
+        Offset(cx + r * math.cos(a), cy + r * math.sin(a)),
+        Paint()
+          ..color = spokeColor
+          ..strokeWidth = 1,
+      );
+    }
+
+    // ── Construir vértices y colores ──────────────────────────────────────
+    final entries = scores.entries.toList();
+    final totalPoints = n + 1;
+    final drawnCount = (progress * totalPoints).ceil().clamp(1, totalPoints);
+
+    final dataPath = Path();
+    final List<Offset> points = [];
+    final List<Color> colors = [];
+    for (int i = 0; i < n; i++) {
+      final v = entries[i].value / 10.0;
+      final a = i * angle - math.pi / 2;
+      points.add(Offset(cx + r * v * math.cos(a), cy + r * v * math.sin(a)));
+      colors.add(_statColor(entries[i].value));
+    }
+
+    // Color promedio del relleno
+    final avgColor = colors.fold<Color>(
+      Colors.transparent,
+      (acc, c) => Color.lerp(acc, c, 0.5)!,
+    );
+
+    // Dibujado progresivo
+    for (int i = 0; i < drawnCount && i < n; i++) {
+      if (i == 0) {
+        dataPath.moveTo(points[0].dx, points[0].dy);
+      } else {
+        if (i == drawnCount - 1 && drawnCount < totalPoints) {
+          final segProgress = (progress * totalPoints) - (drawnCount - 1);
+          final prev = points[i - 1];
+          final curr = points[i];
+          final mid = Offset.lerp(prev, curr, segProgress)!;
+          dataPath.lineTo(mid.dx, mid.dy);
+        } else {
+          dataPath.lineTo(points[i].dx, points[i].dy);
+        }
+      }
+    }
+    if (drawnCount >= n) dataPath.close();
+
+    // Relleno con gradiente radial del color promedio + pulso sutil
+    canvas.drawPath(
+      dataPath,
+      Paint()
+        ..shader = RadialGradient(
+          colors: [
+            avgColor.withOpacity((0.22 + 0.06 * pulse) * progress),
+            avgColor.withOpacity(0.03),
+          ],
+        ).createShader(Rect.fromCircle(center: Offset(cx, cy), radius: r))
+        ..style = PaintingStyle.fill,
+    );
+
+    // Borde exterior con glow (color promedio)
+    canvas.drawPath(
+      dataPath,
+      Paint()
+        ..color = avgColor.withOpacity((0.7 + 0.2 * pulse) * progress)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.8
+        ..strokeJoin = StrokeJoin.round
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, 5 + 2 * pulse),
+    );
+
+    // Línea nítida encima
+    canvas.drawPath(
+      dataPath,
+      Paint()
+        ..color = Colors.white.withOpacity(0.85 * progress)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.4
+        ..strokeJoin = StrokeJoin.round,
+    );
+
+    // ── Puntos de color en vértices (semáforo) ────────────────────────────
+    for (int i = 0; i < n; i++) {
+      if (i >= drawnCount) break;
+      final vc = colors[i];
+      // Halo exterior con pulso
+      canvas.drawCircle(
+        points[i],
+        10 + 3 * pulse,
+        Paint()
+          ..color = vc.withOpacity((0.2 + 0.1 * pulse) * progress)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8),
+      );
+      // Punto sólido del color de la stat
+      canvas.drawCircle(
+        points[i],
+        4.5,
+        Paint()..color = vc.withOpacity(progress),
+      );
+      // Centro blanco
+      canvas.drawCircle(
+        points[i],
+        2.0,
+        Paint()..color = Colors.white.withOpacity(progress),
+      );
+
+      // Label con el color de la stat
+      final la = i * angle - math.pi / 2;
+      final labelOffset = Offset(
+        cx + (r + 24) * math.cos(la),
+        cy + (r + 24) * math.sin(la),
+      );
+      _drawLabel(canvas, entries[i].key, labelOffset, vc.withOpacity(progress));
+    }
+  }
+
+  void _drawLabel(Canvas canvas, String text, Offset offset, Color color) {
+    final tp = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: TextStyle(
+          color: color,
+          fontSize: 11,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 1.5,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    tp.paint(
+      canvas,
+      Offset(offset.dx - tp.width / 2, offset.dy - tp.height / 2),
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _RadarPainter old) =>
+      old.progress != progress || old.pulse != pulse || old.isDark != isDark;
+}
+
+// ── Badge de gamificación ────────────────────────────────────────────────────
+// _BadgeIcon removed as it is no longer used in the V5 design.
+
+void _showQRPass(BuildContext context, AppUser? user, bool isDark) {
+  if (user == null) return;
+  showModalBottomSheet(
+    context: context,
+    backgroundColor: AppColors.surface(isDark),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    ),
+    builder: (_) => Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 28),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 36,
+            height: 4,
+            decoration: BoxDecoration(
+              color: AppColors.border(isDark),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 28),
+          Text(
+            'PASE QR - EVENTO FASE 0',
+            style: TextStyle(
+              color: AppColors.textMuted(isDark),
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 2,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Icon(Icons.qr_code_2, size: 140, color: Colors.black),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            user.uniqueId,
+            style: TextStyle(
+              color: AppColors.text(isDark),
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 2,
+              fontFamily: 'Courier',
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            user.name.toUpperCase(),
+            style: TextStyle(
+              color: AppColors.textMuted(isDark),
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 24),
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.verified, color: Colors.green, size: 16),
+              SizedBox(width: 6),
+              Text(
+                'Identidad Validada',
+                style: TextStyle(
+                  color: Colors.green,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    ),
+  );
+}
+
+double _avg(Map<String, double> stats) {
+  if (stats.isEmpty) return 0.0;
+  return stats.values.reduce((a, b) => a + b) / stats.length;
+}
+
+// ── Historial de Partidos (Transparencia) ───────────────────────────────────
+class _MatchHistorySection extends ConsumerWidget {
+  final String playerId;
+  final bool isDark;
+
+  const _MatchHistorySection({required this.playerId, required this.isDark});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final allEvals = ref.watch(matchEvaluationsProvider);
+    final userEvals = allEvals.where((e) => e.playerId == playerId).toList();
+
+    // Ordenar de más reciente a más antiguo
+    userEvals.sort((a, b) => b.date.compareTo(a.date));
+
+    // Tomar solo los últimos 3
+    final recent = userEvals.take(3).toList();
+
+    if (recent.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final surface = AppColors.surface(isDark);
+    final text = AppColors.text(isDark);
+    final muted = AppColors.textMuted(isDark);
+    final border = AppColors.border(isDark);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'HISTORIAL DE PARTIDOS',
+          style: TextStyle(
+            color: muted,
+            fontSize: 11,
+            letterSpacing: 2,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          decoration: BoxDecoration(
+            color: surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: border),
+          ),
+          child: Column(
+            children: recent.asMap().entries.map((entry) {
+              final i = entry.key;
+              final e = entry.value;
+
+              // Promedio simple para mostrar un solo número "semaforizado"
+              final avg =
+                  (e.tecnica + e.resistencia + e.fairPlay) /
+                  ((e.tecnica > 0 ? 1 : 0) +
+                          (e.resistencia > 0 ? 1 : 0) +
+                          (e.fairPlay > 0 ? 1 : 0))
+                      .clamp(1, 3);
+              final color = _statColor(avg);
+
+              // Identificar la fuente
+              IconData sourceIcon;
+              String sourceText;
+              if (e.source == EvaluationSource.referee) {
+                sourceIcon = Icons.sports;
+                sourceText = 'Árbitro';
+              } else if (e.source == EvaluationSource.coach) {
+                sourceIcon = Icons.sports_kabaddi;
+                sourceText = 'Entrenador';
+              } else {
+                sourceIcon = Icons.groups;
+                sourceText = 'Comunidad';
+              }
+
+              return Column(
+                children: [
+                  ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    leading: CircleAvatar(
+                      backgroundColor: color.withOpacity(0.15),
+                      child: Text(
+                        avg.toStringAsFixed(1),
+                        style: TextStyle(
+                          color: color,
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    title: Row(
+                      children: [
+                        Icon(sourceIcon, size: 14, color: muted),
+                        const SizedBox(width: 4),
+                        Text(
+                          sourceText,
+                          style: TextStyle(
+                            color: text,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                    subtitle: Text(
+                      'Partido SLP-${e.matchId.hashCode.abs().toString().substring(0, 4)}',
+                      style: TextStyle(color: muted, fontSize: 11),
+                    ),
+                    trailing: Text(
+                      '${e.date.day.toString().padLeft(2, '0')}/${e.date.month.toString().padLeft(2, '0')}/${e.date.year}',
+                      style: TextStyle(color: muted, fontSize: 12),
+                    ),
+                  ),
+                  if (i < recent.length - 1)
+                    Divider(
+                      color: border,
+                      height: 1,
+                      indent: 16,
+                      endIndent: 16,
+                    ),
+                ],
+              );
+            }).toList(),
+          ),
+        ),
+      ],
+    );
+  }
+}
