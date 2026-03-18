@@ -6,7 +6,18 @@ import '../models/app_user.dart';
 import '../widgets/help_button.dart';
 
 class RefereeTerminalScreen extends ConsumerStatefulWidget {
-  const RefereeTerminalScreen({super.key});
+  final String? matchId;
+  final String? matchName;
+  final String? playerId;
+  final String? playerName;
+
+  const RefereeTerminalScreen({
+    super.key,
+    this.matchId,
+    this.matchName,
+    this.playerId,
+    this.playerName,
+  });
 
   @override
   ConsumerState<RefereeTerminalScreen> createState() =>
@@ -19,11 +30,10 @@ class _RefereeTerminalScreenState extends ConsumerState<RefereeTerminalScreen> {
   double _fairPlay = 5.0;
   bool _isSealed = false;
 
-  // Partido actual (en producción vendría del fixture seleccionado)
-  final String _matchName = 'Madrid U19 Summer Cup · 03 Mar';
-  final String _playerId = 'SLP-0982';
-  final String _playerName = 'Marco Silva';
-  final String _playerPos = 'Delantero';
+  late final String _matchName = widget.matchName ?? 'Madrid U19 Summer Cup · 03 Mar';
+  late final String _playerId = widget.playerId ?? 'SLP-0982';
+  late final String _playerName = widget.playerName ?? 'Marco Silva';
+  final String _playerPos = 'ND';
 
   @override
   Widget build(BuildContext context) {
@@ -399,7 +409,7 @@ class _RefereeTerminalScreenState extends ConsumerState<RefereeTerminalScreen> {
   void _seal(BuildContext context) {
     setState(() => _isSealed = true);
 
-    final mId = 'M${DateTime.now().millisecondsSinceEpoch}';
+    final mId = widget.matchId ?? 'M${DateTime.now().millisecondsSinceEpoch}';
     final eval = MatchEvaluation(
       matchId: mId,
       matchName: _matchName,

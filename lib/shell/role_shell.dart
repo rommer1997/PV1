@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user_role.dart';
 import '../screens/athletic_cv_screen.dart';
 import '../screens/stadium_feed_screen.dart';
-import '../screens/referee_terminal_screen.dart';
 import '../screens/scout/scout_marketplace_screen.dart';
 import '../screens/scout/scout_dashboard_screen.dart';
 import '../screens/coach/coach_dashboard_screen.dart';
@@ -14,8 +13,9 @@ import '../screens/journalist/journalist_screen.dart';
 import '../screens/brand/brand_dashboard_screen.dart';
 import '../screens/shared/wallet_screen.dart';
 import '../screens/auth/welcome_screen.dart';
-import '../screens/media/media_feed_screen.dart';
 import '../screens/staff/staff_dashboard_screen.dart';
+import '../screens/shared/global_search_screen.dart';
+import '../screens/shared/agenda_screen.dart';
 import '../providers/theme_provider.dart';
 import '../services/user_storage_service.dart';
 
@@ -35,146 +35,63 @@ class _RoleShellState extends ConsumerState<RoleShell> {
       case UserRole.player:
         return [
           _NavItem(Icons.person_outline, 'Perfil', AthleticCVScreen()),
-          _NavItem(Icons.play_circle_outline, 'Media', const MediaFeedScreen()),
-          _NavItem(
-            Icons.dynamic_feed_outlined,
-            'Feed',
-            const StadiumFeedScreen(),
-          ),
-          _NavItem(
-            Icons.account_balance_wallet_outlined,
-            'Wallet',
-            const WalletScreen(),
-          ),
+          _NavItem(Icons.calendar_today, 'Agenda', const AgendaScreen()),
+          const _NavItem(Icons.search, 'Descubrir', GlobalSearchScreen()),
+          const _NavItem(Icons.dynamic_feed_outlined, 'Feed', StadiumFeedScreen()),
+          const _NavItem(Icons.account_balance_wallet_outlined, 'Wallet', WalletScreen()),
         ];
-
       case UserRole.tutor:
         return [
-          _NavItem(
-            Icons.approval_outlined,
-            'Aprobaciones',
-            const TutorApprovalsScreen(),
-          ),
+          const _NavItem(Icons.approval_outlined, 'Docs', TutorApprovalsScreen()),
           _NavItem(Icons.person_outline, 'Hijo', AthleticCVScreen()),
-          _NavItem(
-            Icons.dynamic_feed_outlined,
-            'Feed',
-            const StadiumFeedScreen(),
-          ),
+          const _NavItem(Icons.calendar_today, 'Torneos', AgendaScreen()),
+          const _NavItem(Icons.dynamic_feed_outlined, 'Feed', StadiumFeedScreen()),
         ];
       case UserRole.coach:
         return [
-          _NavItem(
-            Icons.sports_outlined,
-            'Equipo',
-            const CoachDashboardScreen(),
-          ),
-          _NavItem(
-            Icons.storefront_outlined,
-            'Mercado',
-            const CoachMarketplaceScreen(),
-          ),
-          _NavItem(
-            Icons.dynamic_feed_outlined,
-            'Feed',
-            const StadiumFeedScreen(),
-          ),
-          _NavItem(
-            Icons.account_balance_wallet_outlined,
-            'Wallet',
-            const WalletScreen(),
-          ),
+          const _NavItem(Icons.sports_outlined, 'Equipo', CoachDashboardScreen()),
+          const _NavItem(Icons.calendar_today, 'Agenda', AgendaScreen()),
+          const _NavItem(Icons.storefront_outlined, 'Mercado', CoachMarketplaceScreen()),
+          const _NavItem(Icons.account_balance_wallet_outlined, 'Wallet', WalletScreen()),
         ];
       case UserRole.referee:
-        // ⚖️ Árbitro: SIN acceso al feed social ni chat
+        // ⚖️ Árbitro: Usa la Agenda para seleccionar el partido y al jugador a evaluar.
         return [
-          _NavItem(
-            Icons.gavel_outlined,
-            'Terminal',
-            const RefereeTerminalScreen(),
-          ),
+          const _NavItem(Icons.calendar_month_outlined, 'Designaciones', AgendaScreen()),
+          const _NavItem(Icons.search, 'Historiales', GlobalSearchScreen()),
         ];
       case UserRole.scout:
         return [
-          _NavItem(Icons.search, 'Mercado', const ScoutMarketplaceScreen()),
-          _NavItem(
-            Icons.dashboard_outlined,
-            'Favoritos',
-            const ScoutDashboardScreen(),
-          ),
-          _NavItem(
-            Icons.dynamic_feed_outlined,
-            'Feed',
-            const StadiumFeedScreen(),
-          ),
-          _NavItem(
-            Icons.account_balance_wallet_outlined,
-            'Wallet',
-            const WalletScreen(),
-          ),
+          const _NavItem(Icons.dashboard_outlined, 'Favoritos', ScoutDashboardScreen()),
+          const _NavItem(Icons.calendar_today, 'Agenda', AgendaScreen()),
+          const _NavItem(Icons.search, 'Mercado', ScoutMarketplaceScreen()),
+          const _NavItem(Icons.account_balance_wallet_outlined, 'Wallet', WalletScreen()),
         ];
       case UserRole.journalist:
         return [
-          _NavItem(Icons.mic_outlined, 'Studio', const JournalistScreen()),
-          _NavItem(
-            Icons.dynamic_feed_outlined,
-            'Feed',
-            const StadiumFeedScreen(),
-          ),
-          _NavItem(
-            Icons.account_balance_wallet_outlined,
-            'Wallet',
-            const WalletScreen(),
-          ),
+          const _NavItem(Icons.mic_outlined, 'Studio', JournalistScreen()),
+          const _NavItem(Icons.search, 'Búsqueda', GlobalSearchScreen()),
+          const _NavItem(Icons.calendar_today, 'Cartelera', AgendaScreen()),
+          const _NavItem(Icons.dynamic_feed_outlined, 'Noticias', StadiumFeedScreen()),
         ];
       case UserRole.brand:
         return [
-          _NavItem(
-            Icons.campaign_outlined,
-            'Campañas',
-            const BrandDashboardScreen(),
-          ),
-          _NavItem(
-            Icons.dynamic_feed_outlined,
-            'Feed',
-            const StadiumFeedScreen(),
-          ),
-          _NavItem(
-            Icons.account_balance_wallet_outlined,
-            'Wallet',
-            const WalletScreen(),
-          ),
+          const _NavItem(Icons.campaign_outlined, 'Campañas', BrandDashboardScreen()),
+          const _NavItem(Icons.search, 'Talentos', GlobalSearchScreen()),
+          const _NavItem(Icons.dynamic_feed_outlined, 'Tendencias', StadiumFeedScreen()),
         ];
       case UserRole.fan:
         return [
-          _NavItem(
-            Icons.emoji_events_outlined,
-            'Comunidad',
-            const PredictScreen(),
-          ),
-          _NavItem(
-            Icons.dynamic_feed_outlined,
-            'Feed',
-            const StadiumFeedScreen(),
-          ),
-          _NavItem(
-            Icons.account_balance_wallet_outlined,
-            'Wallet',
-            const WalletScreen(),
-          ),
+          const _NavItem(Icons.emoji_events_outlined, 'Predecir', PredictScreen()),
+          const _NavItem(Icons.calendar_today, 'Cartelera', AgendaScreen()),
+          const _NavItem(Icons.search, 'Ídolos', GlobalSearchScreen()),
+          const _NavItem(Icons.account_balance_wallet_outlined, 'Wallet', WalletScreen()),
         ];
       case UserRole.staff:
         return [
-          _NavItem(
-            Icons.admin_panel_settings_outlined,
-            'Admin',
-            const StaffDashboardScreen(),
-          ),
-          _NavItem(
-            Icons.dynamic_feed_outlined,
-            'Feed',
-            const StadiumFeedScreen(),
-          ),
+          const _NavItem(Icons.admin_panel_settings_outlined, 'Admin', StaffDashboardScreen()),
+          const _NavItem(Icons.search, 'Auditoría', GlobalSearchScreen()),
+          const _NavItem(Icons.calendar_today, 'Ligas', AgendaScreen()),
         ];
     }
   }
