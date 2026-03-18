@@ -103,7 +103,7 @@ class _GlowButtonState extends State<GlowButton>
             boxShadow: widget.selected
                 ? [
                     BoxShadow(
-                      color: _activeBg(widget.isDark).withOpacity(0.35),
+                      color: _activeBg(widget.isDark).withValues(alpha: 0.35),
                       blurRadius: 12,
                       spreadRadius: 1,
                     ),
@@ -138,7 +138,7 @@ class _GlowButtonState extends State<GlowButton>
                 if (widget.selected)
                   AnimatedBuilder(
                     animation: _shimmerAnim,
-                    builder: (_, __) {
+                    builder: (_, _) {
                       return ShaderMask(
                         blendMode: BlendMode.srcATop,
                         shaderCallback: (bounds) {
@@ -146,7 +146,7 @@ class _GlowButtonState extends State<GlowButton>
                           return LinearGradient(
                             colors: [
                               Colors.transparent,
-                              Colors.white.withOpacity(0.22),
+                              Colors.white.withValues(alpha: 0.22),
                               Colors.transparent,
                             ],
                             stops: const [0.0, 0.5, 1.0],
@@ -156,7 +156,7 @@ class _GlowButtonState extends State<GlowButton>
                         },
                         child: Container(
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.01),
+                            color: Colors.white.withValues(alpha: 0.01),
                             borderRadius: BorderRadius.circular(
                               widget.borderRadius,
                             ),
@@ -249,12 +249,12 @@ class _GlowCTAButtonState extends State<GlowCTAButton>
           duration: const Duration(milliseconds: 200),
           height: 56,
           decoration: BoxDecoration(
-            color: widget.onTap == null ? accent.withOpacity(0.2) : accent,
+            color: widget.onTap == null ? accent.withValues(alpha: 0.2) : accent,
             borderRadius: BorderRadius.circular(30),
             boxShadow: widget.onTap != null
                 ? [
                     BoxShadow(
-                      color: accent.withOpacity(0.35),
+                      color: accent.withValues(alpha: 0.35),
                       blurRadius: 16,
                       offset: const Offset(0, 4),
                     ),
@@ -268,12 +268,12 @@ class _GlowCTAButtonState extends State<GlowCTAButton>
               // Shimmer sweep
               AnimatedBuilder(
                 animation: _shimmer,
-                builder: (_, __) => ShaderMask(
+                builder: (_, _) => ShaderMask(
                   blendMode: BlendMode.srcATop,
                   shaderCallback: (b) => LinearGradient(
                     colors: [
                       Colors.transparent,
-                      Colors.white.withOpacity(0.2),
+                      Colors.white.withValues(alpha: 0.2),
                       Colors.transparent,
                     ],
                     stops: const [0.0, 0.5, 1.0],

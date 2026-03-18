@@ -316,7 +316,7 @@ class _CampaignCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
             decoration: BoxDecoration(
-              color: const Color(0xFF34C759).withOpacity(0.15),
+              color: const Color(0xFF34C759).withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/theme_provider.dart';
-import '../../services/permission_service.dart';
-import '../../models/user_role.dart';
 import '../../providers/match_evaluations_provider.dart';
 
 // Watchlist notification (mock)
@@ -304,7 +302,7 @@ class _ScoutMarketplaceScreenState
                     : ListView.separated(
                         padding: const EdgeInsets.symmetric(horizontal: 28),
                         itemCount: filtered.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 14),
+                        separatorBuilder: (_, _) => const SizedBox(height: 14),
                         itemBuilder: (ctx, i) => _ScoutPlayerCard(
                           player: filtered[i],
                           isDark: isDark,
@@ -324,7 +322,7 @@ class _ScoutMarketplaceScreenState
                     : ListView.separated(
                         padding: const EdgeInsets.symmetric(horizontal: 28),
                         itemCount: watchlistPlayers.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 14),
+                        separatorBuilder: (_, _) => const SizedBox(height: 14),
                         itemBuilder: (ctx, i) => _ScoutPlayerCard(
                           player: watchlistPlayers[i],
                           isDark: isDark,
@@ -404,7 +402,7 @@ class _ScoutPlayerCardState extends ConsumerState<_ScoutPlayerCard> {
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
           color: isFav
-              ? AppColors.text(isDark).withOpacity(0.3)
+              ? AppColors.text(isDark).withValues(alpha: 0.3)
               : AppColors.border(isDark),
         ),
       ),
@@ -481,9 +479,9 @@ class _ScoutPlayerCardState extends ConsumerState<_ScoutPlayerCard> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.08),
+                color: Colors.orange.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
               ),
               child: Row(
                 children: [
@@ -496,7 +494,7 @@ class _ScoutPlayerCardState extends ConsumerState<_ScoutPlayerCard> {
                   Text(
                     'Perfil protegido — menor de edad. Contacto vía Tutor.',
                     style: TextStyle(
-                      color: Colors.orange.withOpacity(0.9),
+                      color: Colors.orange.withValues(alpha: 0.9),
                       fontSize: 11,
                     ),
                   ),

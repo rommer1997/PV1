@@ -256,8 +256,8 @@ class _KycCard extends StatelessWidget {
           color: isPending
               ? AppColors.border(isDark)
               : (item.status == 'aprobado'
-                    ? Colors.green.withOpacity(0.4)
-                    : Colors.red.withOpacity(0.4)),
+                    ? Colors.green.withValues(alpha: 0.4)
+                    : Colors.red.withValues(alpha: 0.4)),
         ),
       ),
       child: Column(
@@ -295,7 +295,7 @@ class _KycCard extends StatelessWidget {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: _statusColor(item.status).withOpacity(0.12),
+                  color: _statusColor(item.status).withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -342,7 +342,7 @@ class _KycCard extends StatelessWidget {
                     child: Container(
                       height: 40,
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.red.withOpacity(0.4)),
+                        border: Border.all(color: Colors.red.withValues(alpha: 0.4)),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       alignment: Alignment.center,
@@ -410,7 +410,7 @@ class _DisputeCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: open
-              ? Colors.orange.withOpacity(0.4)
+              ? Colors.orange.withValues(alpha: 0.4)
               : AppColors.border(isDark),
         ),
       ),
@@ -492,7 +492,7 @@ class _TournamentPanel extends ConsumerWidget {
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: isActive
-                    ? Colors.orange.withOpacity(0.4)
+                    ? Colors.orange.withValues(alpha: 0.4)
                     : AppColors.border(isDark),
               ),
             ),
@@ -518,8 +518,8 @@ class _TournamentPanel extends ConsumerWidget {
                       ),
                       decoration: BoxDecoration(
                         color: isActive
-                            ? Colors.orange.withOpacity(0.12)
-                            : Colors.green.withOpacity(0.12),
+                            ? Colors.orange.withValues(alpha: 0.12)
+                            : Colors.green.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -605,7 +605,7 @@ class _TournamentPanel extends ConsumerWidget {
               ],
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }
@@ -706,11 +706,11 @@ class _UsersPanelState extends State<_UsersPanel> {
                     ),
                     decoration: BoxDecoration(
                       color: u['status'] == 'baneado'
-                          ? Colors.red.withOpacity(0.12)
+                          ? Colors.red.withValues(alpha: 0.12)
                           : Colors.transparent,
                       border: Border.all(
                         color: u['status'] == 'baneado'
-                            ? Colors.red.withOpacity(0.4)
+                            ? Colors.red.withValues(alpha: 0.4)
                             : AppColors.border(widget.isDark),
                       ),
                       borderRadius: BorderRadius.circular(16),

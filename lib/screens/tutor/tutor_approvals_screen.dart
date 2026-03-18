@@ -8,8 +8,8 @@ class _Offer {
   final String scoutName, scoutTeam, playerId, playerName, terms;
   final bool playerIsMinor;
   _OfferStatus status;
-  bool signatureRequired;
-  bool signed;
+  bool signatureRequired = false;
+  bool signed = false;
   _Offer({
     required this.scoutName,
     required this.scoutTeam,
@@ -18,8 +18,6 @@ class _Offer {
     required this.terms,
     required this.playerIsMinor,
     this.status = _OfferStatus.pending,
-    this.signatureRequired = true,
-    this.signed = false,
   });
 }
 
@@ -52,7 +50,7 @@ class _TutorApprovalsScreenState extends ConsumerState<TutorApprovalsScreen> {
   ];
 
   bool _walletOpen = false;
-  double _donations = 320;
+  final double _donations = 320;
   bool _isPubliclyVisible = true;
   bool _waiverSigned = false;
 
@@ -199,7 +197,7 @@ class _TutorApprovalsScreenState extends ConsumerState<TutorApprovalsScreen> {
                         ),
                         Switch(
                           value: _isPubliclyVisible,
-                          activeColor: AppColors.buttonBg(isDark),
+                          activeThumbColor: AppColors.buttonBg(isDark),
                           onChanged: (v) {
                             setState(() => _isPubliclyVisible = v);
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -315,13 +313,13 @@ class _TutorApprovalsScreenState extends ConsumerState<TutorApprovalsScreen> {
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   color: _waiverSigned
-                      ? Colors.green.withOpacity(0.05)
-                      : Colors.orange.withOpacity(0.05),
+                      ? Colors.green.withValues(alpha: 0.05)
+                      : Colors.orange.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(
                     color: _waiverSigned
-                        ? Colors.green.withOpacity(0.3)
-                        : Colors.orange.withOpacity(0.5),
+                        ? Colors.green.withValues(alpha: 0.3)
+                        : Colors.orange.withValues(alpha: 0.5),
                   ),
                 ),
                 child: Column(
@@ -392,10 +390,10 @@ class _TutorApprovalsScreenState extends ConsumerState<TutorApprovalsScreen> {
                         height: 48,
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          color: Colors.green.withOpacity(0.1),
+                          color: Colors.green.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(24),
                           border: Border.all(
-                            color: Colors.green.withOpacity(0.5),
+                            color: Colors.green.withValues(alpha: 0.5),
                           ),
                         ),
                         alignment: Alignment.center,
@@ -478,9 +476,9 @@ class _OfferItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final st = offer.status;
     final borderColor = st == _OfferStatus.approved
-        ? Colors.green.withOpacity(0.4)
+        ? Colors.green.withValues(alpha: 0.4)
         : st == _OfferStatus.rejected
-        ? Colors.red.withOpacity(0.3)
+        ? Colors.red.withValues(alpha: 0.3)
         : AppColors.border(isDark);
 
     return Container(
@@ -509,7 +507,7 @@ class _OfferItem extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '${offer.scoutTeam}',
+                      offer.scoutTeam,
                       style: TextStyle(
                         color: AppColors.textMuted(isDark),
                         fontSize: 12,
@@ -548,7 +546,7 @@ class _OfferItem extends StatelessWidget {
                 Text(
                   'Menor — requiere tu aprobación obligatoria',
                   style: TextStyle(
-                    color: Colors.orange.withOpacity(0.9),
+                    color: Colors.orange.withValues(alpha: 0.9),
                     fontSize: 11,
                   ),
                 ),
@@ -573,7 +571,7 @@ class _OfferItem extends StatelessWidget {
                     label: 'RECHAZAR',
                     color: Colors.transparent,
                     textColor: Colors.red,
-                    border: Colors.red.withOpacity(0.3),
+                    border: Colors.red.withValues(alpha: 0.3),
                     onTap: onReject,
                   ),
                 ),
@@ -627,7 +625,7 @@ class _StatusPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(

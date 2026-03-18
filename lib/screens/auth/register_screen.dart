@@ -230,9 +230,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       vertical: 12,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.08),
+                      color: Colors.red.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.red.withOpacity(0.3)),
+                      border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
                     ),
                     child: Row(
                       children: [
@@ -356,7 +356,7 @@ class _Field extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: text.withOpacity(0.5)),
+          borderSide: BorderSide(color: text.withValues(alpha: 0.5)),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),

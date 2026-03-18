@@ -66,13 +66,13 @@ class _TOTWPlayerCard extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: goldColor.withOpacity(0.4),
+            color: goldColor.withValues(alpha: 0.4),
             blurRadius: 30,
             spreadRadius: -5,
             offset: const Offset(0, 10),
           ),
         ],
-        border: Border.all(color: goldColor.withOpacity(0.9), width: 2),
+        border: Border.all(color: goldColor.withValues(alpha: 0.9), width: 2),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
@@ -94,8 +94,8 @@ class _TOTWPlayerCard extends StatelessWidget {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      Colors.white.withOpacity(0.05),
-                      Colors.white.withOpacity(0.01),
+                      Colors.white.withValues(alpha: 0.05),
+                      Colors.white.withValues(alpha: 0.01),
                       Colors.transparent,
                     ],
                   ),
@@ -113,7 +113,7 @@ class _TOTWPlayerCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
-                    colors: [goldColor.withOpacity(0.15), Colors.transparent],
+                    colors: [goldColor.withValues(alpha: 0.15), Colors.transparent],
                   ),
                 ),
               ),
@@ -180,10 +180,10 @@ class _TOTWPlayerCard extends StatelessWidget {
                             child: Icon(
                               Icons.directions_run_rounded,
                               size: 140,
-                              color: Colors.white.withOpacity(0.9),
+                              color: Colors.white.withValues(alpha: 0.9),
                               shadows: [
                                 Shadow(
-                                  color: goldColor.withOpacity(0.5),
+                                  color: goldColor.withValues(alpha: 0.5),
                                   blurRadius: 20,
                                 ),
                               ],
@@ -202,7 +202,7 @@ class _TOTWPlayerCard extends StatelessWidget {
                       gradient: LinearGradient(
                         colors: [
                           Colors.transparent,
-                          goldColor.withOpacity(0.8),
+                          goldColor.withValues(alpha: 0.8),
                           Colors.transparent,
                         ],
                       ),
@@ -463,7 +463,7 @@ class AthleticCVScreen extends ConsumerWidget {
                                 padding: const EdgeInsets.all(6),
                                 decoration: BoxDecoration(
                                   color: isLocked
-                                      ? Colors.red.withOpacity(0.1)
+                                      ? Colors.red.withValues(alpha: 0.1)
                                       : surface,
                                   shape: BoxShape.circle,
                                   border: Border.all(
@@ -620,12 +620,12 @@ class AthleticCVScreen extends ConsumerWidget {
                                   border: Border.all(
                                     color: const Color(
                                       0xFFFFD700,
-                                    ).withOpacity(0.5),
+                                    ).withValues(alpha: 0.5),
                                   ),
                                   borderRadius: BorderRadius.circular(20),
                                   color: const Color(
                                     0xFFFFD700,
-                                  ).withOpacity(0.07),
+                                  ).withValues(alpha: 0.07),
                                 ),
                                 child: const Row(
                                   children: [
@@ -821,7 +821,7 @@ class AthleticCVScreen extends ConsumerWidget {
                                   decoration: BoxDecoration(
                                     color: isDark ? Colors.black : Colors.white,
                                     borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: const Color(0xFFF4CA25).withOpacity(0.5)),
+                                    border: Border.all(color: const Color(0xFFF4CA25).withValues(alpha: 0.5)),
                                   ),
                                   child: const Icon(
                                     Icons.qr_code_scanner,
@@ -1099,7 +1099,7 @@ class _SkeletonRadarState extends State<_SkeletonRadar>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return AnimatedBuilder(
       animation: _c,
-      builder: (_, __) => Container(
+      builder: (_, _) => Container(
         width: 280,
         height: 280,
         decoration: BoxDecoration(
@@ -1115,7 +1115,7 @@ class _SkeletonRadarState extends State<_SkeletonRadar>
             width: 22,
             height: 22,
             child: CircularProgressIndicator(
-              color: const Color(0xFF007AFF).withOpacity(0.5),
+              color: const Color(0xFF007AFF).withValues(alpha: 0.5),
               strokeWidth: 1.5,
             ),
           ),
@@ -1197,14 +1197,14 @@ class _StatRowState extends State<_StatRow>
                 ),
               ),
               const SizedBox(width: 6),
-              Icon(Icons.lock_outline, size: 9, color: muted.withOpacity(0.5)),
+              Icon(Icons.lock_outline, size: 9, color: muted.withValues(alpha: 0.5)),
             ],
           ),
 
           // Número contado animado con color semáforo
           AnimatedBuilder(
             animation: _num,
-            builder: (_, __) {
+            builder: (_, _) {
               final displayed = widget.value * _num.value;
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -1343,7 +1343,7 @@ class _WeightRowState extends State<_WeightRow>
                 Text(
                   ' /10',
                   style: TextStyle(
-                    color: muted.withOpacity(0.5),
+                    color: muted.withValues(alpha: 0.5),
                     fontSize: 10,
                     fontWeight: FontWeight.w400,
                   ),
@@ -1352,7 +1352,7 @@ class _WeightRowState extends State<_WeightRow>
                 Text(
                   '${widget.pct}%',
                   style: TextStyle(
-                    color: widget.color.withOpacity(0.6),
+                    color: widget.color.withValues(alpha: 0.6),
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                   ),
@@ -1364,13 +1364,13 @@ class _WeightRowState extends State<_WeightRow>
         const SizedBox(height: 8),
         AnimatedBuilder(
           animation: _w,
-          builder: (_, __) => ClipRRect(
+          builder: (_, _) => ClipRRect(
             borderRadius: BorderRadius.circular(3),
             child: LinearProgressIndicator(
               value: (widget.pct / 100.0) * _w.value,
               minHeight: 3,
               backgroundColor: border,
-              valueColor: AlwaysStoppedAnimation(widget.color.withOpacity(0.8)),
+              valueColor: AlwaysStoppedAnimation(widget.color.withValues(alpha: 0.8)),
             ),
           ),
         ),
@@ -1427,7 +1427,7 @@ class _AnimatedRadarChartState extends State<_AnimatedRadarChart>
       onTap: () => _ctrl.forward(from: 0),
       child: AnimatedBuilder(
         animation: Listenable.merge([_anim, _pulseAnim]),
-        builder: (_, __) => CustomPaint(
+        builder: (_, _) => CustomPaint(
           size: const Size(280, 280),
           painter: _RadarPainter(
             scores: widget.scores,
@@ -1463,11 +1463,11 @@ class _RadarPainter extends CustomPainter {
     final angle = (2 * math.pi) / n;
 
     final gridColor = isDark
-        ? Colors.white.withOpacity(0.07)
-        : Colors.black.withOpacity(0.06);
+        ? Colors.white.withValues(alpha: 0.07)
+        : Colors.black.withValues(alpha: 0.06);
     final spokeColor = isDark
-        ? Colors.white.withOpacity(0.04)
-        : Colors.black.withOpacity(0.05);
+        ? Colors.white.withValues(alpha: 0.04)
+        : Colors.black.withValues(alpha: 0.05);
 
     // ── Anillos de cuadrícula ─────────────────────────────────────────────
     final gridPaint = Paint()
@@ -1543,8 +1543,8 @@ class _RadarPainter extends CustomPainter {
       Paint()
         ..shader = RadialGradient(
           colors: [
-            avgColor.withOpacity((0.22 + 0.06 * pulse) * progress),
-            avgColor.withOpacity(0.03),
+            avgColor.withValues(alpha: (0.22 + 0.06 * pulse) * progress),
+            avgColor.withValues(alpha: 0.03),
           ],
         ).createShader(Rect.fromCircle(center: Offset(cx, cy), radius: r))
         ..style = PaintingStyle.fill,
@@ -1554,7 +1554,7 @@ class _RadarPainter extends CustomPainter {
     canvas.drawPath(
       dataPath,
       Paint()
-        ..color = avgColor.withOpacity((0.7 + 0.2 * pulse) * progress)
+        ..color = avgColor.withValues(alpha: (0.7 + 0.2 * pulse) * progress)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2.8
         ..strokeJoin = StrokeJoin.round
@@ -1565,7 +1565,7 @@ class _RadarPainter extends CustomPainter {
     canvas.drawPath(
       dataPath,
       Paint()
-        ..color = Colors.white.withOpacity(0.85 * progress)
+        ..color = Colors.white.withValues(alpha: 0.85 * progress)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.4
         ..strokeJoin = StrokeJoin.round,
@@ -1580,20 +1580,20 @@ class _RadarPainter extends CustomPainter {
         points[i],
         10 + 3 * pulse,
         Paint()
-          ..color = vc.withOpacity((0.2 + 0.1 * pulse) * progress)
+          ..color = vc.withValues(alpha: (0.2 + 0.1 * pulse) * progress)
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8),
       );
       // Punto sólido del color de la stat
       canvas.drawCircle(
         points[i],
         4.5,
-        Paint()..color = vc.withOpacity(progress),
+        Paint()..color = vc.withValues(alpha: progress),
       );
       // Centro blanco
       canvas.drawCircle(
         points[i],
         2.0,
-        Paint()..color = Colors.white.withOpacity(progress),
+        Paint()..color = Colors.white.withValues(alpha: progress),
       );
 
       // Label con el color de la stat
@@ -1602,7 +1602,7 @@ class _RadarPainter extends CustomPainter {
         cx + (r + 24) * math.cos(la),
         cy + (r + 24) * math.sin(la),
       );
-      _drawLabel(canvas, entries[i].key, labelOffset, vc.withOpacity(progress));
+      _drawLabel(canvas, entries[i].key, labelOffset, vc.withValues(alpha: progress));
     }
   }
 
@@ -1803,7 +1803,7 @@ class _MatchHistorySection extends ConsumerWidget {
                       vertical: 8,
                     ),
                     leading: CircleAvatar(
-                      backgroundColor: color.withOpacity(0.15),
+                      backgroundColor: color.withValues(alpha: 0.15),
                       child: Text(
                         avg.toStringAsFixed(1),
                         style: TextStyle(

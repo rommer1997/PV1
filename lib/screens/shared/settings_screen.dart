@@ -54,7 +54,7 @@ class SettingsScreen extends ConsumerWidget {
             title: Text('Modo Oscuro', style: TextStyle(color: text)),
             trailing: Switch(
               value: isDark,
-              activeColor: AppColors.buttonBg(isDark),
+              activeThumbColor: AppColors.buttonBg(isDark),
               onChanged: (val) {
                 HapticFeedback.lightImpact();
                 ref.read(themeProvider.notifier).toggle();
@@ -75,7 +75,7 @@ class SettingsScreen extends ConsumerWidget {
               final isLocked = ref.watch(safetyLockProvider);
               return Switch(
                 value: isLocked,
-                activeColor: Colors.red,
+                activeThumbColor: Colors.red,
                 onChanged: (val) {
                   HapticFeedback.mediumImpact();
                   ref.read(safetyLockProvider.notifier).toggle();
@@ -130,7 +130,7 @@ class SettingsScreen extends ConsumerWidget {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 16),
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.red.withOpacity(0.5)),
+                border: Border.all(color: Colors.red.withValues(alpha: 0.5)),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: const Center(

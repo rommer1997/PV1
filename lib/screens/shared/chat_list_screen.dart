@@ -26,7 +26,7 @@ class ChatListScreen extends ConsumerWidget {
       ),
       body: ListView.separated(
         itemCount: 3,
-        separatorBuilder: (_, __) => Divider(color: border),
+        separatorBuilder: (_, _) => Divider(color: border),
         itemBuilder: (context, i) {
           final users = ['Elena Vance', 'Coach Carlos', 'Nike Football'];
           final messages = [

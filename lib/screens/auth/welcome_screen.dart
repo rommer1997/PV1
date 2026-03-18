@@ -129,9 +129,9 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                     height: 70,
                     margin: const EdgeInsets.symmetric(horizontal: 28),
                     decoration: BoxDecoration(
-                      color: surface.withOpacity(isDark ? 0.3 : 0.5),
+                      color: surface.withValues(alpha: isDark ? 0.3 : 0.5),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: text.withOpacity(0.1)),
+                      border: Border.all(color: text.withValues(alpha: 0.1)),
                     ),
                   ),
                   ListWheelScrollView.useDelegate(
@@ -196,7 +196,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [bg.withOpacity(0), bg, bg],
+                  colors: [bg.withValues(alpha: 0), bg, bg],
                   stops: const [0.0, 0.4, 1.0],
                 ),
               ),
@@ -225,14 +225,14 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                               boxShadow: isDark
                                   ? [
                                       BoxShadow(
-                                        color: Colors.white.withOpacity(0.1),
+                                        color: Colors.white.withValues(alpha: 0.1),
                                         blurRadius: 20,
                                         offset: const Offset(0, 5),
                                       ),
                                     ]
                                   : [
                                       BoxShadow(
-                                        color: Colors.black.withOpacity(0.15),
+                                        color: Colors.black.withValues(alpha: 0.15),
                                         blurRadius: 20,
                                         offset: const Offset(0, 5),
                                       ),
@@ -268,7 +268,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(28),
                               border: Border.all(
-                                color: text.withOpacity(0.15),
+                                color: text.withValues(alpha: 0.15),
                                 width: 1.5,
                               ),
                             ),
@@ -346,7 +346,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                     child: Text(
                       'Powered by Rommer Volcanes',
                       style: TextStyle(
-                        color: text.withOpacity(0.3),
+                        color: text.withValues(alpha: 0.3),
                         fontSize: 10,
                         fontWeight: FontWeight.w500,
                         letterSpacing: 0.5,

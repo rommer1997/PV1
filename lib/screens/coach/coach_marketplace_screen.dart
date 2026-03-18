@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/theme_provider.dart';
-import '../../models/app_user.dart';
 
 // ── Estado del perfil del entrenador en el marketplace ──────────────────────
 class CoachProfileNotifier extends Notifier<CoachProfile> {
@@ -314,7 +313,7 @@ class _MyProfileTabState extends ConsumerState<_MyProfileTab> {
                 ),
                 decoration: BoxDecoration(
                   color: profile.published
-                      ? const Color(0xFF34C759).withOpacity(0.15)
+                      ? const Color(0xFF34C759).withValues(alpha: 0.15)
                       : surface,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
@@ -840,7 +839,7 @@ class _Field extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: text.withOpacity(0.4)),
+          borderSide: BorderSide(color: text.withValues(alpha: 0.4)),
         ),
       ),
     );

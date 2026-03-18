@@ -50,7 +50,7 @@ class _OnboardingWelcomeOverlayState
                     Image.asset(
                       'assets/icon/icon.png',
                       height: 80,
-                      errorBuilder: (_, __, ___) => const Icon(
+                      errorBuilder: (_, _, _) => const Icon(
                         Icons.sports_soccer,
                         size: 80,
                         color: Color(0xFFF4CA25),
@@ -153,9 +153,9 @@ class _FeatureIntroBox extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

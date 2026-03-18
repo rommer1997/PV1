@@ -81,7 +81,7 @@ class _RefereeTerminalScreenState extends ConsumerState<RefereeTerminalScreen> {
               Text(_matchName, style: TextStyle(color: muted, fontSize: 13)),
               const SizedBox(height: 4),
               Consumer(
-                builder: (_, ref2, __) {
+                builder: (_, ref2, _) {
                   final referee = ref2.watch(sessionProvider);
                   return Text(
                     '${referee?.followersCount ?? 0} seguidores te observan',
@@ -113,7 +113,7 @@ class _RefereeTerminalScreenState extends ConsumerState<RefereeTerminalScreen> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: _ratingColor(refAvg).withOpacity(0.12),
+                          color: _ratingColor(refAvg).withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
@@ -358,7 +358,7 @@ class _RefereeTerminalScreenState extends ConsumerState<RefereeTerminalScreen> {
             activeTrackColor: _ratingColor(value),
             inactiveTrackColor: border,
             thumbColor: _ratingColor(value),
-            overlayColor: _ratingColor(value).withOpacity(0.1),
+            overlayColor: _ratingColor(value).withValues(alpha: 0.1),
             trackHeight: 2.5,
             thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
           ),
@@ -490,7 +490,7 @@ class _MatchHistoryCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: _c(rating).withOpacity(0.12),
+              color: _c(rating).withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(

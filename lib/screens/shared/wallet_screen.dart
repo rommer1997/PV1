@@ -317,7 +317,7 @@ class _TxRow extends StatelessWidget {
             style: TextStyle(
               color: positive
                   ? const Color(0xFF34C759)
-                  : Colors.red.withOpacity(0.8),
+                  : Colors.red.withValues(alpha: 0.8),
               fontSize: 14,
               fontWeight: FontWeight.w600,
             ),

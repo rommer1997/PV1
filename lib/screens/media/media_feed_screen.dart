@@ -51,7 +51,7 @@ class _MediaFeedScreenState extends ConsumerState<MediaFeedScreen> {
                           letterSpacing: -0.5,
                           shadows: [
                             Shadow(
-                              color: Colors.black.withOpacity(0.5),
+                              color: Colors.black.withValues(alpha: 0.5),
                               blurRadius: 4,
                             ),
                           ],
@@ -70,7 +70,7 @@ class _MediaFeedScreenState extends ConsumerState<MediaFeedScreen> {
                         width: 44,
                         height: 44,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.15),
+                          color: Colors.white.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(color: Colors.white24),
                         ),
@@ -96,12 +96,13 @@ class _ReelsFeed extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (posts.isEmpty)
+    if (posts.isEmpty) {
       return _EmptyState(
         isDark: isDark,
         icon: Icons.movie_creation_outlined,
         label: 'Sube tu primer Reel',
       );
+    }
 
     return PageView.builder(
       scrollDirection: Axis.vertical,

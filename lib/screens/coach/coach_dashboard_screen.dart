@@ -146,6 +146,7 @@ final selectedTeamIndexProvider = NotifierProvider<_IndexNotifier, int>(
 class _IndexNotifier extends Notifier<int> {
   @override
   int build() => 0;
+  @override
   set state(int v) => super.state = v;
 }
 
@@ -153,9 +154,9 @@ class NominationsNotifier extends Notifier<List<String>> {
   @override
   List<String> build() => [];
   void toggle(String id) {
-    if (state.contains(id))
+    if (state.contains(id)) {
       state = state.where((x) => x != id).toList();
-    else if (state.length < 3)
+    } else if (state.length < 3)
       state = [...state, id];
   }
 
@@ -248,7 +249,7 @@ class CoachDashboardScreen extends ConsumerWidget {
                             child: ListView.separated(
                               scrollDirection: Axis.horizontal,
                               itemCount: teams.length,
-                              separatorBuilder: (_, __) =>
+                              separatorBuilder: (_, _) =>
                                   const SizedBox(width: 8),
                               itemBuilder: (_, i) => GlowButton(
                                 label: teams[i].name,
@@ -399,7 +400,7 @@ class CoachDashboardScreen extends ConsumerWidget {
                 padding: const EdgeInsets.fromLTRB(28, 0, 28, 40),
                 sliver: SliverList.separated(
                   itemCount: team.players.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  separatorBuilder: (_, _) => const SizedBox(height: 8),
                   itemBuilder: (ctx, i) {
                     final p = team.players[i];
                     return _PlayerRow(
@@ -604,11 +605,11 @@ class _PlayerRow extends StatelessWidget {
         decoration: BoxDecoration(
           color: nominated
               ? (isDark
-                    ? Colors.white.withOpacity(0.07)
-                    : Colors.black.withOpacity(0.05))
+                    ? Colors.white.withValues(alpha: 0.07)
+                    : Colors.black.withValues(alpha: 0.05))
               : surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: nominated ? text.withOpacity(0.3) : border),
+          border: Border.all(color: nominated ? text.withValues(alpha: 0.3) : border),
         ),
         child: Row(
           children: [
@@ -645,7 +646,7 @@ class _PlayerRow extends StatelessWidget {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFFD700).withOpacity(0.15),
+                            color: const Color(0xFFFFD700).withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Text(

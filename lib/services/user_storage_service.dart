@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/app_user.dart';
 import '../models/user_role.dart';
@@ -96,11 +97,13 @@ class UserStorageService {
     );
     if (existing.isNotEmpty) throw Exception('Este correo ya está registrado.');
 
+    final hashedPassword = sha256.convert(utf8.encode(password)).toString();
+
     final newUser = RegisteredUser(
       id: 'u${DateTime.now().millisecondsSinceEpoch}',
       name: name.trim(),
       email: email.trim().toLowerCase(),
-      password: password,
+      password: hashedPassword,
       uniqueId: UniqueIdGenerator.generate(
         UniqueIdGenerator.getPrefixForRole(role.name),
       ),
@@ -121,9 +124,10 @@ class UserStorageService {
   /// Intenta hacer login. Lanza excepción si no encuentra el usuario.
   static Future<RegisteredUser> login(String email, String password) async {
     final all = await getAll();
+    final hashedPassword = sha256.convert(utf8.encode(password)).toString();
     try {
       return all.firstWhere(
-        (u) => u.email == email.trim().toLowerCase() && u.password == password,
+        (u) => u.email == email.trim().toLowerCase() && u.password == hashedPassword,
       );
     } catch (_) {
       throw Exception('Correo o contraseña incorrectos.');

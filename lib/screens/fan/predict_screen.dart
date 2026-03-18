@@ -6,14 +6,13 @@ class _MvpCandidate {
   final String name, id, position;
   final double rating;
   int votes;
-  bool picked;
+  bool picked = false;
   _MvpCandidate({
     required this.name,
     required this.id,
     required this.position,
     required this.rating,
     this.votes = 0,
-    this.picked = false,
   });
 }
 
@@ -229,7 +228,7 @@ class _PredictScreenState extends ConsumerState<PredictScreen>
                               color: surface,
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: picked ? text.withOpacity(0.5) : border,
+                                color: picked ? text.withValues(alpha: 0.5) : border,
                                 width: picked ? 2 : 1,
                               ),
                             ),
@@ -548,7 +547,7 @@ class _PredictScreenState extends ConsumerState<PredictScreen>
                                 ),
                                 const SizedBox(height: 12),
                                 Text(
-                                  '${_predictResult!.toStringAsFixed(1)}',
+                                  _predictResult!.toStringAsFixed(1),
                                   style: TextStyle(
                                     color: text,
                                     fontSize: 48,

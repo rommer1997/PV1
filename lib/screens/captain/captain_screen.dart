@@ -80,10 +80,10 @@ class _CaptainScreenState extends ConsumerState<CaptainScreen>
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFFD700).withOpacity(0.15),
+                          color: const Color(0xFFFFD700).withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
-                            color: const Color(0xFFFFD700).withOpacity(0.4),
+                            color: const Color(0xFFFFD700).withValues(alpha: 0.4),
                           ),
                         ),
                         child: const Row(
@@ -388,7 +388,7 @@ class _UniformDesignerState extends State<_UniformDesigner> {
               Switch(
                 value: _vNeck,
                 onChanged: (v) => setState(() => _vNeck = v),
-                activeColor: text,
+                activeThumbColor: text,
               ),
             ],
           ),
@@ -545,7 +545,7 @@ class _ColorRow extends StatelessWidget {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: palette.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (_, i) {
           final c = palette[i];
           final sel = c.value == selected.value;
@@ -565,7 +565,7 @@ class _ColorRow extends StatelessWidget {
                 boxShadow: sel
                     ? [
                         BoxShadow(
-                          color: c.withOpacity(0.5),
+                          color: c.withValues(alpha: 0.5),
                           blurRadius: 8,
                           spreadRadius: 1,
                         ),
@@ -617,7 +617,7 @@ class _ModelCard extends StatelessWidget {
           boxShadow: selected
               ? [
                   BoxShadow(
-                    color: AppColors.buttonBg(isDark).withOpacity(0.28),
+                    color: AppColors.buttonBg(isDark).withValues(alpha: 0.28),
                     blurRadius: 8,
                   ),
                 ]
@@ -690,7 +690,7 @@ class _ShirtPainter extends CustomPainter {
     canvas.clipPath(body);
     switch (model) {
       case ShirtModel.modern:
-        paint.color = accent.withOpacity(0.85);
+        paint.color = accent.withValues(alpha: 0.85);
         canvas.drawPath(
           Path()
             ..moveTo(w * 0.1, h * 0.1)
@@ -702,7 +702,7 @@ class _ShirtPainter extends CustomPainter {
         );
         break;
       case ShirtModel.stripes:
-        paint.color = accent.withOpacity(0.75);
+        paint.color = accent.withValues(alpha: 0.75);
         for (double x = 0; x < w; x += w * 0.13) {
           canvas.drawRect(Rect.fromLTWH(x, 0, w * 0.065, h), paint);
         }
@@ -720,7 +720,7 @@ class _ShirtPainter extends CustomPainter {
         );
         break;
       case ShirtModel.classic:
-        paint.color = accent.withOpacity(0.5);
+        paint.color = accent.withValues(alpha: 0.5);
         canvas.drawRect(Rect.fromLTWH(w * 0.42, 0, w * 0.16, h), paint);
         break;
     }
@@ -851,7 +851,7 @@ class _ShortPainter extends CustomPainter {
     }
 
     // Cinturilla
-    paint.color = stripe.withOpacity(0.7);
+    paint.color = stripe.withValues(alpha: 0.7);
     canvas.drawRect(Rect.fromLTWH(w * 0.05, 0, w * 0.9, h * 0.1), paint);
   }
 
@@ -882,7 +882,7 @@ class _TournamentCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: enrolled
-              ? AppColors.text(isDark).withOpacity(0.4)
+              ? AppColors.text(isDark).withValues(alpha: 0.4)
               : AppColors.border(isDark),
         ),
       ),
