@@ -67,6 +67,8 @@ class RegisteredUser {
       dailyLoginStreak: 1,
       location: extra['location'],
       bio: extra['bio'],
+      ageGroup: extra['ageGroup'],
+      position: extra['position'],
     );
   }
 }

@@ -11,141 +11,239 @@ class WalletScreen extends ConsumerWidget {
     final isDark = ref.watch(themeProvider) == ThemeMode.dark;
     final user = ref.watch(sessionProvider);
     final sc = user?.sportcoins ?? 0;
+    
     final bg = AppColors.bg(isDark);
     final text = AppColors.text(isDark);
     final muted = AppColors.textMuted(isDark);
     final surface = AppColors.surface(isDark);
     final border = AppColors.border(isDark);
+    final primary = AppColors.buttonBg(isDark);
 
     return Scaffold(
       backgroundColor: bg,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Header
               Text(
-                'BILLETERA',
+                'Billetera SLP',
+                style: TextStyle(
+                  color: text,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Premium Balance Card
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(32),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: isDark 
+                      ? [const Color(0xFF1E1E1E), const Color(0xFF2C2C2C)]
+                      : [const Color(0xFFE0E0E0), const Color(0xFFF5F5F5)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(32),
+                  border: Border.all(
+                    color: isDark ? Colors.white12 : Colors.black12,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: primary.withValues(alpha: 0.15),
+                      blurRadius: 30,
+                      offset: const Offset(0, 10),
+                    )
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'SALDO ACTUAL',
+                          style: TextStyle(
+                            color: muted,
+                            fontSize: 12,
+                            letterSpacing: 2,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        Icon(Icons.account_balance_wallet_outlined, color: muted, size: 20),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    TweenAnimationBuilder<double>(
+                      duration: const Duration(milliseconds: 1500),
+                      curve: Curves.easeOutQuart,
+                      tween: Tween<double>(begin: 0, end: sc.toDouble()),
+                      builder: (context, value, child) {
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            Text(
+                              value.toStringAsFixed(0),
+                              style: TextStyle(
+                                color: text,
+                                fontSize: 48,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -2,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'SC',
+                              style: TextStyle(
+                                color: primary,
+                                fontSize: 24,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '≈ €${(sc * 0.0092).toStringAsFixed(2)} EUR',
+                      style: TextStyle(
+                        color: muted,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 32),
+
+              // Opciones para Obtener SC
+              Text(
+                'OBTENER SPORTCOINS',
                 style: TextStyle(
                   color: muted,
                   fontSize: 11,
-                  letterSpacing: 3,
-                  fontWeight: FontWeight.w600,
+                  letterSpacing: 2,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-              const SizedBox(height: 48),
-
-              // Saldo principal
-              Center(
-                child: TweenAnimationBuilder<double>(
-                  duration: const Duration(milliseconds: 1500),
-                  curve: Curves.easeOutQuart,
-                  tween: Tween<double>(begin: 0, end: sc),
-                  builder: (context, value, child) {
-                    return Column(
-                      children: [
-                        Text(
-                          '${value.toStringAsFixed(0)} SC',
-                          style: TextStyle(
-                            color: text,
-                            fontSize: 56,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: -2,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '≈ €${(value * 0.0092).toStringAsFixed(2)} EUR',
-                          style: TextStyle(
-                            color: muted,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '≈ \$${(value * 0.01).toStringAsFixed(2)} USD',
-                          style: TextStyle(color: muted, fontSize: 13),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ),
-
-              const SizedBox(height: 48),
-
-              // Botones de acción
-              _ActionButton(
-                label: '🎁 Simular Ingreso (+100 SC)',
+              const SizedBox(height: 16),
+              
+              _OptionCard(
+                icon: Icons.storefront_outlined,
+                title: 'Comprar SC',
+                subtitle: 'Adquiere tokens directamente',
                 isDark: isDark,
                 onTap: () {
-                  ref.read(sessionProvider.notifier).addSportCoins(100);
+                   ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Abriendo pasarela de pago...', style: TextStyle(color: text)), backgroundColor: surface)
+                   );
+                },
+              ),
+              const SizedBox(height: 12),
+              _OptionCard(
+                icon: Icons.play_circle_outline,
+                title: 'Recompensas por Anuncios',
+                subtitle: 'Mira patrocinios deportivos y gana +5 SC',
+                isDark: isDark,
+                onTap: () {
+                  ref.read(sessionProvider.notifier).addSportCoins(5);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: const Text(
-                        '¡Has recibido +100 SC por rendimiento deportivo!',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      backgroundColor: AppColors.buttonBg(isDark),
-                      behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                      content: Text('¡Has ganado +5 SC por ver el patrocinio!', style: TextStyle(color: text, fontWeight: FontWeight.bold)),
+                      backgroundColor: primary,
                     ),
                   );
                 },
               ),
-              const SizedBox(height: 14),
-
-              _ActionButton(
-                label: 'Donar a Jugador / Equipo',
-                outline: true,
+              const SizedBox(height: 12),
+              _OptionCard(
+                icon: Icons.group_add_outlined,
+                title: 'Invitar Amigos',
+                subtitle: 'Gana +50 SC por cada registro',
                 isDark: isDark,
-                onTap: () => _showDonateSheet(context, isDark),
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Enlace copiado al portapapeles', style: TextStyle(color: text)), backgroundColor: surface)
+                  );
+                },
+              ),
+
+              const SizedBox(height: 32),
+
+              // Acciones Rápidas
+              Row(
+                children: [
+                  Expanded(
+                    child: _QuickActionButton(
+                      icon: Icons.send_outlined,
+                      label: 'Enviar',
+                      isDark: isDark,
+                      onTap: () => _showDonateSheet(context, isDark),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _QuickActionButton(
+                      icon: Icons.history,
+                      label: 'Stake',
+                      isDark: isDark,
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Staking de Tokens en desarrollo...', style: TextStyle(color: text)), backgroundColor: surface)
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
 
               const SizedBox(height: 48),
 
               Text(
-                'TRANSACCIONES RECIENTES',
+                'MOVIMIENTOS',
                 style: TextStyle(
                   color: muted,
-                  fontSize: 10,
+                  fontSize: 11,
                   letterSpacing: 2,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: 16),
-              _TxRow(
-                label: 'Predicción acertada',
-                amount: '+50 SC',
+              
+              _TransactionRow(
+                title: 'Recompensa por Anuncio',
+                amount: '+5 SC',
                 positive: true,
+                date: 'Hoy, 14:30',
                 isDark: isDark,
               ),
-              _TxRow(
-                label: 'Donación a Marco Silva',
-                amount: '-30 SC',
+              _TransactionRow(
+                title: 'Donación a Elena Vance',
+                amount: '-5 SC',
                 positive: false,
+                date: 'Hoy, 11:20',
                 isDark: isDark,
               ),
-              _TxRow(
-                label: 'Recompensa comunidad',
-                amount: '+100 SC',
+              _TransactionRow(
+                title: 'Bono Inicial',
+                amount: '+500 SC',
                 positive: true,
+                date: 'Ayer',
                 isDark: isDark,
               ),
-              _TxRow(
-                label: 'Inscripción torneo',
-                amount: '-200 SC',
-                positive: false,
-                isDark: isDark,
-              ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 48),
             ],
           ),
         ),
@@ -160,48 +258,27 @@ class WalletScreen extends ConsumerWidget {
     showModalBottomSheet(
       context: ctx,
       backgroundColor: bg2,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (_) => Padding(
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 28),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.border(isDark),
-                borderRadius: BorderRadius.circular(2),
-              ),
+              width: 36, height: 4,
+              decoration: BoxDecoration(color: AppColors.border(isDark), borderRadius: BorderRadius.circular(2)),
             ),
             const SizedBox(height: 28),
-            Text(
-              'Donar SportCoins',
-              style: TextStyle(
-                color: text,
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
+            Text('Enviar / Donar SC', style: TextStyle(color: text, fontSize: 22, fontWeight: FontWeight.w700)),
             const SizedBox(height: 24),
             TextField(
-              style: TextStyle(
-                color: text,
-                fontSize: 32,
-                fontWeight: FontWeight.w700,
-              ),
+              style: TextStyle(color: text, fontSize: 32, fontWeight: FontWeight.w700),
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 hintText: '0 SC',
                 hintStyle: TextStyle(color: muted, fontSize: 32),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.border(isDark)),
-                ),
-                focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: text),
-                ),
+                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppColors.border(isDark))),
+                focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: text)),
               ),
             ),
             const SizedBox(height: 32),
@@ -212,18 +289,10 @@ class WalletScreen extends ConsumerWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.buttonBg(isDark),
                   foregroundColor: AppColors.buttonFg(isDark),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                   padding: const EdgeInsets.symmetric(vertical: 18),
                 ),
-                child: const Text(
-                  'ENVIAR',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 2,
-                  ),
-                ),
+                child: const Text('CONFIRMAR ENVÍO', style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 2)),
               ),
             ),
             const SizedBox(height: 16),
@@ -234,92 +303,189 @@ class WalletScreen extends ConsumerWidget {
   }
 }
 
-class _ActionButton extends StatelessWidget {
-  final String label;
-  final bool outline;
+class _OptionCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
   final bool isDark;
   final VoidCallback onTap;
-  const _ActionButton({
-    required this.label,
-    required this.onTap,
+
+  const _OptionCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
     required this.isDark,
-    this.outline = false,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: outline
-          ? OutlinedButton(
-              onPressed: onTap,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.text(isDark),
-                side: BorderSide(color: AppColors.border(isDark)),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 18),
+    final surface = AppColors.surface(isDark);
+    final border = AppColors.border(isDark);
+    final text = AppColors.text(isDark);
+    final muted = AppColors.textMuted(isDark);
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: surface,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: border),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.bg(isDark),
+                borderRadius: BorderRadius.circular(16),
               ),
-              child: Text(
-                label,
-                style: const TextStyle(fontSize: 14, letterSpacing: 1),
-              ),
-            )
-          : ElevatedButton(
-              onPressed: onTap,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.buttonBg(isDark),
-                foregroundColor: AppColors.buttonFg(isDark),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 18),
-              ),
-              child: Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1,
-                ),
+              child: Icon(icon, color: text, size: 24),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: text,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      color: muted,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
             ),
+            Icon(Icons.chevron_right, color: muted, size: 20),
+          ],
+        ),
+      ),
     );
   }
 }
 
-class _TxRow extends StatelessWidget {
+class _QuickActionButton extends StatelessWidget {
+  final IconData icon;
   final String label;
+  final bool isDark;
+  final VoidCallback onTap;
+
+  const _QuickActionButton({
+    required this.icon,
+    required this.label,
+    required this.isDark,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final surface = AppColors.surface(isDark);
+    final border = AppColors.border(isDark);
+    final text = AppColors.text(isDark);
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        decoration: BoxDecoration(
+          color: surface,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: border),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: text, size: 24),
+            const SizedBox(height: 12),
+            Text(
+              label,
+              style: TextStyle(
+                color: text,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TransactionRow extends StatelessWidget {
+  final String title;
   final String amount;
   final bool positive;
+  final String date;
   final bool isDark;
-  const _TxRow({
-    required this.label,
+  
+  const _TransactionRow({
+    required this.title,
     required this.amount,
     required this.positive,
+    required this.date,
     required this.isDark,
   });
 
   @override
   Widget build(BuildContext context) {
+    final text = AppColors.text(isDark);
+    final muted = AppColors.textMuted(isDark);
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.only(bottom: 20),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: TextStyle(color: AppColors.textMuted(isDark), fontSize: 14),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.surface(isDark),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.border(isDark)),
+            ),
+            child: Icon(
+              positive ? Icons.arrow_downward : Icons.arrow_upward,
+              color: positive ? const Color(0xFF34C759) : Colors.redAccent,
+              size: 16,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(color: text, fontSize: 15, fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  date,
+                  style: TextStyle(color: muted, fontSize: 12),
+                ),
+              ],
+            ),
           ),
           Text(
             amount,
             style: TextStyle(
-              color: positive
-                  ? const Color(0xFF34C759)
-                  : Colors.red.withValues(alpha: 0.8),
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
+              color: positive ? const Color(0xFF34C759) : text,
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],

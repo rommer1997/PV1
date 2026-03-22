@@ -1,313 +1,172 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/theme_provider.dart';
-import '../../providers/all_users_provider.dart';
-import '../../models/app_user.dart';
-import 'athletic_cv_screen.dart';
-import 'shared/chat_list_screen.dart';
+import '../widgets/video_highlight_card.dart';
 
-class StadiumFeedScreen extends ConsumerWidget {
+class StadiumFeedScreen extends ConsumerStatefulWidget {
   const StadiumFeedScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<StadiumFeedScreen> createState() => _StadiumFeedScreenState();
+}
+
+class _StadiumFeedScreenState extends ConsumerState<StadiumFeedScreen> {
+  String _selectedFilter = 'Todo';
+
+  @override
+  Widget build(BuildContext context) {
     final isDark = ref.watch(themeProvider) == ThemeMode.dark;
     final bg = AppColors.bg(isDark);
-    final text = AppColors.text(isDark);
-    final muted = AppColors.textMuted(isDark);
-    final surface = AppColors.surface(isDark);
     final border = AppColors.border(isDark);
+    final surface = AppColors.surface(isDark);
+    final muted = AppColors.textMuted(isDark);
 
     return Scaffold(
       backgroundColor: bg,
       body: SafeArea(
-        child: Column(
-          children: [
-            // Header
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'FEED',
-                        style: TextStyle(
-                          color: muted,
-                          fontSize: 11,
-                          letterSpacing: 3,
-                          fontWeight: FontWeight.w600,
-                        ),
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(28, 20, 28, 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'STADIUM FEED',
+                      style: TextStyle(
+                        color: muted,
+                        fontSize: 11,
+                        letterSpacing: 3,
+                        fontWeight: FontWeight.w600,
                       ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Stadium Feed',
-                        style: TextStyle(
-                          color: text,
-                          fontSize: 26,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      // Chat / Mensajes
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => const ChatListScreen()),
-                          );
-                        },
-                        child: Container(
-                          width: 40,
-                          height: 40,
+                    ),
+                    const SizedBox(height: 24),
+                    
+                    // Composer snippet
+                    Row(
+                      children: [
+                        Container(
+                          width: 44,
+                          height: 44,
                           decoration: BoxDecoration(
+                            shape: BoxShape.circle,
                             color: surface,
-                            borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: border),
                           ),
-                          child: Icon(Icons.chat_bubble_outline, color: muted, size: 20),
+                          child: Icon(Icons.person, color: muted, size: 22),
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      // Búsqueda
-                      GestureDetector(
-                        onTap: () async {
-                          final users = await ref.read(allUsersProvider.future);
-                          if (!context.mounted) return;
-                          showSearch(
-                            context: context,
-                            delegate: _FeedSearch(users: users, isDark: isDark),
-                          );
-                        },
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: surface,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: border),
-                          ),
-                          child: Icon(Icons.search, color: muted, size: 20),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      // Notificaciones
-                      GestureDetector(
-                        onTap: () => _showNotifications(context, isDark),
-                        child: Stack(
-                          children: [
-                            Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: surface,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: border),
-                              ),
-                              child: Icon(
-                                Icons.notifications_none,
-                                color: muted,
-                                size: 20,
-                              ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                            decoration: BoxDecoration(
+                              color: surface,
+                              borderRadius: BorderRadius.circular(24),
+                              border: Border.all(color: border),
                             ),
-                            Positioned(
-                              top: 8,
-                              right: 8,
-                              child: Container(
-                                width: 8,
-                                height: 8,
-                                decoration: const BoxDecoration(
-                                  color: Colors.red,
-                                  shape: BoxShape.circle,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  '¿Qué está pasando en el campo?',
+                                  style: TextStyle(color: muted, fontSize: 14, fontWeight: FontWeight.w500),
                                 ),
-                              ),
+                                Icon(Icons.photo_library_outlined, color: AppColors.buttonBg(isDark), size: 20),
+                              ],
                             ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      // Menu Lateral para Configuración (Tema/Salir)
-                      GestureDetector(
-                        onTap: () {
-                          // Buscar el Scaffold ancestro más cercano que tenga el endDrawer (RoleShell)
-                          context.findAncestorStateOfType<ScaffoldState>()?.openEndDrawer();
-                        },
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: AppColors.buttonBg(isDark),
-                            borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Icon(Icons.menu, color: AppColors.buttonFg(isDark), size: 20),
                         ),
+                      ],
+                    ),
+                    const SizedBox(height: 28),
+
+                    // Filter Pills
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      clipBehavior: Clip.none,
+                      child: Row(
+                        children: [
+                          _Pill(label: 'Todo', isSelected: _selectedFilter == 'Todo', isDark: isDark, onTap: () => setState(() => _selectedFilter = 'Todo')),
+                          const SizedBox(width: 12),
+                          _Pill(label: 'Fichajes', isSelected: _selectedFilter == 'Fichajes', isDark: isDark, onTap: () => setState(() => _selectedFilter = 'Fichajes')),
+                          const SizedBox(width: 12),
+                          _Pill(label: 'Torneos', isSelected: _selectedFilter == 'Torneos', isDark: isDark, onTap: () => setState(() => _selectedFilter = 'Torneos')),
+                          const SizedBox(width: 12),
+                          _Pill(label: 'Periodistas', isSelected: _selectedFilter == 'Periodistas', isDark: isDark, onTap: () => setState(() => _selectedFilter = 'Periodistas')),
+                          const SizedBox(width: 12),
+                          _Pill(label: 'VOD', isSelected: _selectedFilter == 'VOD', isDark: isDark, onTap: () => setState(() => _selectedFilter = 'VOD')),
+                        ],
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
             ),
+            
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  if (_selectedFilter == 'Todo' || _selectedFilter == 'Fichajes') ...[
+                    _PremiumFeedCard(
+                      authorName: 'SLP Transfer Market',
+                      authorRole: 'Agente Oficial',
+                      category: 'FICHAJE',
+                      title: 'Acuerdo Cerrado: Nuevo Talento',
+                      body: 'El contrato deportivo del jugador SLP-0982 ha sido formalizado y emitido exitosamente mediante contrato inteligente. Otro hito validado en la red.',
+                      time: 'Hace 2 h',
+                      likes: 124,
+                      comments: 18,
+                      isDark: isDark,
+                      icon: Icons.handshake_outlined,
+                      highlightColor: Colors.blueAccent,
+                    ),
+                    const SizedBox(height: 20),
+                  ],
 
-            // Filtros
-            SizedBox(
-              height: 36,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 28),
-                children: [
-                  'Todo',
-                  'Fichajes',
-                  'Torneos',
-                  'Periodistas',
-                ].map((f) => _Pill(f, f == 'Todo', isDark)).toList(),
-              ),
-            ),
+                  if (_selectedFilter == 'Todo' || _selectedFilter == 'Periodistas') ...[
+                    _JournalistInteractiveCard(isDark: isDark),
+                    const SizedBox(height: 20),
+                  ],
 
-            const SizedBox(height: 20),
+                  if (_selectedFilter == 'Todo' || _selectedFilter == 'Torneos') ...[
+                    _PremiumFeedCard(
+                      authorName: 'Liga Regional Juvenil',
+                      authorRole: 'Organizador',
+                      category: 'TORNEO',
+                      title: 'Inscripciones Abiertas: Copa de Verano',
+                      body: 'Atención a todos los scouts y jugadores. La liga juvenil más grande de la región abrirá sus inscripciones. Los ojeadores de la primera división estarán observando rigurosamente.',
+                      time: 'Hace 5 h',
+                      likes: 340,
+                      comments: 52,
+                      isDark: isDark,
+                      icon: Icons.emoji_events_outlined,
+                      highlightColor: Colors.amber,
+                      hasImage: true,
+                    ),
+                    const SizedBox(height: 20),
+                  ],
 
-            // Contenido
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 28),
-                children: [
-                  _FeedCard(
-                    category: 'FICHAJE',
-                    title: 'Oferta de Escrow Aceptada',
-                    body:
-                        'El tutor de SLP-0982 aprobó la oferta. El 10% de comisión ha sido retenido automáticamente.',
-                    time: 'Hace 2 h',
-                    isDark: isDark,
-                  ),
-                  const SizedBox(height: 18),
-                  _JournalistCard(isDark: isDark),
-                  const SizedBox(height: 18),
-                  _FeedCard(
-                    category: 'TORNEO',
-                    title: 'Madrid U19 Summer Cup',
-                    body:
-                        "Torneo oficial patrocinado por Nike. Las predicciones del público generaron 14,000 SC en recompensas.",
-                    time: 'Hace 5 h',
-                    isDark: isDark,
-                  ),
-                  const SizedBox(height: 18),
-                  _FeedCard(
-                    category: 'FICHAJE',
-                    title: 'Nuevo Talento Validado',
-                    body:
-                        'SLP-1241 ha alcanzado 5 evaluaciones certificadas y recibe el badge de Talento Oficial.',
-                    time: 'Hace 1 d',
-                    isDark: isDark,
-                  ),
-                  const SizedBox(height: 32),
-                ],
+                  if (_selectedFilter == 'Todo' || _selectedFilter == 'VOD') ...[
+                    VideoHighlightCard(
+                      title: 'Las Mejores Salvadas de la Jornada 5',
+                      description: 'Revive los momentos más impresionantes de la liga. Material bruto SLP VEO para que jugadores y fans revivan el show.',
+                      matchDate: 'Hace 4 h',
+                      isDark: isDark,
+                      canAdjustStats: false,
+                      canBroadcast: false,
+                      onAdjustStats: () {},
+                      onShareToFeed: () {},
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                  const SizedBox(height: 40),
+                ]),
               ),
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Módulo de creación de posts en desarrollo'),
-              backgroundColor: AppColors.buttonBg(isDark),
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          );
-        },
-        backgroundColor: AppColors.buttonBg(isDark),
-        child: Icon(Icons.add, color: AppColors.buttonFg(isDark)),
-      ),
-    );
-  }
-
-  void _showNotifications(BuildContext context, bool isDark) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: AppColors.surface(isDark),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (_) => Padding(
-        padding: const EdgeInsets.all(28),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.textMuted(isDark),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Notificaciones',
-              style: TextStyle(
-                color: AppColors.text(isDark),
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 20),
-            _NotifRow(
-              '⚽ Marco Silva recibió oferta de Real Madrid',
-              'Hace 2 h',
-              isDark,
-            ),
-            _NotifRow(
-              '🏆 Madrid U19 Cup — Resultados publicados',
-              'Hace 5 h',
-              isDark,
-            ),
-            _NotifRow(
-              '🎙️ Elena Vance publicó nueva crónica',
-              'Hace 1 d',
-              isDark,
-            ),
-            const SizedBox(height: 12),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _NotifRow extends StatelessWidget {
-  final String text;
-  final String time;
-  final bool isDark;
-  const _NotifRow(this.text, this.time, this.isDark);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              text,
-              style: TextStyle(color: AppColors.text(isDark), fontSize: 13),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            time,
-            style: TextStyle(color: AppColors.textMuted(isDark), fontSize: 11),
-          ),
-        ],
       ),
     );
   }
@@ -315,127 +174,95 @@ class _NotifRow extends StatelessWidget {
 
 class _Pill extends StatelessWidget {
   final String label;
-  final bool sel;
+  final bool isSelected;
   final bool isDark;
-  const _Pill(this.label, this.sel, this.isDark);
+  final VoidCallback onTap;
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(right: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-      decoration: BoxDecoration(
-        color: sel ? AppColors.buttonBg(isDark) : Colors.transparent,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: sel ? AppColors.buttonBg(isDark) : AppColors.border(isDark),
-        ),
-      ),
-      child: Center(
-        child: Text(
-          label,
-          style: TextStyle(
-            color: sel
-                ? AppColors.buttonFg(isDark)
-                : AppColors.textMuted(isDark),
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _FeedCard extends StatelessWidget {
-  final String category, title, body, time;
-  final bool isDark;
-  const _FeedCard({
-    required this.category,
-    required this.title,
-    required this.body,
-    required this.time,
+  const _Pill({
+    required this.label,
+    required this.isSelected,
     required this.isDark,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(22),
-      decoration: BoxDecoration(
-        color: AppColors.surface(isDark),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.border(isDark)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                category,
-                style: TextStyle(
-                  color: AppColors.textMuted(isDark),
-                  fontSize: 10,
-                  letterSpacing: 2,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              Text(
-                time,
-                style: TextStyle(
-                  color: AppColors.textMuted(isDark),
-                  fontSize: 11,
-                ),
-              ),
-            ],
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.buttonBg(isDark) : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? AppColors.buttonBg(isDark) : AppColors.border(isDark),
           ),
-          const SizedBox(height: 14),
-          Text(
-            title,
-            style: TextStyle(
-              color: AppColors.text(isDark),
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              height: 1.2,
-            ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? AppColors.buttonFg(isDark) : AppColors.textMuted(isDark),
+            fontSize: 13,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
           ),
-          const SizedBox(height: 8),
-          Text(
-            body,
-            style: TextStyle(
-              color: AppColors.textMuted(isDark),
-              fontSize: 13,
-              height: 1.5,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 }
 
-class _JournalistCard extends StatefulWidget {
+class _PremiumFeedCard extends StatefulWidget {
+  final String authorName, authorRole, category, title, body, time;
+  final int likes, comments;
   final bool isDark;
-  const _JournalistCard({required this.isDark});
+  final IconData icon;
+  final Color highlightColor;
+  final bool hasImage;
+
+  const _PremiumFeedCard({
+    required this.authorName,
+    required this.authorRole,
+    required this.category,
+    required this.title,
+    required this.body,
+    required this.time,
+    required this.likes,
+    required this.comments,
+    required this.isDark,
+    required this.icon,
+    required this.highlightColor,
+    this.hasImage = false,
+  });
+
   @override
-  State<_JournalistCard> createState() => _JournalistCardState();
+  State<_PremiumFeedCard> createState() => _PremiumFeedCardState();
 }
 
-class _JournalistCardState extends State<_JournalistCard> {
-  int _donated = 0;
+class _PremiumFeedCardState extends State<_PremiumFeedCard> {
+  bool _isLiked = false;
+  late int _likeCount;
+
+  @override
+  void initState() {
+    super.initState();
+    _likeCount = widget.likes;
+  }
 
   @override
   Widget build(BuildContext context) {
+    final surface = AppColors.surface(widget.isDark);
+    final border = AppColors.border(widget.isDark);
+    final text = AppColors.text(widget.isDark);
+    final muted = AppColors.textMuted(widget.isDark);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        color: AppColors.surface(widget.isDark),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.border(widget.isDark)),
+        color: surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -443,83 +270,114 @@ class _JournalistCardState extends State<_JournalistCard> {
           Row(
             children: [
               Container(
-                width: 36,
-                height: 36,
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
                   color: AppColors.bg(widget.isDark),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: border),
                 ),
-                child: Icon(
-                  Icons.person,
-                  color: AppColors.textMuted(widget.isDark),
-                  size: 18,
+                child: Icon(widget.icon, color: widget.highlightColor, size: 20),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.authorName,
+                      style: TextStyle(color: text, fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: -0.3),
+                    ),
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        Text(
+                          widget.authorRole,
+                          style: TextStyle(color: muted, fontSize: 12, fontWeight: FontWeight.w600),
+                        ),
+                        Text(' • ${widget.time}', style: TextStyle(color: muted, fontSize: 12)),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Elena Vance',
-                    style: TextStyle(
-                      color: AppColors.text(widget.isDark),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    'Periodista · Hace 3 h',
-                    style: TextStyle(
-                      color: AppColors.textMuted(widget.isDark),
-                      fontSize: 11,
-                    ),
-                  ),
-                ],
-              ),
+              Icon(Icons.more_horiz, color: muted),
             ],
           ),
-          const SizedBox(height: 14),
-          Text(
-            'Impresionante exhibición táctica del Atletico hoy. Los datos del árbitro ya están en la base de datos inmutable.',
-            style: TextStyle(
-              color: AppColors.textMuted(widget.isDark),
-              fontSize: 13,
-              height: 1.6,
+          const SizedBox(height: 18),
+          
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: widget.highlightColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              widget.category.toUpperCase(),
+              style: TextStyle(color: widget.highlightColor, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5),
             ),
           ),
-          const SizedBox(height: 16),
-          GestureDetector(
-            onTap: () {
-              setState(() => _donated += 5);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Donaste 5 SC a Elena ✓'),
-                  backgroundColor: Colors.white10,
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+          const SizedBox(height: 14),
+
+          Text(
+            widget.title,
+            style: TextStyle(color: text, fontSize: 18, fontWeight: FontWeight.w800, height: 1.3, letterSpacing: -0.5),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            widget.body,
+            style: TextStyle(color: muted, fontSize: 14, height: 1.5, fontWeight: FontWeight.w500),
+          ),
+          
+          if (widget.hasImage) ...[
+            const SizedBox(height: 16),
+            Container(
+              height: 180,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                gradient: LinearGradient(
+                  colors: [widget.highlightColor.withValues(alpha: 0.8), widget.highlightColor.withValues(alpha: 0.3)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-              );
-            },
-            child: Row(
-              children: [
-                Icon(
-                  Icons.volunteer_activism_outlined,
-                  color: AppColors.textMuted(widget.isDark),
-                  size: 16,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  'Donar SportCoins${_donated > 0 ? ' · $_donated SC enviados' : ''}',
-                  style: TextStyle(
-                    color: AppColors.textMuted(widget.isDark),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
+              ),
+              child: Center(
+                child: Icon(Icons.stadium_rounded, color: Colors.white.withValues(alpha: 0.8), size: 56),
+              ),
             ),
+          ],
+
+          const SizedBox(height: 20),
+          Divider(color: border, height: 1),
+          const SizedBox(height: 12),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _SocialButton(
+                icon: _isLiked ? Icons.favorite : Icons.favorite_border,
+                label: '$_likeCount',
+                color: _isLiked ? Colors.redAccent : muted,
+                onTap: () {
+                  setState(() {
+                    _isLiked = !_isLiked;
+                    _isLiked ? _likeCount++ : _likeCount--;
+                  });
+                },
+              ),
+              _SocialButton(
+                icon: Icons.chat_bubble_outline,
+                label: '${widget.comments}',
+                color: muted,
+                onTap: () {},
+              ),
+              _SocialButton(
+                icon: Icons.share_outlined,
+                label: 'Compartir',
+                color: muted,
+                onTap: () {},
+              ),
+            ],
           ),
         ],
       ),
@@ -527,93 +385,171 @@ class _JournalistCardState extends State<_JournalistCard> {
   }
 }
 
-// Búsqueda
-class _FeedSearch extends SearchDelegate {
-  final List<AppUser> users;
+class _JournalistInteractiveCard extends StatefulWidget {
   final bool isDark;
-  _FeedSearch({required this.users, required this.isDark});
+  const _JournalistInteractiveCard({required this.isDark});
 
   @override
-  ThemeData appBarTheme(BuildContext context) {
-    return Theme.of(context).copyWith(
-      appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.bg(isDark),
-        iconTheme: IconThemeData(color: AppColors.text(isDark)),
-        elevation: 0,
-      ),
-      inputDecorationTheme: const InputDecorationTheme(
-        border: InputBorder.none,
-      ),
-      scaffoldBackgroundColor: AppColors.bg(isDark),
-    );
-  }
+  State<_JournalistInteractiveCard> createState() => _JournalistInteractiveCardState();
+}
+
+class _JournalistInteractiveCardState extends State<_JournalistInteractiveCard> {
+  int _donated = 0;
+  bool _isLiked = false;
+  int _likeCount = 89;
 
   @override
-  List<Widget> buildActions(BuildContext context) => [
-    IconButton(
-      icon: Icon(Icons.clear, color: AppColors.text(isDark)),
-      onPressed: () => query = '',
-    ),
-  ];
-
-  @override
-  Widget buildLeading(BuildContext context) => IconButton(
-    icon: Icon(Icons.arrow_back, color: AppColors.text(isDark)),
-    onPressed: () => close(context, null),
-  );
-
-  @override
-  Widget buildResults(BuildContext context) => _buildList(context);
-
-  @override
-  Widget buildSuggestions(BuildContext context) => _buildList(context);
-
-  Widget _buildList(BuildContext context) {
-    final f = query.isEmpty
-        ? users
-        : users
-              .where(
-                (u) =>
-                    u.name.toLowerCase().contains(query.toLowerCase()) ||
-                    u.uniqueId.toLowerCase().contains(query.toLowerCase()),
-              )
-              .toList();
+  Widget build(BuildContext context) {
+    final surface = AppColors.surface(widget.isDark);
+    final border = AppColors.border(widget.isDark);
+    final text = AppColors.text(widget.isDark);
+    final muted = AppColors.textMuted(widget.isDark);
 
     return Container(
-      color: AppColors.bg(isDark),
-      child: ListView.builder(
-        itemCount: f.length,
-        itemBuilder: (context, i) {
-          final u = f[i];
-          final muted = AppColors.textMuted(isDark);
-          return ListTile(
-            leading: CircleAvatar(
-              backgroundColor: AppColors.surface(isDark),
-              child: Icon(Icons.person, color: muted, size: 18),
-            ),
-            title: Text(
-              u.name,
-              style: TextStyle(
-                color: AppColors.text(isDark),
-                fontWeight: FontWeight.w600,
+      width: double.infinity,
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        color: surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.bg(widget.isDark),
+                  border: Border.all(color: border),
+                ),
+                child: Icon(Icons.campaign_outlined, color: muted, size: 22),
               ),
-            ),
-            subtitle: Text(
-              '${u.uniqueId} · ${u.role.name.toUpperCase()}',
-              style: TextStyle(color: muted, fontSize: 11),
-            ),
-            trailing: u.isVerified
-                ? const Icon(Icons.verified, color: Colors.green, size: 16)
-                : null,
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Elena Vance',
+                      style: TextStyle(color: text, fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: -0.3),
+                    ),
+                    Row(
+                      children: [
+                        Text('Periodista Validada', style: TextStyle(color: Colors.green, fontSize: 12, fontWeight: FontWeight.w600)),
+                        Text(' • Hace 3 h', style: TextStyle(color: muted, fontSize: 12)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          
+          Text(
+            'Impresionante exhibición táctica del Atletico hoy. Los datos del árbitro ya están en la base de datos inmutable para total transparencia institucional. ¿Qué opinan de las rotaciones?',
+            style: TextStyle(color: text, fontSize: 15, height: 1.5, fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(height: 20),
+          
+          // Donation Area
+          GestureDetector(
             onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => AthleticCVScreen(viewedUser: u),
+              setState(() => _donated += 5);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Aportaste 5 SC a Elena ✓', style: TextStyle(color: text, fontWeight: FontWeight.bold)),
+                  backgroundColor: AppColors.buttonBg(widget.isDark),
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               );
             },
-          );
-        },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: _donated > 0 ? Colors.amber.withValues(alpha: 0.1) : AppColors.bg(widget.isDark),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: _donated > 0 ? Colors.amber.withValues(alpha: 0.5) : border),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.workspace_premium_outlined, color: _donated > 0 ? Colors.amber : muted, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    _donated > 0 ? '$_donated SC Apoyados' : 'Respaldar Análisis Periodístico',
+                    style: TextStyle(color: _donated > 0 ? Colors.amber : text, fontSize: 14, fontWeight: FontWeight.w700),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          
+          const SizedBox(height: 20),
+          Divider(color: border, height: 1),
+          const SizedBox(height: 12),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _SocialButton(
+                icon: _isLiked ? Icons.favorite : Icons.favorite_border,
+                label: '$_likeCount',
+                color: _isLiked ? Colors.redAccent : muted,
+                onTap: () {
+                  setState(() {
+                    _isLiked = !_isLiked;
+                    _isLiked ? _likeCount++ : _likeCount--;
+                  });
+                },
+              ),
+              _SocialButton(
+                icon: Icons.chat_bubble_outline,
+                label: '24',
+                color: muted,
+                onTap: () {},
+              ),
+              _SocialButton(
+                icon: Icons.share_outlined,
+                label: 'Compartir',
+                color: muted,
+                onTap: () {},
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SocialButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _SocialButton({required this.icon, required this.label, required this.color, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Row(
+          children: [
+            Icon(icon, color: color, size: 20),
+            const SizedBox(width: 6),
+            Text(label, style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.w600)),
+          ],
+        ),
       ),
     );
   }

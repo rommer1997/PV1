@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/app_user.dart';
 import '../../providers/theme_provider.dart';
 import '../../widgets/help_button.dart';
+import '../../widgets/video_highlight_card.dart';
 
 class JournalistScreen extends ConsumerStatefulWidget {
   const JournalistScreen({super.key});
@@ -184,6 +185,32 @@ class _JournalistScreenState extends ConsumerState<JournalistScreen> {
                     ),
                   ],
                 ),
+              ),
+
+              const SizedBox(height: 36),
+              Text(
+                'RECURSOS DE VIDEO (SLP VEO)',
+                style: TextStyle(
+                  color: muted,
+                  fontSize: 10,
+                  letterSpacing: 2,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 16),
+              VideoHighlightCard(
+                title: 'Derbi Sub-19: Análisis Táctico',
+                description: 'Material bruto generado por cámaras IA listo para ser narrado en tu Studio y publicado.',
+                matchDate: 'Hoy',
+                isDark: isDark,
+                canAdjustStats: false,
+                canBroadcast: true,
+                onAdjustStats: () {},
+                onShareToFeed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(backgroundColor: AppColors.buttonBg(isDark), content: Text('Recurso añadido a la crónica listo para publicar', style: TextStyle(color: AppColors.buttonFg(isDark)))),
+                  );
+                },
               ),
 
               const SizedBox(height: 36),

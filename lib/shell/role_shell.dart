@@ -14,10 +14,10 @@ import '../screens/brand/brand_dashboard_screen.dart';
 import '../screens/shared/wallet_screen.dart';
 import '../screens/auth/welcome_screen.dart';
 import '../screens/staff/staff_dashboard_screen.dart';
-import '../screens/shared/global_search_screen.dart';
-import '../screens/shared/agenda_screen.dart';
 import '../providers/theme_provider.dart';
 import '../services/user_storage_service.dart';
+import '../screens/shared/explore_hub_screen.dart';
+import '../screens/shared/settings_screen.dart';
 
 class RoleShell extends ConsumerStatefulWidget {
   final UserRole role;
@@ -35,8 +35,7 @@ class _RoleShellState extends ConsumerState<RoleShell> {
       case UserRole.player:
         return [
           _NavItem(Icons.person_outline, 'Perfil', AthleticCVScreen()),
-          _NavItem(Icons.calendar_today, 'Agenda', const AgendaScreen()),
-          const _NavItem(Icons.search, 'Descubrir', GlobalSearchScreen()),
+          const _NavItem(Icons.explore_outlined, 'Explorar', ExploreHubScreen()),
           const _NavItem(Icons.dynamic_feed_outlined, 'Feed', StadiumFeedScreen()),
           const _NavItem(Icons.account_balance_wallet_outlined, 'Wallet', WalletScreen()),
         ];
@@ -44,54 +43,50 @@ class _RoleShellState extends ConsumerState<RoleShell> {
         return [
           const _NavItem(Icons.approval_outlined, 'Docs', TutorApprovalsScreen()),
           _NavItem(Icons.person_outline, 'Hijo', AthleticCVScreen()),
-          const _NavItem(Icons.calendar_today, 'Torneos', AgendaScreen()),
+          const _NavItem(Icons.explore_outlined, 'Explorar', ExploreHubScreen()),
           const _NavItem(Icons.dynamic_feed_outlined, 'Feed', StadiumFeedScreen()),
         ];
       case UserRole.coach:
         return [
           const _NavItem(Icons.sports_outlined, 'Equipo', CoachDashboardScreen()),
-          const _NavItem(Icons.calendar_today, 'Agenda', AgendaScreen()),
+          const _NavItem(Icons.explore_outlined, 'Explorar', ExploreHubScreen()),
           const _NavItem(Icons.storefront_outlined, 'Mercado', CoachMarketplaceScreen()),
           const _NavItem(Icons.account_balance_wallet_outlined, 'Wallet', WalletScreen()),
         ];
       case UserRole.referee:
         // ⚖️ Árbitro: Usa la Agenda para seleccionar el partido y al jugador a evaluar.
         return [
-          const _NavItem(Icons.calendar_month_outlined, 'Designaciones', AgendaScreen()),
-          const _NavItem(Icons.search, 'Historiales', GlobalSearchScreen()),
+          const _NavItem(Icons.explore_outlined, 'Explorar', ExploreHubScreen()),
         ];
       case UserRole.scout:
         return [
           const _NavItem(Icons.dashboard_outlined, 'Favoritos', ScoutDashboardScreen()),
-          const _NavItem(Icons.calendar_today, 'Agenda', AgendaScreen()),
+          const _NavItem(Icons.explore_outlined, 'Explorar', ExploreHubScreen()),
           const _NavItem(Icons.search, 'Mercado', ScoutMarketplaceScreen()),
           const _NavItem(Icons.account_balance_wallet_outlined, 'Wallet', WalletScreen()),
         ];
       case UserRole.journalist:
         return [
           const _NavItem(Icons.mic_outlined, 'Studio', JournalistScreen()),
-          const _NavItem(Icons.search, 'Búsqueda', GlobalSearchScreen()),
-          const _NavItem(Icons.calendar_today, 'Cartelera', AgendaScreen()),
+          const _NavItem(Icons.explore_outlined, 'Explorar', ExploreHubScreen()),
           const _NavItem(Icons.dynamic_feed_outlined, 'Noticias', StadiumFeedScreen()),
         ];
       case UserRole.brand:
         return [
           const _NavItem(Icons.campaign_outlined, 'Campañas', BrandDashboardScreen()),
-          const _NavItem(Icons.search, 'Talentos', GlobalSearchScreen()),
+          const _NavItem(Icons.explore_outlined, 'Explorar', ExploreHubScreen()),
           const _NavItem(Icons.dynamic_feed_outlined, 'Tendencias', StadiumFeedScreen()),
         ];
       case UserRole.fan:
         return [
           const _NavItem(Icons.emoji_events_outlined, 'Predecir', PredictScreen()),
-          const _NavItem(Icons.calendar_today, 'Cartelera', AgendaScreen()),
-          const _NavItem(Icons.search, 'Ídolos', GlobalSearchScreen()),
+          const _NavItem(Icons.explore_outlined, 'Explorar', ExploreHubScreen()),
           const _NavItem(Icons.account_balance_wallet_outlined, 'Wallet', WalletScreen()),
         ];
       case UserRole.staff:
         return [
           const _NavItem(Icons.admin_panel_settings_outlined, 'Admin', StaffDashboardScreen()),
-          const _NavItem(Icons.search, 'Auditoría', GlobalSearchScreen()),
-          const _NavItem(Icons.calendar_today, 'Ligas', AgendaScreen()),
+          const _NavItem(Icons.explore_outlined, 'Explorar', ExploreHubScreen()),
         ];
     }
   }
@@ -159,9 +154,45 @@ class _RoleShellState extends ConsumerState<RoleShell> {
         ),
       ),
       // Mantenemos el estado usando IndexedStack
-      body: IndexedStack(
-        index: _index,
-        children: items.map((e) => e.screen).toList(),
+      body: Stack(
+        children: [
+          IndexedStack(
+            index: _index,
+            children: items.map((e) => e.screen).toList(),
+          ),
+          SafeArea(
+            child: Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8, right: 16),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // El botón QR fue movido a Athletic CV Screen
+                    if (widget.role != UserRole.player) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.surface(isDark).withValues(alpha: 0.8),
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          icon: Icon(Icons.settings_outlined, color: AppColors.text(isDark)),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
       bottomNavigationBar: Container(
         color: bg,
@@ -219,3 +250,5 @@ class _NavItem {
   final Widget screen;
   const _NavItem(this.icon, this.label, this.screen);
 }
+
+

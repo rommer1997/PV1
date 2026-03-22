@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'dart:math' as math;
 import '../models/app_user.dart';
 import '../providers/theme_provider.dart';
 import '../providers/match_evaluations_provider.dart';
 import '../widgets/help_button.dart';
+import '../models/user_role.dart';
 import 'shared/profile_edit_screen.dart';
 import 'shared/settings_screen.dart';
+import '../widgets/video_highlight_card.dart';
 
 // ── Paleta semáforo por rendimiento ──────────────────────────────────────────
 Color _statColor(double v) {
@@ -453,6 +456,20 @@ class AthleticCVScreen extends ConsumerWidget {
                         Row(
                           children: [
                             const HelpButton(screenKey: 'athletic_cv'),
+                            const SizedBox(width: 8),
+                            // Botón QR
+                            GestureDetector(
+                              onTap: () => _showQRPass(context, user, isDark),
+                              child: Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: surface,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: border),
+                                ),
+                                child: Icon(Icons.qr_code_2, size: 16, color: muted),
+                              ),
+                            ),
                             const SizedBox(width: 8),
                             // Crisis Toggle (Simulación)
                             GestureDetector(
@@ -1003,16 +1020,38 @@ class AthleticCVScreen extends ConsumerWidget {
 
                 const SizedBox(height: 36),
 
-                // ── Historial de Partidos ──────────────────────────────────
-                _FadeSlide(
-                  delay: 720,
-                  child: _MatchHistorySection(
-                    playerId: targetPlayerId,
-                    isDark: isDark,
+                // ── Vídeos y Highlights (VOD) ──────────────────────────────
+                if (rawUser?.role == UserRole.coach || rawUser?.role == UserRole.staff) ...[
+                  _FadeSlide(
+                    delay: 800,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'RECURSO PARA EVALUADORES (SLP VEO)',
+                          style: TextStyle(
+                            color: muted,
+                            fontSize: 11,
+                            letterSpacing: 2,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        VideoHighlightCard(
+                          title: 'Actuación Estelar vs. Academia F.C.',
+                          description: 'Resumen táctico generado por cámaras IA para la evaluación de Stats del jugador.',
+                          matchDate: '15/03/2026',
+                          isDark: isDark,
+                          canAdjustStats: true, 
+                          canBroadcast: false,
+                          onAdjustStats: () => _showAdjustStatsModal(context, viewedUser, isDark),
+                          onShareToFeed: () {},
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-
-                const SizedBox(height: 50),
+                  const SizedBox(height: 50),
+                ],
               ],
             ),
           ),
@@ -1635,86 +1674,254 @@ class _RadarPainter extends CustomPainter {
 
 void _showQRPass(BuildContext context, AppUser? user, bool isDark) {
   if (user == null) return;
+  final qrData = 'sportlink://user/${user.uniqueId}';
+  
   showModalBottomSheet(
     context: context,
-    backgroundColor: AppColors.surface(isDark),
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-    ),
-    builder: (_) => Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 28),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 36,
-            height: 4,
-            decoration: BoxDecoration(
-              color: AppColors.border(isDark),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(height: 28),
-          Text(
-            'PASE QR - EVENTO FASE 0',
-            style: TextStyle(
-              color: AppColors.textMuted(isDark),
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 2,
-            ),
-          ),
-          const SizedBox(height: 20),
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const Icon(Icons.qr_code_2, size: 140, color: Colors.black),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            user.uniqueId,
-            style: TextStyle(
-              color: AppColors.text(isDark),
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 2,
-              fontFamily: 'Courier',
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            user.name.toUpperCase(),
-            style: TextStyle(
-              color: AppColors.textMuted(isDark),
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 24),
-          const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.verified, color: Colors.green, size: 16),
-              SizedBox(width: 6),
-              Text(
-                'Identidad Validada',
-                style: TextStyle(
-                  color: Colors.green,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (_) => Container(
+      margin: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 40),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isDark 
+              ? [const Color(0xFF1E1E1E), const Color(0xFF0F0F0F)]
+              : [const Color(0xFFFFFFFF), const Color(0xFFF0F0F0)],
+        ),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        border: Border.all(
+          color: const Color(0xFFF4CA25).withValues(alpha: 0.3),
+        ),
+      ),
+      child: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Grabber
+              Container(
+                width: 48,
+                height: 5,
+                margin: const EdgeInsets.only(bottom: 28),
+                decoration: BoxDecoration(
+                  color: AppColors.border(isDark),
+                  borderRadius: BorderRadius.circular(2.5),
                 ),
               ),
+              // Header del Ticket
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'PASE DIGITAL VIP',
+                        style: TextStyle(
+                          color: Color(0xFFF4CA25),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 2.5,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'ACREDITACIÓN DE JUGADOR',
+                        style: TextStyle(
+                          color: AppColors.textMuted(isDark),
+                          fontSize: 11,
+                          letterSpacing: 1.5,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF4CA25).withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.star, color: Color(0xFFF4CA25), size: 24),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 36),
+              
+              // Contenedor del QR
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(28),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFF4CA25).withValues(alpha: 0.15),
+                      blurRadius: 30,
+                      spreadRadius: -5,
+                    ),
+                  ],
+                ),
+                child: QrImageView(
+                  data: qrData,
+                  version: QrVersions.auto,
+                  size: 240.0,
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black,
+                  errorCorrectionLevel: QrErrorCorrectLevel.Q,
+                ),
+              ),
+              
+              const SizedBox(height: 36),
+              
+              // Detalles del Usuario
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.grey.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: AppColors.border(isDark)),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      user.uniqueId,
+                      style: TextStyle(
+                        color: AppColors.text(isDark),
+                        fontSize: 28,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 5,
+                        fontFamily: 'Courier',
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      user.name.toUpperCase(),
+                      style: TextStyle(
+                        color: AppColors.textMuted(isDark),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              const SizedBox(height: 28),
+              
+              // Badge de Validación
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF34C759).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(100),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.verified_user, color: Color(0xFF34C759), size: 18),
+                    SizedBox(width: 8),
+                    Text(
+                      'Identidad Validada en SportLink',
+                      style: TextStyle(
+                        color: Color(0xFF34C759),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
             ],
           ),
-          const SizedBox(height: 16),
-        ],
+        ),
+        ),
       ),
     ),
   );
 }
+
+void _showAdjustStatsModal(BuildContext context, AppUser? user, bool isDark) {
+  if (user == null) return;
+  final surface = AppColors.surface(isDark);
+  final text = AppColors.text(isDark);
+  final muted = AppColors.textMuted(isDark);
+  
+  showModalBottomSheet(
+    context: context,
+    backgroundColor: surface,
+    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+    builder: (_) => SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Ajuste de Stats por Video', style: TextStyle(color: text, fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Text('Basado en la evidencia del video VEO, ¿cómo evaluarías el rendimiento del jugador en este partido?', style: TextStyle(color: muted, fontSize: 13, height: 1.4)),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Técnica', style: TextStyle(color: text, fontWeight: FontWeight.bold)),
+                Row(
+                  children: List.generate(5, (index) => Icon(Icons.star, color: index < 4 ? Colors.amber : muted, size: 28)),
+                )
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Resistencia', style: TextStyle(color: text, fontWeight: FontWeight.bold)),
+                Row(
+                  children: List.generate(5, (index) => Icon(Icons.star, color: index < 3 ? Colors.amber : muted, size: 28)),
+                )
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Fair Play', style: TextStyle(color: text, fontWeight: FontWeight.bold)),
+                Row(
+                  children: List.generate(5, (index) => Icon(Icons.star, color: index < 5 ? Colors.amber : muted, size: 28)),
+                )
+              ],
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.buttonBg(isDark),
+                  foregroundColor: AppColors.buttonFg(isDark),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(backgroundColor: AppColors.buttonBg(isDark), content: Text('Stats actualizadas en el Smart Contract', style: TextStyle(color: AppColors.buttonFg(isDark)))));
+                },
+                child: const Text('Confirmar Evaluación de Video', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
 
 double _avg(Map<String, double> stats) {
   if (stats.isEmpty) return 0.0;

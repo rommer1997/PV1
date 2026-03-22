@@ -16,6 +16,8 @@ class AppUser {
   final bool isVerified;
   final String? location;
   final String? bio;
+  final String? ageGroup;
+  final String? position;
 
   const AppUser({
     required this.id,
@@ -32,6 +34,8 @@ class AppUser {
     this.isVerified = false,
     this.location,
     this.bio,
+    this.ageGroup,
+    this.position,
   });
 
   /// Sanitiza los datos sensibles según la relación con el visor.
@@ -55,6 +59,8 @@ class AppUser {
       isVerified: isVerified,
       location: null,
       bio: null,
+      ageGroup: ageGroup,
+      position: null,
     );
   }
 }
@@ -70,6 +76,8 @@ final mockUsers = <UserRole, AppUser>{
     followersCount: 1204,
     followingCount: 45,
     isVerified: true,
+    ageGroup: '15-17 años',
+    position: 'DEL',
   ),
   UserRole.scout: const AppUser(
     id: '3',
@@ -95,6 +103,7 @@ final mockUsers = <UserRole, AppUser>{
     name: 'Laura M.',
     followersCount: 23,
     followingCount: 154,
+    ageGroup: '+21 años',
   ),
   UserRole.tutor: const AppUser(
     id: '6',
@@ -153,6 +162,8 @@ class SessionNotifier extends Notifier<AppUser?> {
         isVerified: state!.isVerified,
         location: state!.location,
         bio: state!.bio,
+        ageGroup: state!.ageGroup,
+        position: state!.position,
       );
     }
   }
