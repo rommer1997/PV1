@@ -151,6 +151,24 @@ class VideoHighlightCard extends ConsumerWidget {
                       
                       // Shared actions
                       _ActionButton(
+                        icon: Icons.monetization_on_outlined,
+                        label: 'Apoyar',
+                        color: const Color(0xFFE2F163),
+                        onTap: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Has enviado +1 SC como propina al jugador por este highlight.',
+                                style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                              ),
+                              backgroundColor: Color(0xFFE2F163),
+                            ),
+                          );
+                        },
+                        isDark: isDark,
+                      ),
+                      const SizedBox(width: 10),
+                      _ActionButton(
                         icon: Icons.share_outlined,
                         label: 'Compartir',
                         color: AppColors.buttonBg(isDark),

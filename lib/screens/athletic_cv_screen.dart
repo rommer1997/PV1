@@ -756,127 +756,101 @@ class AthleticCVScreen extends ConsumerWidget {
                       const SizedBox(width: 32),
 
                       // Follow Button (Mock interaction)
-                      GestureDetector(
-                        onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Has empezado a seguir a ${user?.name}',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
+                      if (!isCurrentUser)
+                        GestureDetector(
+                          onTap: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Has empezado a seguir a ${user?.name}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
+                                backgroundColor: const Color(0xFF007AFF),
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                duration: const Duration(seconds: 2),
                               ),
-                              backgroundColor: const Color(0xFF007AFF),
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              duration: const Duration(seconds: 2),
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 10,
                             ),
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 10,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(
-                              0xFF007AFF,
-                            ), // Blue follow button
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Text(
-                            'Seguir',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
+                            decoration: BoxDecoration(
+                              color: const Color(
+                                0xFF007AFF,
+                              ), // Blue follow button
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Text(
+                              'Seguir',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                           ),
                         ),
-                      ),
                     ],
                   ),
                 ),
 
                 const SizedBox(height: 32),
 
-                // ── Pase VIP / QR Button Rediseñado ────────────────────────
-                if (isCurrentUser)
+                // ── Presentación del Jugador (Bio) ─────────────────────────
+                if (user?.bio != null)
                   _FadeSlide(
-                    delay: 120,
-                    child: GestureDetector(
-                      onTap: () => _showQRPass(context, user, isDark),
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 24),
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: isDark 
-                                ? [const Color(0xFF2C2C2C), const Color(0xFF1A1A1A)]
-                                : [const Color(0xFFF0F0F0), const Color(0xFFFFFFFF)],
+                    delay: 100,
+                    child: Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.only(bottom: 24),
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: surface,
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(color: border),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.format_quote_rounded, color: const Color(0xFFE2F163), size: 24),
+                              const SizedBox(width: 8),
+                              Text(
+                                'CARTA DE PRESENTACIÓN',
+                                style: TextStyle(
+                                  color: muted,
+                                  fontSize: 10,
+                                  letterSpacing: 2,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ],
                           ),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: isDark ? const Color(0xFF404040) : const Color(0xFFE0E0E0)),
-                          boxShadow: [
-                            BoxShadow(
-                              color: isDark ? Colors.black26 : Colors.black12,
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
+                          const SizedBox(height: 16),
+                          Text(
+                            user!.bio!,
+                            style: TextStyle(
+                              color: text,
+                              fontSize: 15,
+                              height: 1.6,
+                              fontWeight: FontWeight.w400,
                             ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    color: isDark ? Colors.black : Colors.white,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: const Color(0xFFF4CA25).withValues(alpha: 0.5)),
-                                  ),
-                                  child: const Icon(
-                                    Icons.qr_code_scanner,
-                                    color: Color(0xFFF4CA25), // Premium gold
-                                    size: 24,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Pase Digital VIP',
-                                      style: TextStyle(
-                                        color: text,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                    ),
-                                    Text(
-                                      'Mostrar código QR',
-                                      style: TextStyle(
-                                        color: muted,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            Icon(Icons.chevron_right, color: muted),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
 
-                // ── Carta FIFA V5 Showcase ──────────────────────────────────
+
                 _FadeSlide(
                   delay: 160,
                   child: Center(

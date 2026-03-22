@@ -78,6 +78,7 @@ final mockUsers = <UserRole, AppUser>{
     isVerified: true,
     ageGroup: '15-17 años',
     position: 'DEL',
+    bio: 'Falso 9 con excelente visión de juego y regate en espacios reducidos. Mi objetivo principal este año es conseguir una beca deportiva internacional.',
   ),
   UserRole.scout: const AppUser(
     id: '3',

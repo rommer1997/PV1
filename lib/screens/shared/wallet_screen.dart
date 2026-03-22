@@ -130,7 +130,7 @@ class WalletScreen extends ConsumerWidget {
 
               // Opciones para Obtener SC
               Text(
-                'OBTENER SPORTCOINS',
+                'NUEVAS FORMAS DE GANAR SC',
                 style: TextStyle(
                   color: muted,
                   fontSize: 11,
@@ -141,21 +141,33 @@ class WalletScreen extends ConsumerWidget {
               const SizedBox(height: 16),
               
               _OptionCard(
-                icon: Icons.storefront_outlined,
-                title: 'Comprar SC',
-                subtitle: 'Adquiere tokens directamente',
+                icon: Icons.emoji_events_outlined,
+                title: 'Retos Deportivos',
+                subtitle: 'Participa en 2 torneos este mes (+150 SC)',
                 isDark: isDark,
                 onTap: () {
                    ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Abriendo pasarela de pago...', style: TextStyle(color: text)), backgroundColor: surface)
+                    SnackBar(content: Text('Has reclamado tu recompensa semanal.', style: TextStyle(color: text, fontWeight: FontWeight.bold)), backgroundColor: primary)
+                   );
+                },
+              ),
+              const SizedBox(height: 12),
+              _OptionCard(
+                icon: Icons.visibility_outlined,
+                title: 'Regalías por Scouting',
+                subtitle: 'Ganas +1 SC directo cada vez que un scout paga por ver tu radar',
+                isDark: isDark,
+                onTap: () {
+                   ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Historial: 14 scouts pagaron por ver tu perfil esta semana.', style: TextStyle(color: text)), backgroundColor: surface)
                    );
                 },
               ),
               const SizedBox(height: 12),
               _OptionCard(
                 icon: Icons.play_circle_outline,
-                title: 'Recompensas por Anuncios',
-                subtitle: 'Mira patrocinios deportivos y gana +5 SC',
+                title: 'Ver Patrocinios',
+                subtitle: 'Mira 30s de publicidad oficial (+5 SC)',
                 isDark: isDark,
                 onTap: () {
                   ref.read(sessionProvider.notifier).addSportCoins(5);
@@ -164,18 +176,6 @@ class WalletScreen extends ConsumerWidget {
                       content: Text('¡Has ganado +5 SC por ver el patrocinio!', style: TextStyle(color: text, fontWeight: FontWeight.bold)),
                       backgroundColor: primary,
                     ),
-                  );
-                },
-              ),
-              const SizedBox(height: 12),
-              _OptionCard(
-                icon: Icons.group_add_outlined,
-                title: 'Invitar Amigos',
-                subtitle: 'Gana +50 SC por cada registro',
-                isDark: isDark,
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Enlace copiado al portapapeles', style: TextStyle(color: text)), backgroundColor: surface)
                   );
                 },
               ),
