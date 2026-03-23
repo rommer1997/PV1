@@ -5,6 +5,7 @@ import 'global_search_screen.dart';
 import 'agenda_screen.dart';
 import '../matches/match_discovery_screen.dart';
 import 'sportlink_ai_screen.dart';
+import '../scout/scout_dashboard_screen.dart';
 
 class ExploreHubScreen extends ConsumerWidget {
   const ExploreHubScreen({super.key});
@@ -19,7 +20,7 @@ class ExploreHubScreen extends ConsumerWidget {
     final primary = AppColors.buttonBg(isDark);
 
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
         backgroundColor: bg,
         appBar: AppBar(
@@ -41,6 +42,7 @@ class ExploreHubScreen extends ConsumerWidget {
               Tab(icon: Icon(Icons.search), text: 'Descubrir'),
               Tab(icon: Icon(Icons.sports_soccer), text: 'Partidos'),
               Tab(icon: Icon(Icons.calendar_today), text: 'Agenda'),
+              Tab(icon: Icon(Icons.star_outline), text: 'Favoritos'),
             ],
           ),
         ),
@@ -49,6 +51,7 @@ class ExploreHubScreen extends ConsumerWidget {
             GlobalSearchScreen(),
             MatchDiscoveryScreen(),
             AgendaScreen(),
+            ScoutDashboardScreen(),
           ],
         ),
         floatingActionButton: FloatingActionButton.extended(

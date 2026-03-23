@@ -5,7 +5,6 @@ import '../../providers/theme_provider.dart';
 import '../../models/app_user.dart';
 import '../../services/user_storage_service.dart';
 import '../auth/welcome_screen.dart';
-import 'profile_edit_screen.dart';
 import 'notifications_settings_screen.dart';
 import 'help_support_screen.dart';
 import 'privacy_settings_screen.dart';

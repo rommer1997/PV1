@@ -4,7 +4,6 @@ import '../models/user_role.dart';
 import '../screens/athletic_cv_screen.dart';
 import '../screens/stadium_feed_screen.dart';
 import '../screens/scout/scout_marketplace_screen.dart';
-import '../screens/scout/scout_dashboard_screen.dart';
 import '../screens/coach/coach_dashboard_screen.dart';
 import '../screens/coach/coach_marketplace_screen.dart';
 import '../screens/tutor/tutor_approvals_screen.dart';
@@ -60,7 +59,7 @@ class _RoleShellState extends ConsumerState<RoleShell> {
         ];
       case UserRole.scout:
         return [
-          const _NavItem(Icons.dashboard_outlined, 'Favoritos', ScoutDashboardScreen()),
+          _NavItem(Icons.person_outline, 'Perfil', AthleticCVScreen()),
           const _NavItem(Icons.explore_outlined, 'Explorar', ExploreHubScreen()),
           const _NavItem(Icons.search, 'Mercado', ScoutMarketplaceScreen()),
           const _NavItem(Icons.account_balance_wallet_outlined, 'Wallet', WalletScreen()),
