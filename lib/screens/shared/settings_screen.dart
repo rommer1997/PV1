@@ -13,12 +13,23 @@ import 'privacy_settings_screen.dart';
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
+  void _showComingSoon(BuildContext context, String feature) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$feature estará disponible próximamente.'),
+        backgroundColor: const Color(0xFFF4CA25), // Brand yellow
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = ref.watch(themeProvider) == ThemeMode.dark;
     final bg = AppColors.bg(isDark);
     final text = AppColors.text(isDark);
     final muted = AppColors.textMuted(isDark);
+    final user = ref.watch(sessionProvider);
 
     return Scaffold(
       backgroundColor: bg,
@@ -34,59 +45,19 @@ class SettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
         children: [
-          _buildSectionHeader('Cuenta', muted),
-          _buildListTile(
-            icon: Icons.person_outline,
-            title: 'Editar Perfil',
-            isDark: isDark,
-            onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileEditScreen()));
-            },
-          ),
-          _buildListTile(
-            icon: Icons.notifications_none,
-            title: 'Notificaciones',
-            isDark: isDark,
-            onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsSettingsScreen()));
-            },
-          ),
-          const SizedBox(height: 24),
-          
-          _buildSectionHeader('Preferencias', muted),
-          ListTile(
-            leading: Icon(
-              isDark ? Icons.nightlight_round : Icons.wb_sunny,
-              color: AppColors.text(isDark),
-            ),
-            title: Text('Modo Oscuro', style: TextStyle(color: text)),
-            trailing: Switch(
-              value: isDark,
-              activeThumbColor: AppColors.buttonBg(isDark),
-              onChanged: (val) {
-                HapticFeedback.lightImpact();
-                ref.read(themeProvider.notifier).toggle();
-              },
-            ),
-          ),
-          const SizedBox(height: 24),
-
+          // ── 1. Privacidad y Seguridad ──────────────────────────────────────
           _buildSectionHeader('Privacidad y Seguridad', muted),
           _buildListTile(
             icon: Icons.lock_outline,
-            title: 'Ajustes de Privacidad',
+            title: 'Control de Visibilidad del Perfil',
             isDark: isDark,
-            onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const PrivacySettingsScreen()));
-            },
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PrivacySettingsScreen())),
           ),
-          ListTile(
-            leading: Icon(Icons.security, color: AppColors.text(isDark)),
-            title: Text('Modo Menores / Crisis', style: TextStyle(color: text)),
-            subtitle: Text(
-              'Oculta tus datos sensibles públicamente',
-              style: TextStyle(color: muted, fontSize: 12),
-            ),
+          _buildListTile(
+            icon: Icons.shield_outlined,
+            title: 'Modo Menores / Crisis',
+            subtitle: 'Oculta tus datos sensibles',
+            isDark: isDark,
             trailing: Consumer(builder: (context, ref, _) {
               final isLocked = ref.watch(safetyLockProvider);
               return Switch(
@@ -98,20 +69,73 @@ class SettingsScreen extends ConsumerWidget {
                 },
               );
             }),
+            onTap: () {},
+          ),
+          _buildListTile(icon: Icons.data_usage, title: 'Gestión de Datos Personales', isDark: isDark, onTap: () => _showComingSoon(context, 'Gestión de Datos')),
+          _buildListTile(icon: Icons.security, title: 'Autenticación de Dos Factores (2FA)', isDark: isDark, onTap: () => _showComingSoon(context, '2FA')),
+          _buildListTile(icon: Icons.devices, title: 'Dispositivos Conectados', isDark: isDark, onTap: () => _showComingSoon(context, 'Dispositivos Conectados')),
+          _buildListTile(icon: Icons.password, title: 'Cambiar Contraseña', isDark: isDark, onTap: () => _showComingSoon(context, 'Cambio de Contraseña')),
+          const SizedBox(height: 24),
+
+          // ── 2. Notificaciones ──────────────────────────────────────────────
+          _buildSectionHeader('Notificaciones', muted),
+          _buildListTile(
+            icon: Icons.notifications_active_outlined,
+            title: 'Preferencias de Notificación',
+            isDark: isDark,
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsSettingsScreen())),
+          ),
+          _buildListTile(
+            icon: Icons.mail_outline,
+            title: 'Canales de Notificación',
+            subtitle: 'Push, Email, SMS',
+            isDark: isDark,
+            onTap: () => _showComingSoon(context, 'Canales de Notificación'),
           ),
           const SizedBox(height: 24),
 
-          _buildSectionHeader('Más', muted),
+          // ── 3. Apariencia y Accesibilidad ──────────────────────────────────
+          _buildSectionHeader('Apariencia y Accesibilidad', muted),
           _buildListTile(
-            icon: Icons.help_outline,
-            title: 'Soporte y Ayuda',
+            icon: isDark ? Icons.nightlight_round : Icons.wb_sunny,
+            title: 'Modo Oscuro',
             isDark: isDark,
-            onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const HelpSupportScreen()));
-            },
+            trailing: Switch(
+              value: isDark,
+              activeThumbColor: AppColors.buttonBg(isDark),
+              onChanged: (val) {
+                HapticFeedback.lightImpact();
+                ref.read(themeProvider.notifier).toggle();
+              },
+            ),
+            onTap: () {},
           ),
+          _buildListTile(icon: Icons.language, title: 'Idioma', subtitle: 'Español (ES)', isDark: isDark, onTap: () => _showComingSoon(context, 'Selector de Idiomas')),
+          _buildListTile(icon: Icons.text_fields, title: 'Tamaño de Fuente', isDark: isDark, onTap: () => _showComingSoon(context, 'Tamaño de Fuente')),
+          const SizedBox(height: 24),
+
+          // ── 4. Gestión de SportCoins ───────────────────────────────────────
+          _buildSectionHeader('Gestión de SportCoins', muted),
+          _buildListTile(
+            icon: Icons.monetization_on_outlined,
+            title: 'Saldo Actual',
+            subtitle: '${user?.sportcoins ?? 0} SC',
+            isDark: isDark,
+            onTap: () {},
+          ),
+          _buildListTile(icon: Icons.history, title: 'Historial de Transacciones', isDark: isDark, onTap: () => _showComingSoon(context, 'Historial de SportCoins')),
+          _buildListTile(icon: Icons.add_circle_outline, title: 'Recargar SportCoins', isDark: isDark, onTap: () => _showComingSoon(context, 'Recarga de SportCoins')),
+          _buildListTile(icon: Icons.money_off, title: 'Retirar SportCoins', isDark: isDark, onTap: () => _showComingSoon(context, 'Retirada de SportCoins')),
+          const SizedBox(height: 24),
+
+          // ── 5. Ayuda y Soporte ─────────────────────────────────────────────
+          _buildSectionHeader('Ayuda y Soporte', muted),
+          _buildListTile(icon: Icons.question_answer_outlined, title: 'Preguntas Frecuentes (FAQ)', isDark: isDark, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const HelpSupportScreen()))),
+          _buildListTile(icon: Icons.contact_support_outlined, title: 'Contactar Soporte', isDark: isDark, onTap: () => _showComingSoon(context, 'Soporte Directo')),
+          _buildListTile(icon: Icons.bug_report_outlined, title: 'Reportar un Problema', isDark: isDark, onTap: () => _showComingSoon(context, 'Reporte de Errores')),
           const SizedBox(height: 32),
-          
+
+          // ── Cerrar Sesión ──────────────────────────────────────────────────
           GestureDetector(
             onTap: () async {
               HapticFeedback.mediumImpact();
@@ -128,7 +152,6 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                     TextButton(
                       onPressed: () async {
-                        // FIX DEMO LOGOUT
                         ref.read(sessionProvider.notifier).logout();
                         await UserStorageService.clearSession();
                         if (!context.mounted) return;
@@ -159,6 +182,7 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ),
           ),
+          const SizedBox(height: 48),
         ],
       ),
     );
@@ -182,13 +206,16 @@ class SettingsScreen extends ConsumerWidget {
   Widget _buildListTile({
     required IconData icon,
     required String title,
+    String? subtitle,
+    Widget? trailing,
     required bool isDark,
     required VoidCallback onTap,
   }) {
     return ListTile(
       leading: Icon(icon, color: AppColors.text(isDark)),
       title: Text(title, style: TextStyle(color: AppColors.text(isDark))),
-      trailing: Icon(Icons.chevron_right, color: AppColors.textMuted(isDark)),
+      subtitle: subtitle != null ? Text(subtitle, style: TextStyle(color: AppColors.textMuted(isDark), fontSize: 12)) : null,
+      trailing: trailing ?? Icon(Icons.chevron_right, color: AppColors.textMuted(isDark)),
       onTap: onTap,
     );
   }
