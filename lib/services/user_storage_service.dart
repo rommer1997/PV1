@@ -165,8 +165,7 @@ class UserStorageService {
   static Future<void> updateProfile({
     required String id,
     String? name,
-    String? location,
-    String? bio,
+    Map<String, dynamic>? extraFields,
   }) async {
     final all = await getAll();
     final idx = all.indexWhere((u) => u.id == id);
@@ -182,8 +181,9 @@ class UserStorageService {
       } catch (_) {}
     }
 
-    if (location != null) extra['location'] = location;
-    if (bio != null) extra['bio'] = bio;
+    if (extraFields != null) {
+      extra.addAll(extraFields);
+    }
 
     final updatedUser = RegisteredUser(
       id: u.id,

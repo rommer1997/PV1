@@ -10,6 +10,7 @@ import '../models/user_role.dart';
 import 'shared/profile_edit_screen.dart';
 import 'shared/settings_screen.dart';
 import '../widgets/video_highlight_card.dart';
+import '../widgets/totw_player_card.dart';
 
 // ── Paleta semáforo por rendimiento ──────────────────────────────────────────
 Color _statColor(double v) {
@@ -22,13 +23,13 @@ Color _statColor(double v) {
 // TEC, RES, FPL vienen del promedio ponderado de evaluaciones del árbitro.
 // VEL, FUE, TÁC son evaluaciones privadas del entrenador (pendiente integración).
 
-// ── Widget de Carta FIFA (TOTW) ──────────────────────────────────────────────
-class _TOTWPlayerCard extends StatelessWidget {
+// ── Widget Perfil Hero (Minimalista) ──────────────────────────────────────────────
+class _ProfileHeroClean extends StatelessWidget {
   final AppUser? user;
   final Map<String, double> stats;
   final bool isDark;
 
-  const _TOTWPlayerCard({
+  const _ProfileHeroClean({
     required this.user,
     required this.stats,
     required this.isDark,
@@ -40,7 +41,6 @@ class _TOTWPlayerCard extends StatelessWidget {
     final avg = stats.values.reduce((a, b) => a + b) / stats.length;
     final ovr = (avg * 10).round();
 
-    // Mapear stats de 0-10 a 0-99 estilo FIFA
     final pac = ((stats['VEL'] ?? 0) * 10).round();
     final sho = ((stats['FPL'] ?? 0) * 10).round();
     final pas = ((stats['TÁC'] ?? 0) * 10).round();
@@ -48,269 +48,168 @@ class _TOTWPlayerCard extends StatelessWidget {
     final def = ((stats['RES'] ?? 0) * 10).round();
     final phy = ((stats['FUE'] ?? 0) * 10).round();
 
-    const goldColor = Color(0xFFF4CA25); // Stitch V5 Gold
-    const darkGold = Color(0xFFB8860B);
+    final bg = AppColors.surface(isDark);
+    final text = AppColors.text(isDark);
+    final muted = AppColors.textMuted(isDark);
+    final border = AppColors.border(isDark);
 
     return Container(
-      width: 280,
-      height: 440,
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
       decoration: BoxDecoration(
+        color: bg,
         borderRadius: BorderRadius.circular(24),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF2C2C2C),
-            Color(0xFF0A0A0A),
-            Color(0xFF1A1A1A),
-            Color(0xFF000000),
-          ],
-          stops: [0.0, 0.4, 0.8, 1.0],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: goldColor.withValues(alpha: 0.4),
-            blurRadius: 30,
-            spreadRadius: -5,
-            offset: const Offset(0, 10),
+        border: Border.all(color: border),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (_) => Dialog(
+                      backgroundColor: Colors.transparent,
+                      insetPadding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Center(
+                        child: TOTWPlayerCard(
+                          user: user,
+                          stats: stats,
+                          isDark: isDark,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF1A1A1A) : const Color(0xFFF5F5F5),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: border),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        '$ovr',
+                        style: TextStyle(
+                          color: text,
+                          fontSize: 28,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      Text(
+                        'OVR',
+                        style: TextStyle(
+                          color: muted,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 24),
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const ProfileEditScreen(),
+                    ),
+                  );
+                },
+                child: Container(
+                  width: 90,
+                  height: 90,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isDark ? const Color(0xFF2C2C2C) : const Color(0xFFE0E0E0),
+                    border: Border.all(color: border, width: 2),
+                  ),
+                  child: Icon(
+                    Icons.person_rounded,
+                    size: 50,
+                    color: muted.withValues(alpha: 0.5),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Text(
+            (user?.name ?? 'M. SILVA').toUpperCase(),
+            style: TextStyle(
+              color: text,
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.5,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'ST • 🇪🇸',
+            style: TextStyle(
+              color: muted,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 32),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _HeroStat(label: 'PAC', value: pac, isDark: isDark),
+              _HeroStat(label: 'SHO', value: sho, isDark: isDark),
+              _HeroStat(label: 'PAS', value: pas, isDark: isDark),
+              _HeroStat(label: 'DRI', value: dri, isDark: isDark),
+              _HeroStat(label: 'DEF', value: def, isDark: isDark),
+              _HeroStat(label: 'PHY', value: phy, isDark: isDark),
+            ],
           ),
         ],
-        border: Border.all(color: goldColor.withValues(alpha: 0.9), width: 2),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: Stack(
-          children: [
-            // Carbon Fiber Texture
-            Positioned.fill(
-              child: Opacity(
-                opacity: 0.1,
-                child: CustomPaint(painter: _CarbonFiberPainter()),
-              ),
-            ),
-
-            // Premium Glossy Overlay
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Colors.white.withValues(alpha: 0.05),
-                      Colors.white.withValues(alpha: 0.01),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-              ),
-            ),
-
-            // Brillo superior
-            Positioned(
-              top: -50,
-              left: -50,
-              child: Container(
-                width: 150,
-                height: 150,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [goldColor.withValues(alpha: 0.15), Colors.transparent],
-                  ),
-                ),
-              ),
-            ),
-
-            // Contenido de la carta
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-              child: Column(
-                children: [
-                  // Parte superior: OVR, Logo, Foto
-                  Expanded(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Columna izquierda: OVR, Posición, País, Club
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              '$ovr',
-                              style: const TextStyle(
-                                color: goldColor,
-                                fontSize: 38,
-                                fontWeight: FontWeight.w900,
-                                height: 1.0,
-                              ),
-                            ),
-                            const Text(
-                              'ST',
-                              style: TextStyle(
-                                color: goldColor,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            // Bandera (Placeholder)
-                            Container(
-                              width: 26,
-                              height: 18,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(2),
-                                border: Border.all(color: darkGold, width: 0.5),
-                              ),
-                              child: const Center(
-                                child: Text(
-                                  '🇪🇸',
-                                  style: TextStyle(fontSize: 12),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            // Escudo (Placeholder)
-                            Icon(Icons.shield, color: goldColor, size: 28),
-                          ],
-                        ),
-
-                        // Silueta/Foto del jugador
-                        Expanded(
-                          child: Container(
-                            alignment: Alignment.bottomCenter,
-                            child: Icon(
-                              Icons.directions_run_rounded,
-                              size: 140,
-                              color: Colors.white.withValues(alpha: 0.9),
-                              shadows: [
-                                Shadow(
-                                  color: goldColor.withValues(alpha: 0.5),
-                                  blurRadius: 20,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Separador dorado
-                  Container(
-                    height: 1,
-                    margin: const EdgeInsets.symmetric(vertical: 12),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.transparent,
-                          goldColor.withValues(alpha: 0.8),
-                          Colors.transparent,
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  // Nombre
-                  Text(
-                    (user?.name ?? 'M. SILVA').toUpperCase(),
-                    style: const TextStyle(
-                      color: goldColor,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 2,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Stats (2 columnas x 3 filas)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Columna 1
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _StatItem(val: pac, label: 'PAC'),
-                          const SizedBox(height: 6),
-                          _StatItem(val: sho, label: 'SHO'),
-                          const SizedBox(height: 6),
-                          _StatItem(val: pas, label: 'PAS'),
-                        ],
-                      ),
-                      const SizedBox(width: 32),
-                      // Columna 2
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _StatItem(val: dri, label: 'DRI'),
-                          const SizedBox(height: 6),
-                          _StatItem(val: def, label: 'DEF'),
-                          const SizedBox(height: 6),
-                          _StatItem(val: phy, label: 'PHY'),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
 }
 
-class _StatItem extends StatelessWidget {
-  final int val;
+class _HeroStat extends StatelessWidget {
   final String label;
+  final int value;
+  final bool isDark;
 
-  const _StatItem({required this.val, required this.label});
+  const _HeroStat({required this.label, required this.value, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    final text = AppColors.text(isDark);
+    final muted = AppColors.textMuted(isDark);
+
+    return Column(
       children: [
         Text(
-          '$val',
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w800,
+          '$value',
+          style: TextStyle(
+            color: text,
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
           ),
         ),
-        const SizedBox(width: 6),
+        const SizedBox(height: 4),
         Text(
           label,
-          style: const TextStyle(
-            color: Color(0xFFFFD700),
-            fontSize: 16,
-            fontWeight: FontWeight.w400,
+          style: TextStyle(
+            color: muted,
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],
     );
   }
-}
-
-class _CarbonFiberPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (!size.width.isFinite || !size.height.isFinite) return;
-
-    final paint = Paint()
-      ..color = Colors.white
-      ..strokeWidth = 1;
-
-    for (double i = 0; i < size.width + size.height; i += 8) {
-      canvas.drawLine(Offset(i, 0), Offset(0, i), paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 final athleticCVProvider = Provider.autoDispose
@@ -453,9 +352,14 @@ class AthleticCVScreen extends ConsumerWidget {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        Row(
-                          children: [
-                            const HelpButton(screenKey: 'athletic_cv'),
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: [
+                                  const HelpButton(screenKey: 'athletic_cv'),
                             const SizedBox(width: 8),
                             // Botón QR
                             GestureDetector(
@@ -664,7 +568,10 @@ class AthleticCVScreen extends ConsumerWidget {
                                   ],
                                 ),
                               ),
-                          ],
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -854,7 +761,7 @@ class AthleticCVScreen extends ConsumerWidget {
                 _FadeSlide(
                   delay: 160,
                   child: Center(
-                    child: _TOTWPlayerCard(
+                    child: _ProfileHeroClean(
                       user: user,
                       stats: stats,
                       isDark: isDark,
@@ -869,6 +776,43 @@ class AthleticCVScreen extends ConsumerWidget {
                   delay: 240,
                   child: Center(
                     child: _AnimatedRadarChart(scores: stats, isDark: isDark),
+                  ),
+                ),
+                const SizedBox(height: 48),
+
+                // ── Insignias / Logros ─────────────────────────────────────
+                _FadeSlide(
+                  delay: 260,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 4),
+                        child: Text(
+                          'LOGROS E INSIGNIAS',
+                          style: TextStyle(
+                            color: muted,
+                            fontSize: 10,
+                            letterSpacing: 2.5,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        height: 100,
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
+                          children: [
+                            _buildBadgeCard('Top 10% Vel.', Icons.bolt, const Color(0xFFFF9F0A), isDark),
+                            _buildBadgeCard('Talento SLP', Icons.verified_user, const Color(0xFF34C759), isDark),
+                            _buildBadgeCard('Scout Fav', Icons.star, const Color(0xFFF4CA25), isDark),
+                            _buildBadgeCard('Líder', Icons.local_fire_department, Colors.redAccent, isDark),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
 
@@ -1033,6 +977,42 @@ class AthleticCVScreen extends ConsumerWidget {
       ),
     );
   }
+
+  Widget _buildBadgeCard(String title, IconData icon, Color color, bool isDark) {
+    return Container(
+      width: 90,
+      margin: const EdgeInsets.only(right: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.surface(isDark),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.1),
+            blurRadius: 10,
+            spreadRadius: -2,
+          )
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: color, size: 28),
+          const SizedBox(height: 8),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: AppColors.text(isDark),
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 // ── Widget de animación de entrada: fade + deslizamiento hacia arriba ─────────
@@ -1055,14 +1035,17 @@ class _FadeSlideState extends State<_FadeSlide>
     super.initState();
     _c = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 550),
+      duration: const Duration(milliseconds: 250),
     );
     _opacity = CurvedAnimation(parent: _c, curve: Curves.easeOut);
     _slide = Tween<Offset>(
-      begin: const Offset(0, 0.18),
+      begin: const Offset(0, 0.10),
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _c, curve: Curves.easeOutCubic));
-    Future.delayed(Duration(milliseconds: widget.delay), () {
+    
+    // Reduce delays dramatically for snappier navigation
+    final optimizedDelay = widget.delay ~/ 4;
+    Future.delayed(Duration(milliseconds: optimizedDelay), () {
       if (mounted) _c.forward();
     });
   }

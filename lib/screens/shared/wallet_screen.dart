@@ -128,6 +128,10 @@ class WalletScreen extends ConsumerWidget {
 
               const SizedBox(height: 32),
 
+              // Smart Escrow Card
+              _SmartEscrowCard(isDark: isDark),
+              const SizedBox(height: 32),
+
               // Opciones para Obtener SC
               Text(
                 'NUEVAS FORMAS DE GANAR SC',
@@ -487,6 +491,108 @@ class _TransactionRow extends StatelessWidget {
               fontSize: 16,
               fontWeight: FontWeight.w700,
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Smart Escrow Card ────────────────────────────────────────────────────────
+class _SmartEscrowCard extends StatelessWidget {
+  final bool isDark;
+  const _SmartEscrowCard({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final surface = AppColors.surface(isDark);
+    final border = AppColors.border(isDark);
+    final text = AppColors.text(isDark);
+    final muted = AppColors.textMuted(isDark);
+    final highlight = isDark ? Colors.blueAccent : Colors.blue;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'FONDOS RETENIDOS (ESCROW)',
+                style: TextStyle(
+                  color: muted,
+                  fontSize: 11,
+                  letterSpacing: 2,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              Icon(Icons.shield_outlined, color: highlight, size: 20),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            '1,500 SC',
+            style: TextStyle(
+              color: text,
+              fontSize: 32,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -1,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Contrato de firma (C.D. Madrid U19)\nEsperando firma manual del Entrenador Staff.',
+            style: TextStyle(color: muted, fontSize: 12, height: 1.4),
+          ),
+          const SizedBox(height: 24),
+          // Progress Bar
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: highlight,
+                    borderRadius: const BorderRadius.horizontal(left: Radius.circular(3)),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Container(
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: highlight,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Container(
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.white12 : Colors.black12,
+                    borderRadius: const BorderRadius.horizontal(right: Radius.circular(3)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Progreso contrato', style: TextStyle(color: muted, fontSize: 11)),
+              Text('2/3 firmas', style: TextStyle(color: highlight, fontSize: 11, fontWeight: FontWeight.w700)),
+            ],
           ),
         ],
       ),

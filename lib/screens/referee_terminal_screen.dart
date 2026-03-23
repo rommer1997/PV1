@@ -4,6 +4,25 @@ import '../providers/theme_provider.dart';
 import '../providers/match_evaluations_provider.dart';
 import '../models/app_user.dart';
 import '../widgets/help_button.dart';
+import 'dart:async';
+
+// ── Mock Offline Mode Providers ────────────────────────────────────────────────
+class ConnectivityNotifier extends Notifier<bool> {
+  @override
+  bool build() => true;
+  void toggle() {
+    state = !state;
+  }
+}
+final connectivityProvider = NotifierProvider<ConnectivityNotifier, bool>(() => ConnectivityNotifier());
+
+class OfflineQueueNotifier extends Notifier<List<MatchEvaluation>> {
+  @override
+  List<MatchEvaluation> build() => [];
+  void queue(MatchEvaluation eval) => state = [...state, eval];
+  void clear() => state = [];
+}
+final offlineQueueProvider = NotifierProvider<OfflineQueueNotifier, List<MatchEvaluation>>(() => OfflineQueueNotifier());
 
 class RefereeTerminalScreen extends ConsumerStatefulWidget {
   final String? matchId;
@@ -52,6 +71,9 @@ class _RefereeTerminalScreenState extends ConsumerState<RefereeTerminalScreen> {
     final refAvg = weighted.isEmpty
         ? null
         : weighted.values.reduce((a, b) => a + b) / weighted.length;
+        
+    final isOnline = ref.watch(connectivityProvider);
+    final offlineQueue = ref.watch(offlineQueueProvider);
 
     return Scaffold(
       backgroundColor: bg,
@@ -61,6 +83,61 @@ class _RefereeTerminalScreenState extends ConsumerState<RefereeTerminalScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // ── Banner Offline / Toggle Network ──
+              GestureDetector(
+                onTap: () {
+                  final notifier = ref.read(connectivityProvider.notifier);
+                  notifier.toggle();
+                  if (!isOnline && offlineQueue.isNotEmpty) {
+                     // Simulamos sync al volver a online
+                     ScaffoldMessenger.of(context).showSnackBar(
+                       const SnackBar(content: Text('Sincronizando Evaluaciones Offline... ⏳')),
+                     );
+                     Future.delayed(const Duration(seconds: 2), () {
+                        for (var e in offlineQueue) {
+                          ref.read(matchEvaluationsProvider.notifier).addEvaluation(e);
+                        }
+                        ref.read(offlineQueueProvider.notifier).clear();
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('✓ Sincronización Completada con la Nube SportLink!')),
+                          );
+                        }
+                     });
+                  }
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: isOnline ? Colors.green.withValues(alpha: 0.1) : Colors.orange.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: isOnline ? Colors.green.withValues(alpha: 0.3) : Colors.orange.withValues(alpha: 0.3)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(isOnline ? Icons.wifi : Icons.wifi_off, size: 16, color: isOnline ? Colors.green : Colors.orange),
+                      const SizedBox(width: 8),
+                      Text(
+                        isOnline ? 'Online' : 'Offline Mode (Signal Lost)',
+                        style: TextStyle(color: isOnline ? Colors.green : Colors.orange, fontSize: 12, fontWeight: FontWeight.bold),
+                      ),
+                      if (!isOnline && offlineQueue.isNotEmpty) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.orange,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text('${offlineQueue.length} Pending', style: const TextStyle(color: Colors.black, fontSize: 10, fontWeight: FontWeight.w900)),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -429,17 +506,27 @@ class _RefereeTerminalScreenState extends ConsumerState<RefereeTerminalScreen> {
         EvaluationSource.referee,
       ),
     );
-    ref.read(matchEvaluationsProvider.notifier).addEvaluation(eval);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '✓ Evaluación sellada · Rating: ${eval.matchRating.toStringAsFixed(1)} · Athletic-CV actualizado',
+    
+    final isOnline = ref.read(connectivityProvider);
+    if (isOnline) {
+      ref.read(matchEvaluationsProvider.notifier).addEvaluation(eval);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('✓ Evaluación sellada · Rating: ${eval.matchRating.toStringAsFixed(1)} · Athletic-CV actualizado'),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
+      );
+    } else {
+      ref.read(offlineQueueProvider.notifier).queue(eval);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('⚠️ Evaluación encriptada guardada localmente (Drift/Hive cache)'),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+    }
   }
 }
 

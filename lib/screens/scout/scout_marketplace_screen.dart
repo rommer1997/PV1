@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/match_evaluations_provider.dart';
+import '../../models/app_user.dart';
 
 // Watchlist notification (mock)
 class WatchlistNotifier extends Notifier<List<String>> {
@@ -95,13 +96,19 @@ class _ScoutMarketplaceScreenState
   @override
   Widget build(BuildContext context) {
     final isDark = ref.watch(themeProvider) == ThemeMode.dark;
+    final rawUser = ref.watch(sessionProvider);
+    final all = ref.watch(allPlayersProvider);
+    final watchlist = ref.watch(watchlistProvider);
+
+    if (!(rawUser?.isVerified ?? false)) {
+      return _PendingVerificationView(isDark: isDark);
+    }
+
     final bg = AppColors.bg(isDark);
     final text = AppColors.text(isDark);
     final muted = AppColors.textMuted(isDark);
     final surface = AppColors.surface(isDark);
     final border = AppColors.border(isDark);
-    final all = ref.watch(allPlayersProvider);
-    final watchlist = ref.watch(watchlistProvider);
 
     final filtered = all.where((p) {
       final matchSearch =
@@ -641,6 +648,78 @@ class _StatChip extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _PendingVerificationView extends StatelessWidget {
+  final bool isDark;
+  const _PendingVerificationView({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final bg = AppColors.bg(isDark);
+    final text = AppColors.text(isDark);
+    final muted = AppColors.textMuted(isDark);
+    final border = AppColors.border(isDark);
+
+    return Scaffold(
+      backgroundColor: bg,
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.admin_panel_settings, size: 80, color: text.withValues(alpha: 0.2)),
+                const SizedBox(height: 24),
+                Text(
+                  'Verificación\nEn Proceso',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: text,
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    height: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Tu cuenta está en revisión por el departamento legal para acreditar tu afiliación institucional.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: muted,
+                    fontSize: 14,
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface(isDark),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: border),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.info_outline, color: Colors.orange, size: 20),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'M-Search estará disponible en cuanto el Staff valide tus credenciales KYC.',
+                          style: TextStyle(color: text, fontSize: 12),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

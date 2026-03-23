@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/app_user.dart';
+import '../../models/user_role.dart';
 import '../../providers/theme_provider.dart';
 import '../../services/user_storage_service.dart';
 
@@ -16,6 +17,8 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
   late TextEditingController _nameCtrl;
   late TextEditingController _cityCtrl;
   late TextEditingController _bioCtrl;
+  String? _ageGroup;
+  String? _position;
   bool _isLoading = false;
 
   @override
@@ -25,6 +28,8 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
     _nameCtrl = TextEditingController(text: user?.name ?? '');
     _cityCtrl = TextEditingController(text: user?.location ?? '');
     _bioCtrl = TextEditingController(text: user?.bio ?? '');
+    _ageGroup = user?.ageGroup;
+    _position = user?.position;
   }
 
   @override
@@ -44,12 +49,20 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
     setState(() => _isLoading = true);
 
     try {
+      final extraFields = <String, dynamic>{
+        'location': _cityCtrl.text.trim(),
+        'bio': _bioCtrl.text.trim(),
+      };
+      if (user.role == UserRole.player) {
+        if (_ageGroup != null) extraFields['ageGroup'] = _ageGroup;
+        if (_position != null) extraFields['position'] = _position;
+      }
+
       // 1. Guardar en almacenamiento local
       await UserStorageService.updateProfile(
         id: user.id,
         name: _nameCtrl.text.trim(),
-        location: _cityCtrl.text.trim(),
-        bio: _bioCtrl.text.trim(),
+        extraFields: extraFields,
       );
 
       // 2. Actualizar estado en memoria
@@ -67,6 +80,8 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
         isVerified: user.isVerified,
         location: _cityCtrl.text.trim(),
         bio: _bioCtrl.text.trim(),
+        ageGroup: _ageGroup ?? user.ageGroup,
+        position: _position ?? user.position,
       );
 
       ref.read(sessionProvider.notifier).login(updatedUser);
@@ -95,6 +110,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
     final text = AppColors.text(isDark);
     final muted = AppColors.textMuted(isDark);
 
+    final user = ref.read(sessionProvider);
     return Scaffold(
       backgroundColor: bg,
       appBar: AppBar(
@@ -188,6 +204,48 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                   alignLabelWithHint: true,
                 ),
               ),
+
+              if (user?.role == UserRole.player) ...[
+                const SizedBox(height: 32),
+                Text(
+                  'Datos Deportivos',
+                  style: TextStyle(
+                    color: text,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  value: _ageGroup,
+                  dropdownColor: AppColors.surface(isDark),
+                  style: TextStyle(color: text),
+                  decoration: InputDecoration(
+                    labelText: 'Categoría de Edad',
+                    labelStyle: TextStyle(color: muted),
+                    prefixIcon: Icon(Icons.cake, color: muted),
+                  ),
+                  items: ['U13', '13-15 años', '15-17 años', 'U19', 'Adulto']
+                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                      .toList(),
+                  onChanged: (val) => setState(() => _ageGroup = val),
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  value: _position,
+                  dropdownColor: AppColors.surface(isDark),
+                  style: TextStyle(color: text),
+                  decoration: InputDecoration(
+                    labelText: 'Posición Principal',
+                    labelStyle: TextStyle(color: muted),
+                    prefixIcon: Icon(Icons.sports_soccer, color: muted),
+                  ),
+                  items: ['POR', 'DEF', 'MED', 'DEL']
+                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                      .toList(),
+                  onChanged: (val) => setState(() => _position = val),
+                ),
+              ],
 
               const SizedBox(height: 48),
 

@@ -114,7 +114,7 @@ class _StadiumFeedScreenState extends ConsumerState<StadiumFeedScreen> {
                       authorRole: 'Agente Oficial',
                       category: 'FICHAJE',
                       title: 'Acuerdo Cerrado: Nuevo Talento',
-                      body: 'El contrato deportivo del jugador SLP-0982 ha sido formalizado y emitido exitosamente mediante contrato inteligente. Otro hito validado en la red.',
+                      body: 'El contrato deportivo del jugador @SLP_0982 ha sido formalizado y emitido exitosamente mediante contrato inteligente. Otro hito validado en la red. #FichajesSLP #NextGen',
                       time: 'Hace 2 h',
                       likes: 124,
                       comments: 18,
@@ -136,7 +136,7 @@ class _StadiumFeedScreenState extends ConsumerState<StadiumFeedScreen> {
                       authorRole: 'Organizador',
                       category: 'TORNEO',
                       title: 'Inscripciones Abiertas: Copa de Verano',
-                      body: 'Atención a todos los scouts y jugadores. La liga juvenil más grande de la región abrirá sus inscripciones. Los ojeadores de la primera división estarán observando rigurosamente.',
+                      body: 'Atención a todos los scouts y @jugadores. La liga juvenil más grande de la región abrirá sus inscripciones. Los ojeadores de la primera división estarán observando. #CopaVerano #Scouting',
                       time: 'Hace 5 h',
                       likes: 340,
                       comments: 52,
@@ -323,9 +323,10 @@ class _PremiumFeedCardState extends State<_PremiumFeedCard> {
             style: TextStyle(color: text, fontSize: 18, fontWeight: FontWeight.w800, height: 1.3, letterSpacing: -0.5),
           ),
           const SizedBox(height: 8),
-          Text(
-            widget.body,
-            style: TextStyle(color: muted, fontSize: 14, height: 1.5, fontWeight: FontWeight.w500),
+          _StyledContentText(
+            text: widget.body,
+            baseStyle: TextStyle(color: muted, fontSize: 14, height: 1.5, fontWeight: FontWeight.w500),
+            isDark: widget.isDark,
           ),
           
           if (widget.hasImage) ...[
@@ -450,9 +451,10 @@ class _JournalistInteractiveCardState extends State<_JournalistInteractiveCard> 
           ),
           const SizedBox(height: 18),
           
-          Text(
-            'Impresionante exhibición táctica del Atletico hoy. Los datos del árbitro ya están en la base de datos inmutable para total transparencia institucional. ¿Qué opinan de las rotaciones?',
-            style: TextStyle(color: text, fontSize: 15, height: 1.5, fontWeight: FontWeight.w500),
+          _StyledContentText(
+            text: 'Impresionante exhibición táctica del Atletico hoy. Los datos del árbitro ya están en la base de datos inmutable. ¿Qué opinan de las rotaciones? #FútbolAvanzado @SLP_Data',
+            baseStyle: TextStyle(color: text, fontSize: 15, height: 1.5, fontWeight: FontWeight.w500),
+            isDark: widget.isDark,
           ),
           const SizedBox(height: 20),
           
@@ -552,5 +554,60 @@ class _SocialButton extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _StyledContentText extends StatelessWidget {
+  final String text;
+  final TextStyle baseStyle;
+  final bool isDark;
+
+  const _StyledContentText({
+    required this.text,
+    required this.baseStyle,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final words = text.split(' ');
+    final spans = <InlineSpan>[];
+    
+    final highlightColor = isDark ? const Color(0xFF007AFF) : const Color(0xFF005bb5); 
+    
+    for (int i = 0; i < words.length; i++) {
+      final w = words[i];
+      if (w.startsWith('#') || w.startsWith('@')) {
+        spans.add(
+          WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: GestureDetector(
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Explorar: $w', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                    backgroundColor: AppColors.bg(isDark),
+                    duration: const Duration(seconds: 2),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              },
+              child: Text(
+                w,
+                style: baseStyle.copyWith(
+                  color: highlightColor,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          )
+        );
+      } else {
+        spans.add(TextSpan(text: w, style: baseStyle));
+      }
+      if (i < words.length - 1) spans.add(const TextSpan(text: ' '));
+    }
+
+    return RichText(text: TextSpan(children: spans));
   }
 }

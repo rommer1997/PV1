@@ -5,6 +5,10 @@ import '../../providers/theme_provider.dart';
 import '../../models/app_user.dart';
 import '../../services/user_storage_service.dart';
 import '../auth/welcome_screen.dart';
+import 'profile_edit_screen.dart';
+import 'notifications_settings_screen.dart';
+import 'help_support_screen.dart';
+import 'privacy_settings_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -35,13 +39,17 @@ class SettingsScreen extends ConsumerWidget {
             icon: Icons.person_outline,
             title: 'Editar Perfil',
             isDark: isDark,
-            onTap: () {},
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileEditScreen()));
+            },
           ),
           _buildListTile(
             icon: Icons.notifications_none,
             title: 'Notificaciones',
             isDark: isDark,
-            onTap: () {},
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsSettingsScreen()));
+            },
           ),
           const SizedBox(height: 24),
           
@@ -64,6 +72,14 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 24),
 
           _buildSectionHeader('Privacidad y Seguridad', muted),
+          _buildListTile(
+            icon: Icons.lock_outline,
+            title: 'Ajustes de Privacidad',
+            isDark: isDark,
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const PrivacySettingsScreen()));
+            },
+          ),
           ListTile(
             leading: Icon(Icons.security, color: AppColors.text(isDark)),
             title: Text('Modo Menores / Crisis', style: TextStyle(color: text)),
@@ -90,7 +106,9 @@ class SettingsScreen extends ConsumerWidget {
             icon: Icons.help_outline,
             title: 'Soporte y Ayuda',
             isDark: isDark,
-            onTap: () {},
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const HelpSupportScreen()));
+            },
           ),
           const SizedBox(height: 32),
           

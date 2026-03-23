@@ -167,6 +167,28 @@ final nominationsProvider = NotifierProvider<NominationsNotifier, List<String>>(
   () => NominationsNotifier(),
 );
 
+// ── Solicitudes Pendientes (Mock Handshake) ───────────────────────────────────
+class PendingRequest {
+  final String playerId, playerName, teamId;
+  const PendingRequest(this.playerId, this.playerName, this.teamId);
+}
+
+class PendingRequestsNotifier extends Notifier<List<PendingRequest>> {
+  @override
+  List<PendingRequest> build() => [
+    const PendingRequest('SLP-8832', 'Javier Gómez', 'T1'),
+  ];
+
+  void removeRequest(String playerId) {
+    state = state.where((req) => req.playerId != playerId).toList();
+  }
+}
+
+final pendingRequestsProvider =
+    NotifierProvider<PendingRequestsNotifier, List<PendingRequest>>(
+  () => PendingRequestsNotifier(),
+);
+
 // ── Pantalla ──────────────────────────────────────────────────────────────────
 class CoachDashboardScreen extends ConsumerWidget {
   const CoachDashboardScreen({super.key});
@@ -177,6 +199,7 @@ class CoachDashboardScreen extends ConsumerWidget {
     final teams = ref.watch(teamsProvider);
     final selIdx = ref.watch(selectedTeamIndexProvider);
     final nominations = ref.watch(nominationsProvider);
+    final pendingRequests = ref.watch(pendingRequestsProvider);
 
     final bg = AppColors.bg(isDark);
     final text = AppColors.text(isDark);
@@ -368,6 +391,106 @@ class CoachDashboardScreen extends ConsumerWidget {
                 ],
               ),
             ),
+
+            // ── Solicitudes Pendientes ─────────
+            if (team != null) ...[
+              Builder(
+                builder: (context) {
+                  final teamRequests = pendingRequests.where((r) => r.teamId == team.id).toList();
+                  if (teamRequests.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
+                  
+                  return SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(28, 0, 28, 14),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.mark_email_unread_outlined, size: 16, color: Colors.orange.shade400),
+                              const SizedBox(width: 6),
+                              Text(
+                                'SOLICITUDES PENDIENTES (${teamRequests.length})',
+                                style: TextStyle(
+                                  color: Colors.orange.shade400,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          ...teamRequests.map((req) => Container(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.withValues(alpha: 0.05),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        req.playerName,
+                                        style: TextStyle(color: text, fontWeight: FontWeight.bold),
+                                      ),
+                                      Text(
+                                        'ID: ${req.playerId}',
+                                        style: TextStyle(color: muted, fontSize: 11),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        ref.read(pendingRequestsProvider.notifier).removeRequest(req.playerId);
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                        decoration: BoxDecoration(
+                                          border: Border.all(color: muted.withValues(alpha: 0.3)),
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Text('Rechazar', style: TextStyle(color: text, fontSize: 12)),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    GestureDetector(
+                                      onTap: () {
+                                        ref.read(teamsProvider.notifier).addPlayerById(team.id, req.playerId, req.playerName);
+                                        ref.read(pendingRequestsProvider.notifier).removeRequest(req.playerId);
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text('✓ ${req.playerName} añadido al equipo')),
+                                        );
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.buttonBg(isDark),
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Text('Aceptar', style: TextStyle(color: AppColors.buttonFg(isDark), fontSize: 12, fontWeight: FontWeight.bold)),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          )),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
 
             // ── Lista de jugadores (SliverList: fluye con el scroll) ──────────
             if (team == null)
