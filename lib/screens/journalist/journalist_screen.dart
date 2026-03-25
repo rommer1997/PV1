@@ -4,6 +4,7 @@ import '../../models/app_user.dart';
 import '../../providers/theme_provider.dart';
 import '../../widgets/help_button.dart';
 import '../../widgets/video_highlight_card.dart';
+import '../../providers/articles_provider.dart';
 
 class JournalistScreen extends ConsumerStatefulWidget {
   const JournalistScreen({super.key});
@@ -22,7 +23,7 @@ class _JournalistScreenState extends ConsumerState<JournalistScreen> {
     super.dispose();
   }
 
-  Future<void> _publish(bool isDark) async {
+  Future<void> _publish(bool isDark, String authorName) async {
     if (_textCtrl.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Escribe algo antes de publicar')),
@@ -30,7 +31,15 @@ class _JournalistScreenState extends ConsumerState<JournalistScreen> {
       return;
     }
     setState(() => _publishing = true);
-    await Future.delayed(const Duration(milliseconds: 1200));
+    await Future.delayed(const Duration(milliseconds: 800));
+    
+    // Guardar en el provider
+    ref.read(articlesProvider.notifier).addArticle(
+      'Crónica en directo: ${DateTime.now().hour}:${DateTime.now().minute}',
+      _textCtrl.text.trim(),
+      authorName,
+    );
+
     if (!mounted) return;
     setState(() {
       _publishing = false;
@@ -148,7 +157,7 @@ class _JournalistScreenState extends ConsumerState<JournalistScreen> {
                       children: [
                         Icon(Icons.attach_file, color: muted, size: 20),
                         GestureDetector(
-                          onTap: _publishing ? null : () => _publish(isDark),
+                          onTap: _publishing ? null : () => _publish(isDark, user?.name ?? 'M. Kempes'),
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 200),
                             padding: const EdgeInsets.symmetric(
@@ -215,7 +224,7 @@ class _JournalistScreenState extends ConsumerState<JournalistScreen> {
 
               const SizedBox(height: 36),
               Text(
-                'MIS PUBLICACIONES',
+                'MIS ÚLTIMAS PUBLICACIONES',
                 style: TextStyle(
                   color: muted,
                   fontSize: 10,
@@ -224,22 +233,29 @@ class _JournalistScreenState extends ConsumerState<JournalistScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              _Article(
-                title: 'Análisis táctico: Real Madrid Sub-19',
-                preview:
-                    'La presión alta del equipo fue clave para dominar el mediocampo durante los primeros 70 minutos...',
-                tips: '45 SC',
-                timeAgo: 'Hace 3 h',
-                isDark: isDark,
-              ),
-              const SizedBox(height: 16),
-              _Article(
-                title: 'Top 5 Talentos Validados de la Temporada',
-                preview:
-                    'Según los datos inmutables de SportLink Pro, estos son los cinco jugadores con mayor calificación certificada...',
-                tips: '210 SC',
-                timeAgo: 'Hace 2 d',
-                isDark: isDark,
+              Consumer(
+                builder: (context, ref, child) {
+                  final articles = ref.watch(articlesProvider)
+                      .where((a) => a.authorName == (user?.name ?? 'Mario Kempes'))
+                      .toList();
+                  
+                  if (articles.isEmpty) {
+                    return Center(child: Text('No hay publicaciones recientes', style: TextStyle(color: muted, fontSize: 12)));
+                  }
+
+                  return Column(
+                    children: articles.map((a) => Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: _Article(
+                        title: a.title,
+                        preview: a.content,
+                        tips: '${a.likes * 2} SC', // Simulación de ganancias
+                        timeAgo: 'Hace un momento',
+                        isDark: isDark,
+                      ),
+                    )).toList(),
+                  );
+                },
               ),
             ],
           ),

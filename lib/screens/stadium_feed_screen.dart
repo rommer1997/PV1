@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/theme_provider.dart';
 import '../widgets/video_highlight_card.dart';
 import '../providers/match_evaluations_provider.dart';
+import '../providers/articles_provider.dart';
 
 class StadiumFeedScreen extends ConsumerStatefulWidget {
   const StadiumFeedScreen({super.key});
@@ -127,8 +128,29 @@ class _StadiumFeedScreenState extends ConsumerState<StadiumFeedScreen> {
                   ],
 
                   if (_selectedFilter == 'Todo' || _selectedFilter == 'Periodistas') ...[
-                    _JournalistInteractiveCard(isDark: isDark),
-                    const SizedBox(height: 20),
+                    Consumer(
+                      builder: (context, ref, _) {
+                        final articles = ref.watch(articlesProvider);
+                        return Column(
+                          children: articles.map((article) => Padding(
+                            padding: const EdgeInsets.only(bottom: 20),
+                            child: _PremiumFeedCard(
+                              authorName: article.authorName,
+                              authorRole: 'Periodista Validado',
+                              category: 'CRÓNICA',
+                              title: article.title,
+                              body: article.content,
+                              time: 'Reciente',
+                              likes: article.likes,
+                              comments: 12,
+                              isDark: isDark,
+                              icon: Icons.campaign_outlined,
+                              highlightColor: Colors.green,
+                            ),
+                          )).toList(),
+                        );
+                      },
+                    ),
                   ],
 
                   if (_selectedFilter == 'Todo' || _selectedFilter == 'Torneos') ...[

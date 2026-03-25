@@ -54,7 +54,7 @@ class TeamsNotifier extends Notifier<List<TeamData>> {
       players: [
         const TeamMember(
           name: 'Marco Silva',
-          id: 'SLP-0982',
+          id: '1',
           pos: 'Delantero',
           status: 'fit',
           rating: 8.5,
@@ -62,7 +62,7 @@ class TeamsNotifier extends Notifier<List<TeamData>> {
         ),
         const TeamMember(
           name: 'Luis Peña',
-          id: 'SLP-1102',
+          id: '101',
           pos: 'Centrocampista',
           status: 'fit',
           rating: 7.9,
@@ -76,14 +76,14 @@ class TeamsNotifier extends Notifier<List<TeamData>> {
         ),
         const TeamMember(
           name: 'Adrián Torres',
-          id: 'SLP-1341',
+          id: '102',
           pos: 'Defensa',
           status: 'fit',
           rating: 8.1,
         ),
         const TeamMember(
           name: 'Jorge Ruiz',
-          id: 'SLP-1218',
+          id: '103',
           pos: 'Delantero',
           status: 'fit',
           rating: 7.6,
