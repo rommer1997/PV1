@@ -1,28 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../providers/match_evaluations_provider.dart';
+import '../../providers/players_provider.dart';
 import '../../providers/theme_provider.dart';
-import '../../widgets/glow_button.dart';
 import '../../models/spotlight_models.dart';
+import '../../widgets/glow_button.dart';
+import 'dart:math' as math;
 
-// ── Modelos ───────────────────────────────────────────────────────────────────
-class PlayerData {
-  final String name, id, pos, status;
+// ── Modelos Locales de Equipo ──────────────────────────────────────────────
+class TeamMember {
+  final String id, name, pos, status;
   final double rating;
   final bool isCaptain;
 
-  const PlayerData({
-    required this.name,
+  const TeamMember({
     required this.id,
+    required this.name,
     required this.pos,
     required this.status,
     required this.rating,
     this.isCaptain = false,
   });
 
-  PlayerData copyWith({bool? isCaptain, String? status}) => PlayerData(
-    name: name,
+  TeamMember copyWith({bool? isCaptain, String? status}) => TeamMember(
     id: id,
+    name: name,
     pos: pos,
     status: status ?? this.status,
     rating: rating,
@@ -32,9 +35,9 @@ class PlayerData {
 
 class TeamData {
   final String id, name;
-  final List<PlayerData> players;
+  final List<TeamMember> players;
   const TeamData({required this.id, required this.name, required this.players});
-  TeamData copyWith({String? name, List<PlayerData>? players}) => TeamData(
+  TeamData copyWith({String? name, List<TeamMember>? players}) => TeamData(
     id: id,
     name: name ?? this.name,
     players: players ?? this.players,
@@ -49,7 +52,7 @@ class TeamsNotifier extends Notifier<List<TeamData>> {
       id: 'T1',
       name: 'Atletico Juvenil A',
       players: [
-        const PlayerData(
+        const TeamMember(
           name: 'Marco Silva',
           id: 'SLP-0982',
           pos: 'Delantero',
@@ -57,28 +60,28 @@ class TeamsNotifier extends Notifier<List<TeamData>> {
           rating: 8.5,
           isCaptain: true,
         ),
-        const PlayerData(
+        const TeamMember(
           name: 'Luis Peña',
           id: 'SLP-1102',
           pos: 'Centrocampista',
           status: 'fit',
           rating: 7.9,
         ),
-        const PlayerData(
+        const TeamMember(
           name: 'Carlos Vega',
           id: 'SLP-0871',
           pos: 'Portero',
           status: 'injured',
           rating: 7.2,
         ),
-        const PlayerData(
+        const TeamMember(
           name: 'Adrián Torres',
           id: 'SLP-1341',
           pos: 'Defensa',
           status: 'fit',
           rating: 8.1,
         ),
-        const PlayerData(
+        const TeamMember(
           name: 'Jorge Ruiz',
           id: 'SLP-1218',
           pos: 'Delantero',
@@ -115,7 +118,7 @@ class TeamsNotifier extends Notifier<List<TeamData>> {
   }
 
   void addPlayerById(String teamId, String playerId, String name) {
-    final p = PlayerData(
+    final p = TeamMember(
       name: name.isNotEmpty ? name : 'Jugador $playerId',
       id: playerId,
       pos: 'Por definir',
@@ -491,6 +494,15 @@ class CoachDashboardScreen extends ConsumerWidget {
                 ),
               ),
 
+            // ── Radar de Equipo (Stickiness Entrenador) ──────────────────────
+            if (team != null)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(28, 0, 28, 24),
+                  child: _TeamRadarSection(team: team, isDark: isDark),
+                ),
+              ),
+
             // ── Solicitudes Pendientes ─────────
             if (team != null) ...[
               Builder(
@@ -773,15 +785,28 @@ class CoachDashboardScreen extends ConsumerWidget {
           ),
           ElevatedButton(
             onPressed: () {
-              if (idCtrl.text.trim().isNotEmpty) {
-                ref
-                    .read(teamsProvider.notifier)
-                    .addPlayerById(
-                      teamId,
-                      idCtrl.text.trim(),
-                      nameCtrl.text.trim(),
-                    );
-                Navigator.pop(ctx);
+              final id = idCtrl.text.trim();
+              if (id.isNotEmpty) {
+                // 🔍 VALIDACIÓN: Comprobamos si el jugador existe en el sistema SportLink
+                final players = ref.read(playersProvider);
+                final exists = players.any((p) => p.user.uniqueId == id || p.user.id == id);
+                
+                if (exists) {
+                  final pd = players.firstWhere((p) => p.user.uniqueId == id || p.user.id == id);
+                  ref.read(teamsProvider.notifier).addPlayerById(
+                    teamId,
+                    pd.user.id,
+                    pd.user.name,
+                  );
+                  Navigator.pop(ctx);
+                } else {
+                  ScaffoldMessenger.of(ctx).showSnackBar(
+                    const SnackBar(
+                      content: Text('❌ ID SportLink no encontrado. El jugador debe estar registrado.'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
               }
             },
             style: ElevatedButton.styleFrom(
@@ -797,8 +822,8 @@ class CoachDashboardScreen extends ConsumerWidget {
 }
 
 // ── Fila de jugador ───────────────────────────────────────────────────────────
-class _PlayerRow extends StatelessWidget {
-  final PlayerData player;
+class _PlayerRow extends ConsumerWidget {
+  final TeamMember player;
   final bool nominated, isDark;
   final VoidCallback onNominate, onSetCaptain, onRemove;
   const _PlayerRow({
@@ -809,9 +834,8 @@ class _PlayerRow extends StatelessWidget {
     required this.onSetCaptain,
     required this.onRemove,
   });
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isInjured = player.status == 'injured';
     final text = AppColors.text(isDark);
     final muted = AppColors.textMuted(isDark);
@@ -820,7 +844,7 @@ class _PlayerRow extends StatelessWidget {
 
     return GestureDetector(
       onTap: onNominate,
-      onLongPress: () => _showActions(context),
+      onLongPress: () => _showActions(context, ref),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -912,14 +936,14 @@ class _PlayerRow extends StatelessWidget {
     );
   }
 
-  void _showActions(BuildContext ctx) {
+  void _showActions(BuildContext context, WidgetRef ref) {
     showModalBottomSheet(
-      context: ctx,
+      context: context,
       backgroundColor: AppColors.surface(isDark),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (_) => SafeArea(
+      builder: (ctx) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -951,6 +975,27 @@ class _PlayerRow extends StatelessWidget {
             const SizedBox(height: 16),
             ListTile(
               leading: Icon(
+                Icons.analytics_outlined,
+                color: AppColors.accent,
+              ),
+              title: Text(
+                'Evaluación Técnica',
+                style: TextStyle(
+                  color: AppColors.text(isDark),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              subtitle: Text(
+                'Registrar rendimiento del partido',
+                style: TextStyle(color: AppColors.textMuted(isDark), fontSize: 11),
+              ),
+              onTap: () {
+                Navigator.pop(ctx);
+                _showEvaluationDialog(context, ref, isDark);
+              },
+            ),
+            ListTile(
+              leading: Icon(
                 player.isCaptain ? Icons.star_border : Icons.star,
                 color: const Color(0xFFFFD700),
               ),
@@ -964,6 +1009,27 @@ class _PlayerRow extends StatelessWidget {
               onTap: () {
                 Navigator.pop(ctx);
                 onSetCaptain();
+              },
+            ),
+            ListTile(
+              leading: Icon(
+                Icons.sticky_note_2_outlined,
+                color: Colors.amber.shade600,
+              ),
+              title: Text(
+                'Notas Privadas',
+                style: TextStyle(
+                  color: AppColors.text(isDark),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              subtitle: Text(
+                'Solo visibles para ti',
+                style: TextStyle(color: AppColors.textMuted(isDark), fontSize: 11),
+              ),
+              onTap: () {
+                Navigator.pop(ctx);
+                _showPrivateNoteDialog(context, ref, isDark);
               },
             ),
             ListTile(
@@ -989,4 +1055,303 @@ class _PlayerRow extends StatelessWidget {
       ),
     );
   }
+
+  void _showPrivateNoteDialog(BuildContext context, WidgetRef ref, bool isDark) {
+    final players = ref.read(playersProvider);
+    final pd = players.where((p) => p.user.id == player.id).firstOrNull;
+    const coachId = '4'; 
+    final initialNote = pd?.user.privateNotes[coachId] ?? '';
+    
+    final ctrl = TextEditingController(text: initialNote);
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surface(isDark),
+        title: Text('Notas: ${player.name}', style: const TextStyle(fontWeight: FontWeight.bold)),
+        content: TextField(
+          controller: ctrl,
+          maxLines: 5,
+          style: TextStyle(color: AppColors.text(isDark)),
+          decoration: InputDecoration(
+            hintText: 'Ej: Jugador clave para transiciones rápidas. Le falta fondo físico.',
+            hintStyle: TextStyle(color: AppColors.textMuted(isDark)),
+            border: const OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Cerrar', style: TextStyle(color: AppColors.textMuted(isDark))),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              ref.read(playersProvider.notifier).updatePrivateNote(player.id, coachId, ctrl.text.trim());
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('✓ Nota guardada')),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.buttonBg(isDark),
+              foregroundColor: AppColors.buttonFg(isDark),
+            ),
+            child: const Text('Guardar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEvaluationDialog(BuildContext context, WidgetRef ref, bool isDark) {
+    double tec = 8.0, res = 8.0, fpl = 8.0;
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) => AlertDialog(
+          backgroundColor: AppColors.surface(isDark),
+          title: Row(
+            children: [
+              Icon(Icons.analytics_outlined, color: AppColors.accent, size: 20),
+              const SizedBox(width: 10),
+              const Text('Evaluación Coach', style: TextStyle(fontWeight: FontWeight.bold)),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _EvaluationSlider(
+                label: 'Técnica',
+                value: tec,
+                onChanged: (v) => setState(() => tec = v),
+                isDark: isDark,
+              ),
+              _EvaluationSlider(
+                label: 'Resistencia',
+                value: res,
+                onChanged: (v) => setState(() => res = v),
+                isDark: isDark,
+              ),
+              _EvaluationSlider(
+                label: 'Fair Play',
+                value: fpl,
+                onChanged: (v) => setState(() => fpl = v),
+                isDark: isDark,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text('Cancelar', style: TextStyle(color: AppColors.textMuted(isDark))),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final eval = MatchEvaluation(
+                  matchId: 'M-COACH-${DateTime.now().millisecondsSinceEpoch}',
+                  matchName: 'Evaluación Técnica Coach',
+                  playerId: player.id,
+                  playerName: player.name,
+                  date: DateTime.now(),
+                  tecnica: tec,
+                  resistencia: res,
+                  fairPlay: fpl,
+                  source: EvaluationSource.coach,
+                  signature: MatchEvaluation.generateSeal(
+                    'M-COACH',
+                    player.id,
+                    tec,
+                    res,
+                    fpl,
+                    EvaluationSource.coach,
+                  ),
+                );
+                ref.read(matchEvaluationsProvider.notifier).addEvaluation(eval);
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('✓ Evaluación técnica registrada (Peso 20%)')),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.buttonBg(isDark),
+                foregroundColor: AppColors.buttonFg(isDark),
+              ),
+              child: const Text('Guardar'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _EvaluationSlider extends StatelessWidget {
+  final String label;
+  final double value;
+  final ValueChanged<double> onChanged;
+  final bool isDark;
+
+  const _EvaluationSlider({
+    required this.label,
+    required this.value,
+    required this.onChanged,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(label, style: TextStyle(color: AppColors.text(isDark), fontSize: 13)),
+            Text(value.toStringAsFixed(1), style: TextStyle(color: AppColors.accent, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        Slider(
+          value: value,
+          min: 0,
+          max: 10,
+          divisions: 100,
+          activeColor: AppColors.accent,
+          onChanged: onChanged,
+        ),
+      ],
+    );
+
+  }
+}
+
+class _TeamRadarSection extends StatelessWidget {
+  final TeamData team;
+  final bool isDark;
+
+  const _TeamRadarSection({required this.team, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final teamStats = {
+      'ATAQUE': 8.2,
+      'DEFENSA': 6.5,
+      'FÍSICO': 7.4,
+      'TÁCTICA': 7.9,
+      'MORAL': 9.0,
+    };
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.surface(isDark),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.border(isDark)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'ANÁLISIS DE EQUIPO',
+                style: TextStyle(
+                  color: Color(0xFFE2F163),
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.5,
+                ),
+              ),
+              Icon(Icons.radar, size: 16, color: AppColors.buttonBg(isDark)),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Center(
+            child: SizedBox(
+              height: 180,
+              width: 180,
+              child: CustomPaint(
+                painter: _SimpleRadarPainter(stats: teamStats, isDark: isDark),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _TeamMetric(label: 'Fuerte', val: 'Ataque (8.2)', color: Colors.green, isDark: isDark),
+              _TeamMetric(label: 'Débil', val: 'Defensa (6.5)', color: Colors.red, isDark: isDark),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TeamMetric extends StatelessWidget {
+  final String label, val;
+  final Color color;
+  final bool isDark;
+  const _TeamMetric({required this.label, required this.val, required this.color, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(label, style: TextStyle(color: AppColors.textMuted(isDark), fontSize: 10, letterSpacing: 1)),
+        const SizedBox(height: 4),
+        Text(val, style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 13)),
+      ],
+    );
+  }
+}
+
+class _SimpleRadarPainter extends CustomPainter {
+  final Map<String, double> stats;
+  final bool isDark;
+  _SimpleRadarPainter({required this.stats, required this.isDark});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2;
+    final keys = stats.keys.toList();
+    final points = <Offset>[];
+
+    final paintLine = Paint()
+      ..color = AppColors.border(isDark)
+      ..strokeWidth = 1
+      ..style = PaintingStyle.stroke;
+
+    final paintFill = Paint()
+      ..color = const Color(0xFFE2F163).withValues(alpha: 0.3)
+      ..style = PaintingStyle.fill;
+
+    final paintStroke = Paint()
+      ..color = const Color(0xFFE2F163)
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke;
+
+    for (var i = 1; i <= 5; i++) {
+      canvas.drawCircle(center, radius * (i / 5), paintLine);
+    }
+
+    for (var i = 0; i < keys.length; i++) {
+      final angle = (i * 2 * math.pi / keys.length) - math.pi / 2;
+      final val = stats[keys[i]]! / 10.0;
+      final x = center.dx + radius * val * math.cos(angle);
+      final y = center.dy + radius * val * math.sin(angle);
+      points.add(Offset(x, y));
+      canvas.drawLine(center, Offset(center.dx + radius * math.cos(angle), center.dy + radius * math.sin(angle)), paintLine);
+    }
+
+    if (points.isNotEmpty) {
+      final path = Path()..addPolygon(points, true);
+      canvas.drawPath(path, paintFill);
+      canvas.drawPath(path, paintStroke);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }

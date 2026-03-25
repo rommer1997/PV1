@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/theme_provider.dart';
 import '../widgets/video_highlight_card.dart';
+import '../providers/match_evaluations_provider.dart';
 
 class StadiumFeedScreen extends ConsumerStatefulWidget {
   const StadiumFeedScreen({super.key});
@@ -161,6 +162,11 @@ class _StadiumFeedScreenState extends ConsumerState<StadiumFeedScreen> {
                     ),
                     const SizedBox(height: 20),
                   ],
+
+                if (_selectedFilter == 'Todo' || _selectedFilter == 'Fichajes' || _selectedFilter == 'Periodistas') ...[
+                  _BrandSponsoredCard(isDark: isDark),
+                  const SizedBox(height: 20),
+                ],
                   const SizedBox(height: 40),
                 ]),
               ),
@@ -451,10 +457,20 @@ class _JournalistInteractiveCardState extends State<_JournalistInteractiveCard> 
           ),
           const SizedBox(height: 18),
           
-          _StyledContentText(
-            text: 'Impresionante exhibición táctica del Atletico hoy. Los datos del árbitro ya están en la base de datos inmutable. ¿Qué opinan de las rotaciones? #FútbolAvanzado @SLP_Data',
-            baseStyle: TextStyle(color: text, fontSize: 15, height: 1.5, fontWeight: FontWeight.w500),
-            isDark: widget.isDark,
+          Consumer(
+            builder: (context, ref, _) {
+              final evals = ref.watch(matchEvaluationsProvider);
+              final latest = evals.firstOrNull;
+              final msg = latest != null 
+                ? 'Impresionante exhibición de @${latest.playerId} en el ${latest.matchName}. Técnica de ${latest.tecnica.toStringAsFixed(1)} validada inmutablemente. #NextGen'
+                : 'Analizando las promesas del fútbol regional. Los datos del árbitro son la única fuente de verdad. ¿Quién será el próximo en destacar? #SportLink';
+              
+              return _StyledContentText(
+                text: msg,
+                baseStyle: TextStyle(color: text, fontSize: 15, height: 1.5, fontWeight: FontWeight.w500),
+                isDark: widget.isDark,
+              );
+            },
           ),
           const SizedBox(height: 20),
           
@@ -609,5 +625,97 @@ class _StyledContentText extends StatelessWidget {
     }
 
     return RichText(text: TextSpan(children: spans));
+  }
+}
+
+class _BrandSponsoredCard extends StatelessWidget {
+  final bool isDark;
+  const _BrandSponsoredCard({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final border = AppColors.border(isDark);
+    final text = AppColors.text(isDark);
+    final muted = AppColors.textMuted(isDark);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isDark 
+              ? [const Color(0xFF1E1E1E), const Color(0xFF121212)]
+              : [const Color(0xFFF8F9FA), const Color(0xFFE9ECEF)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFF4CA25).withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: border),
+                ),
+                child: const Icon(Icons.bolt, color: Colors.orange, size: 24),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          'Nike SportLink Elite',
+                          style: TextStyle(color: text, fontSize: 15, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(width: 6),
+                        const Icon(Icons.verified, color: Colors.blue, size: 14),
+                      ],
+                    ),
+                    Text('Patrocinador Oficial', style: TextStyle(color: muted, fontSize: 11)),
+                  ],
+                ),
+              ),
+              const Text('PUBLICIDAD', style: TextStyle(color: Colors.grey, fontSize: 9, fontWeight: FontWeight.w800)),
+            ],
+          ),
+          const SizedBox(height: 18),
+          Text(
+            '¿Crees que tienes lo necesario?',
+            style: TextStyle(color: text, fontSize: 17, fontWeight: FontWeight.w900, letterSpacing: -0.5),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Estamos buscando al próximo MVP de la Copa Sub-19. Los jugadores con un OVR superior a 85 en Técnica (TEC) recibirán un kit exclusivo de entrenamiento. ¡Sigue validando tus stats!',
+            style: TextStyle(color: muted, fontSize: 13, height: 1.5),
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFF4CA25),
+                foregroundColor: Colors.black,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+              onPressed: () {},
+              child: const Text('Postular mi perfil', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

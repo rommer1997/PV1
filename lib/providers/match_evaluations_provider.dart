@@ -193,3 +193,31 @@ final playerWeightedRatingsProvider =
           .toList(); // ya ordenado más reciente primero
       return calcWeightedAverages(evals);
     });
+
+// ── Provider: Historial de OVR para Gráficos ──────────────────────────────────
+final playerOvrHistoryProvider =
+    Provider.family<List<MapEntry<DateTime, double>>, String>((ref, playerId) {
+      final evals = ref
+          .watch(matchEvaluationsProvider)
+          .where((e) => e.playerId == playerId)
+          .toList(); // más reciente primero
+
+      if (evals.isEmpty) return [];
+
+      // Revertimos para tener orden cronológico en el gráfico
+      final chronological = evals.reversed.toList();
+      final history = <MapEntry<DateTime, double>>[];
+
+      // Para cada partido, calculamos el OVR acumulado hasta ese momento (simplificado)
+      for (int i = 0; i < chronological.length; i++) {
+        final subset = chronological.sublist(0, i + 1);
+        // Invertimos el subset para que calcWeightedAverages funcione (espera más reciente primero)
+        final stats = calcWeightedAverages(subset.reversed.toList());
+        final ovr = (stats['TEC'] ?? 0 + (stats['RES'] ?? 0) + (stats['FPL'] ?? 0)) / 3;
+        
+        // Evitamos duplicados de fecha en el mismo día para el gráfico (o tomamos la última)
+        history.add(MapEntry(chronological[i].date, ovr));
+      }
+
+      return history;
+    });

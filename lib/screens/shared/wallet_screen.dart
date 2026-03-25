@@ -215,21 +215,18 @@ class WalletScreen extends ConsumerWidget {
 
               const SizedBox(height: 32),
 
-              // ── SLP PRO Subscription ──────────────────────────────────────
+              // ── Impacto Económico y Donaciones ──────────────────────────
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF6366F1), Color(0xFFA855F7)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  color: surface,
                   borderRadius: BorderRadius.circular(28),
+                  border: Border.all(color: border),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFA855F7).withValues(alpha: 0.3),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     )
                   ],
                 ),
@@ -239,37 +236,31 @@ class WalletScreen extends ConsumerWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'SPORTLINK PRO',
+                        Text(
+                          'MI IMPACTO',
                           style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 1.5,
+                            color: muted,
+                            fontSize: 11,
+                            letterSpacing: 2,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Text(
-                            'ACTIVO',
-                            style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                          ),
-                        ),
+                        Icon(Icons.volunteer_activism_outlined, color: text, size: 20),
                       ],
                     ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Disfrutas de beneficios exclusivos:',
-                      style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        _StatSmall(label: 'Donaciones', value: '12', isDark: isDark),
+                        const SizedBox(width: 24),
+                        _StatSmall(label: 'Ganancias Retos', value: '450 SC', isDark: isDark),
+                      ],
                     ),
-                    const SizedBox(height: 12),
-                    _ProBenefit(icon: Icons.filter_list_alt, text: 'Filtros de scouting avanzados'),
-                    _ProBenefit(icon: Icons.remove_red_eye_outlined, text: 'Visibilidad total de visitas'),
-                    _ProBenefit(icon: Icons.bolt_rounded, text: 'Prioridad en Algoritmo Spotlight'),
+                    const SizedBox(height: 20),
+                    Text(
+                      'La comunidad ha apoyado tu carrera deportiva. ¡Sigue así!',
+                      style: TextStyle(color: muted, fontSize: 12, height: 1.4),
+                    ),
                   ],
                 ),
               ),
@@ -661,22 +652,21 @@ class _SmartEscrowCard extends StatelessWidget {
   }
 }
 
-class _ProBenefit extends StatelessWidget {
-  final IconData icon;
-  final String text;
-  const _ProBenefit({required this.icon, required this.text});
+class _StatSmall extends StatelessWidget {
+  final String label;
+  final String value;
+  final bool isDark;
+  const _StatSmall({required this.label, required this.value, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.white, size: 16),
-          const SizedBox(width: 8),
-          Expanded(child: Text(text, style: const TextStyle(color: Colors.white, fontSize: 12))),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: TextStyle(color: AppColors.textMuted(isDark), fontSize: 11)),
+        const SizedBox(height: 4),
+        Text(value, style: TextStyle(color: AppColors.text(isDark), fontSize: 16, fontWeight: FontWeight.w800)),
+      ],
     );
   }
 }

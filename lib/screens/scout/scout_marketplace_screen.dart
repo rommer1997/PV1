@@ -2,83 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/match_evaluations_provider.dart';
+import '../../providers/players_provider.dart';
 import '../../models/app_user.dart';
 import '../../widgets/convocatorias_feed.dart';
 import '../../widgets/glow_button.dart';
 import 'create_convocatoria_screen.dart';
 
-// Watchlist notification (mock)
-class WatchlistNotifier extends Notifier<List<String>> {
-  @override
-  List<String> build() => [];
-  void toggle(String id) => state.contains(id)
-      ? state = state.where((x) => x != id).toList()
-      : state = [...state, id];
-}
+// Eliminado el WatchlistNotifier local, ahora usamos playersProvider
 
-final watchlistProvider = NotifierProvider<WatchlistNotifier, List<String>>(
-  () => WatchlistNotifier(),
-);
-
-final allPlayersProvider = Provider<List<Map<String, dynamic>>>((ref) {
-  // Obtenemos las verdaderas evaluaciones de Marco Silva ('p1')
-  final marcoRatings = ref.watch(playerWeightedRatingsProvider('SLP-0982'));
-  final marcoTec = marcoRatings['TEC'] ?? 8.5;
-  final marcoSpeed = 9.0; // Simulada (viene de entrenador)
-  final marcoOverall =
-      (marcoTec + marcoRatings['RES']! + marcoRatings['FPL']! + marcoSpeed) / 4;
-
-  return [
-    {
-      'name': 'Marco Silva',
-      'id': 'SLP-0982',
-      'pos': 'Delantero',
-      'age': 17,
-      'city': 'Madrid',
-      'speed': double.parse(marcoSpeed.toStringAsFixed(1)),
-      'tech': double.parse(marcoTec.toStringAsFixed(1)),
-      'rating': double.parse(marcoOverall.toStringAsFixed(1)),
-      'isMinor': true,
-      'validated': true,
-    },
-    {
-      'name': 'Luis Peña',
-      'id': 'SLP-1102',
-      'pos': 'Centrocampista',
-      'age': 19,
-      'city': 'Madrid',
-      'speed': 8.2,
-      'tech': 9.1,
-      'rating': 8.6,
-      'isMinor': false,
-      'validated': true,
-    },
-    {
-      'name': 'Adrián Torres',
-      'id': 'SLP-1341',
-      'pos': 'Defensa',
-      'age': 18,
-      'city': 'Barcelona',
-      'speed': 7.8,
-      'tech': 8.0,
-      'rating': 7.9,
-      'isMinor': false,
-      'validated': true,
-    },
-    {
-      'name': 'Jorge Ruiz',
-      'id': 'SLP-1218',
-      'pos': 'Delantero',
-      'age': 20,
-      'city': 'Sevilla',
-      'speed': 8.9,
-      'tech': 8.3,
-      'rating': 8.5,
-      'isMinor': false,
-      'validated': false,
-    },
-  ];
-});
+// ── Eliminamos el hardcodeo previo ───────────────────────────────────────────
+// allPlayersProvider era una List<Map> fija. Ahora usamos playersProvider.
 
 class ScoutMarketplaceScreen extends ConsumerStatefulWidget {
   const ScoutMarketplaceScreen({super.key});
@@ -95,16 +28,15 @@ class _ScoutMarketplaceScreenState
   String _posFilter = 'Todos';
   _ScoutTab _tab = _ScoutTab.search;
   double _minRating = 7.0;
-  int _minEndorsements = 0;
-  bool _soloConVideo = false;
-  String _disponibilidad = 'Todos'; // Todos, Libre, Amateur, Contrato
 
   @override
   Widget build(BuildContext context) {
     final isDark = ref.watch(themeProvider) == ThemeMode.dark;
     final rawUser = ref.watch(sessionProvider);
-    final all = ref.watch(allPlayersProvider);
-    final watchlist = ref.watch(watchlistProvider);
+    
+    // 🔗 SECCIÓN CLAVE: Consumimos la fuente de verdad unificada
+    final players = ref.watch(playersProvider);
+    final scoutId = rawUser?.id ?? '3'; // Mock si no hay sesión
 
     if (!(rawUser?.isVerified ?? false)) {
       return _PendingVerificationView(isDark: isDark);
@@ -116,26 +48,32 @@ class _ScoutMarketplaceScreenState
     final surface = AppColors.surface(isDark);
     final border = AppColors.border(isDark);
 
-    final filtered = all.where((p) {
-      final matchSearch =
-          _search.isEmpty ||
-          (p['name'] as String).toLowerCase().contains(_search.toLowerCase());
-      final matchPos = _posFilter == 'Todos' || p['pos'] == _posFilter;
-      final matchRating = (p['rating'] as double) >= _minRating;
-      final onlyValidated = (p['validated'] as bool);
-      // Filtros avanzados
-      final matchEndorsements = _minEndorsements == 0 ||
-          ((p['endorsements'] as int? ?? 0) >= _minEndorsements);
-      final matchVideo = !_soloConVideo ||
-          (p['hasVideo'] as bool? ?? false);
-      final matchDisponibilidad = _disponibilidad == 'Todos' ||
-          (p['disponibilidad'] as String? ?? 'Libre') == _disponibilidad;
-      return matchSearch && matchPos && matchRating && onlyValidated &&
-          matchEndorsements && matchVideo && matchDisponibilidad;
+    // Filtrado dinámico basado en PlayerData
+    final filtered = players.where((p) {
+      // 🧮 Obtenemos el rating real del provider de pesajes (Árbitro 60%, etc)
+      final ratings = ref.watch(playerWeightedRatingsProvider(p.user.uniqueId));
+      final tec = ratings['TEC'] ?? 0.0;
+      final res = ratings['RES'] ?? 0.0;
+      final fpl = ratings['FPL'] ?? 0.0;
+      final avg = (tec + res + fpl) / 3;
+
+      final matchSearch = _search.isEmpty ||
+          p.user.name.toLowerCase().contains(_search.toLowerCase());
+      final matchPos = _posFilter == 'Todos' || 
+          (p.user.position ?? 'ND') == _posFilter ||
+          (_posFilter == 'Delantero' && p.user.position == 'DEL') ||
+          (_posFilter == 'Centrocampista' && p.user.position == 'MC') ||
+          (_posFilter == 'Defensa' && p.user.position == 'DF') ||
+          (_posFilter == 'Portero' && p.user.position == 'POR');
+      
+      final matchRating = avg >= _minRating || avg == 0; // Si es 0 (nuevo), lo mostramos por defecto?
+      final onlyValidated = p.user.isVerified;
+
+      return matchSearch && matchPos && matchRating && onlyValidated;
     }).toList();
 
-    final watchlistPlayers = all
-        .where((p) => watchlist.contains(p['id']))
+    final watchlistPlayers = players
+        .where((p) => p.scoutWatchlistIds.contains(scoutId))
         .toList();
 
     return Scaffold(
@@ -191,7 +129,7 @@ class _ScoutMarketplaceScreenState
                   ),
                   const SizedBox(width: 10),
                   _ScoutTabBtn(
-                    label: '⭐ Seguimiento (${watchlist.length})',
+                    label: '⭐ Seguimiento (${watchlistPlayers.length})',
                     sel: _tab == _ScoutTab.watchlist,
                     isDark: isDark,
                     onTap: () => setState(() => _tab = _ScoutTab.watchlist),
@@ -458,7 +396,7 @@ class _ScoutTabBtn extends StatelessWidget {
 }
 
 class _ScoutPlayerCard extends ConsumerStatefulWidget {
-  final Map<String, dynamic> player;
+  final PlayerData player;
   final bool isDark;
   const _ScoutPlayerCard({required this.player, required this.isDark});
   @override
@@ -470,11 +408,20 @@ class _ScoutPlayerCardState extends ConsumerState<_ScoutPlayerCard> {
 
   @override
   Widget build(BuildContext context) {
-    final p = widget.player;
+    final pd = widget.player;
+    final u = pd.user;
     final isDark = widget.isDark;
-    final isMinor = p['isMinor'] as bool;
-    final watchlist = ref.watch(watchlistProvider);
-    final isFav = watchlist.contains(p['id']);
+    
+    final rawUser = ref.watch(sessionProvider);
+    final scoutId = rawUser?.id ?? '3';
+    final isFav = pd.scoutWatchlistIds.contains(scoutId);
+
+    // 🧮 Rating reactivo del provider global
+    final ratings = ref.watch(playerWeightedRatingsProvider(u.uniqueId));
+    final tec = ratings['TEC'] ?? 0.0;
+    final res = ratings['RES'] ?? 0.0;
+    final fpl = ratings['FPL'] ?? 0.0;
+    final rtg = (tec + res + fpl) / 3;
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -513,14 +460,14 @@ class _ScoutPlayerCardState extends ConsumerState<_ScoutPlayerCard> {
                     Row(
                       children: [
                         Text(
-                          p['name'],
+                          u.name,
                           style: TextStyle(
                             color: AppColors.text(isDark),
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        if (p['validated'] == true) ...[
+                        if (u.isVerified) ...[
                           const SizedBox(width: 6),
                           const Icon(
                             Icons.verified,
@@ -530,21 +477,29 @@ class _ScoutPlayerCardState extends ConsumerState<_ScoutPlayerCard> {
                         ],
                       ],
                     ),
-                    Text(
-                      '${p['pos']} · ${p['age']} años · ${p['city']}',
-                      style: TextStyle(
-                        color: AppColors.textMuted(isDark),
-                        fontSize: 12,
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          '${u.position ?? 'ND'} · ${u.ageGroup ?? '18+'} · ${u.location ?? 'España'}',
+                          style: TextStyle(
+                            color: AppColors.textMuted(isDark),
+                            fontSize: 12,
+                          ),
+                        ),
+                        if (u.ovrHistory.length >= 2) ...[
+                          const SizedBox(width: 8),
+                          _OvrTrendBadge(history: u.ovrHistory),
+                        ],
+                      ],
                     ),
                   ],
                 ),
               ),
-              // Watchlist star
+              // Watchlist star — Conectada al PlayersProvider
               GestureDetector(
                 onTap: () => ref
-                    .read(watchlistProvider.notifier)
-                    .toggle(p['id'] as String),
+                    .read(playersProvider.notifier)
+                    .toggleWatchlist(u.id, scoutId),
                 child: Icon(
                   isFav ? Icons.star : Icons.star_border,
                   color: isFav ? Colors.amber : AppColors.textMuted(isDark),
@@ -554,8 +509,7 @@ class _ScoutPlayerCardState extends ConsumerState<_ScoutPlayerCard> {
             ],
           ),
 
-          // PRIVACY: menores ocultan datos de contacto para scouts
-          if (isMinor) ...[
+          if (u.isMinor) ...[
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -590,20 +544,20 @@ class _ScoutPlayerCardState extends ConsumerState<_ScoutPlayerCard> {
           Row(
             children: [
               _StatChip(
-                label: 'VEL',
-                value: p['speed'].toString(),
+                label: 'TEC',
+                value: tec.toStringAsFixed(1),
                 isDark: isDark,
               ),
               const SizedBox(width: 12),
               _StatChip(
-                label: 'TEC',
-                value: p['tech'].toString(),
+                label: 'RES',
+                value: res.toStringAsFixed(1),
                 isDark: isDark,
               ),
               const SizedBox(width: 12),
               _StatChip(
                 label: 'RTG',
-                value: p['rating'].toString(),
+                value: rtg.toStringAsFixed(1),
                 isDark: isDark,
               ),
               const Spacer(),
@@ -622,7 +576,7 @@ class _ScoutPlayerCardState extends ConsumerState<_ScoutPlayerCard> {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      p['id'],
+                      u.uniqueId,
                       style: TextStyle(
                         color: AppColors.textMuted(isDark),
                         fontSize: 10,
@@ -640,12 +594,28 @@ class _ScoutPlayerCardState extends ConsumerState<_ScoutPlayerCard> {
           // Acciones — scout NO tiene chat directo
           Row(
             children: [
-              // Solicitud de interés (pasa por tutor/entrenador)
+              Expanded(
+                child: GlowButton(
+                  label: 'Generar Informe Técnico',
+                  selected: false,
+                  isDark: isDark,
+                  onTap: () => _showScoutingReportDialog(context, ref, isDark),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                ),
+              ),
+              const SizedBox(width: 12),
               Expanded(
                 child: GestureDetector(
                   onTap: _requestSent
                       ? null
-                      : () => setState(() => _requestSent = true),
+                      : () {
+                          setState(() => _requestSent = true);
+                          ref.read(playersProvider.notifier).addOffer(u.id, {
+                            'type': 'Interest',
+                            'scoutId': scoutId,
+                            'date': DateTime.now().toIso8601String(),
+                          });
+                        },
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 250),
                     height: 42,
@@ -661,8 +631,8 @@ class _ScoutPlayerCardState extends ConsumerState<_ScoutPlayerCard> {
                     alignment: Alignment.center,
                     child: Text(
                       _requestSent
-                          ? 'Solicitud Enviada al Tutor ✓'
-                          : 'Solicitud de Interés',
+                          ? 'Enviada ✓'
+                          : 'Solicitud Interés',
                       style: TextStyle(
                         color: _requestSent
                             ? AppColors.textMuted(isDark)
@@ -678,6 +648,110 @@ class _ScoutPlayerCardState extends ConsumerState<_ScoutPlayerCard> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showScoutingReportDialog(BuildContext context, WidgetRef ref, bool isDark) {
+    final pd = widget.player;
+    double tec = 8.0, pot = 8.0;
+    final ctrl = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) => AlertDialog(
+          backgroundColor: AppColors.surface(isDark),
+          title: Text('Informe: ${pd.user.name}', style: const TextStyle(fontWeight: FontWeight.bold)),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _ReportSlider(
+                  label: 'Técnica Observada',
+                  value: tec,
+                  onChanged: (v) => setState(() => tec = v),
+                  isDark: isDark,
+                ),
+                _ReportSlider(
+                  label: 'Potencial Proyectado',
+                  value: pot,
+                  onChanged: (v) => setState(() => pot = v),
+                  isDark: isDark,
+                ),
+                TextField(
+                  controller: ctrl,
+                  maxLines: 3,
+                  style: TextStyle(color: AppColors.text(isDark)),
+                  decoration: InputDecoration(
+                    hintText: 'Observaciones tácticas...',
+                    hintStyle: TextStyle(color: AppColors.textMuted(isDark)),
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text('Cancelar', style: TextStyle(color: AppColors.textMuted(isDark))),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final report = {
+                  'scoutId': '3',
+                  'date': DateTime.now().toIso8601String(),
+                  'tecnica': tec,
+                  'potencial': pot,
+                  'observaciones': ctrl.text,
+                };
+                ref.read(playersProvider.notifier).addScoutingReport(pd.user.id, report);
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('✓ Informe técnico guardado en el CV del jugador')),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.buttonBg(isDark),
+                foregroundColor: AppColors.buttonFg(isDark),
+              ),
+              child: const Text('Guardar'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ReportSlider extends StatelessWidget {
+  final String label;
+  final double value;
+  final ValueChanged<double> onChanged;
+  final bool isDark;
+
+  const _ReportSlider({required this.label, required this.value, required this.onChanged, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(label, style: TextStyle(color: AppColors.text(isDark), fontSize: 13)),
+            Text(value.toStringAsFixed(1), style: const TextStyle(color: Color(0xFFE2F163), fontWeight: FontWeight.bold)),
+          ],
+        ),
+        Slider(
+          value: value,
+          min: 0,
+          max: 10,
+          divisions: 100,
+          activeColor: const Color(0xFFE2F163),
+          onChanged: onChanged,
+        ),
+      ],
     );
   }
 }
@@ -795,5 +869,42 @@ class _PendingVerificationView extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _OvrTrendBadge extends StatelessWidget {
+  final Map<String, double> history;
+  const _OvrTrendBadge({required this.history});
+
+  @override
+  Widget build(BuildContext context) {
+    // Clasificar por fecha y ver si el último es mayor al anterior
+    final sortedKeys = history.keys.toList()..sort();
+    if (sortedKeys.length < 2) return const SizedBox.shrink();
+    
+    final last = history[sortedKeys.last]!;
+    final prev = history[sortedKeys[sortedKeys.length - 2]]!;
+    
+    if (last > prev) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+        decoration: BoxDecoration(
+          color: Colors.green.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.trending_up, color: Colors.green, size: 10),
+            SizedBox(width: 2),
+            Text(
+              'UP',
+              style: TextStyle(color: Colors.green, fontSize: 8, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      );
+    }
+    return const SizedBox.shrink();
   }
 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/theme_provider.dart';
 import '../providers/match_evaluations_provider.dart';
-import '../models/app_user.dart';
+import '../providers/players_provider.dart';
 import '../widgets/help_button.dart';
 import 'dart:async';
 
@@ -49,10 +49,10 @@ class _RefereeTerminalScreenState extends ConsumerState<RefereeTerminalScreen> {
   double _fairPlay = 5.0;
   bool _isSealed = false;
 
-  late final String _matchName = widget.matchName ?? 'Madrid U19 Summer Cup · 03 Mar';
-  late final String _playerId = widget.playerId ?? 'SLP-0982';
-  late final String _playerName = widget.playerName ?? 'Marco Silva';
-  final String _playerPos = 'ND';
+  late String _matchName = widget.matchName ?? 'Madrid U19 Summer Cup';
+  late String _playerId = widget.playerId ?? 'SLP-0982';
+  late String _playerName = widget.playerName ?? 'Marco Silva';
+  String _playerPos = 'ND';
 
   @override
   Widget build(BuildContext context) {
@@ -63,10 +63,22 @@ class _RefereeTerminalScreenState extends ConsumerState<RefereeTerminalScreen> {
     final surface = AppColors.surface(isDark);
     final border = AppColors.border(isDark);
 
+    // Buscamos el jugador en el provider global para tener datos frescos (como la posición)
+    final allPlayers = ref.watch(playersProvider);
+    final pd = allPlayers.any((p) => p.user.uniqueId == _playerId || p.user.id == _playerId)
+        ? allPlayers.firstWhere((p) => p.user.uniqueId == _playerId || p.user.id == _playerId)
+        : null;
+    
+    if (pd != null) {
+      _playerName = pd.user.name;
+      _playerPos = pd.user.position ?? 'ND';
+    }
+
     final evals = ref
         .watch(matchEvaluationsProvider)
-        .where((e) => e.playerId == _playerId)
+        .where((e) => e.playerId == _playerId || (pd != null && e.playerId == pd.user.id))
         .toList();
+
     final weighted = calcWeightedAverages(evals);
     final refAvg = weighted.isEmpty
         ? null
@@ -89,7 +101,6 @@ class _RefereeTerminalScreenState extends ConsumerState<RefereeTerminalScreen> {
                   final notifier = ref.read(connectivityProvider.notifier);
                   notifier.toggle();
                   if (!isOnline && offlineQueue.isNotEmpty) {
-                     // Simulamos sync al volver a online
                      ScaffoldMessenger.of(context).showSnackBar(
                        const SnackBar(content: Text('Sincronizando Evaluaciones Offline... ⏳')),
                      );
@@ -100,7 +111,7 @@ class _RefereeTerminalScreenState extends ConsumerState<RefereeTerminalScreen> {
                         ref.read(offlineQueueProvider.notifier).clear();
                         if (mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('✓ Sincronización Completada con la Nube SportLink!')),
+                            const SnackBar(content: Text('✓ Sincronización Completada!')),
                           );
                         }
                      });
@@ -120,20 +131,9 @@ class _RefereeTerminalScreenState extends ConsumerState<RefereeTerminalScreen> {
                       Icon(isOnline ? Icons.wifi : Icons.wifi_off, size: 16, color: isOnline ? Colors.green : Colors.orange),
                       const SizedBox(width: 8),
                       Text(
-                        isOnline ? 'Online' : 'Offline Mode (Signal Lost)',
+                        isOnline ? 'Online' : 'Modo Offline',
                         style: TextStyle(color: isOnline ? Colors.green : Colors.orange, fontSize: 12, fontWeight: FontWeight.bold),
                       ),
-                      if (!isOnline && offlineQueue.isNotEmpty) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: Colors.orange,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text('${offlineQueue.length} Pending', style: const TextStyle(color: Colors.black, fontSize: 10, fontWeight: FontWeight.w900)),
-                        ),
-                      ],
                     ],
                   ),
                 ),
@@ -153,9 +153,19 @@ class _RefereeTerminalScreenState extends ConsumerState<RefereeTerminalScreen> {
                   const HelpButton(screenKey: 'referee_terminal'),
                 ],
               ),
+              const SizedBox(height: 24),
+
+              // 🪪 Credencial Digital
+              _RefereeCredentialCard(
+                name: 'Carlos Rodríguez',
+                id: 'COLEGIADO REF-28-0912',
+                isDark: isDark,
+              ),
+
+              const SizedBox(height: 32),
               const SizedBox(height: 12),
               Text(
-                'Verificar\nPartido',
+                'Evaluar\nJugador',
                 style: TextStyle(
                   color: text,
                   fontSize: 36,
@@ -166,26 +176,16 @@ class _RefereeTerminalScreenState extends ConsumerState<RefereeTerminalScreen> {
               ),
               const SizedBox(height: 6),
               Text(_matchName, style: TextStyle(color: muted, fontSize: 13)),
-              const SizedBox(height: 4),
-              Consumer(
-                builder: (_, ref2, _) {
-                  final referee = ref2.watch(sessionProvider);
-                  return Text(
-                    '${referee?.followersCount ?? 0} seguidores te observan',
-                    style: TextStyle(color: muted, fontSize: 11),
-                  );
-                },
-              ),
 
               const SizedBox(height: 24),
 
-              // Historial de partidos del jugador
+              // Historial de evaluaciones
               if (evals.isNotEmpty) ...[
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'HISTORIAL DE EVALUACIONES',
+                      'HISTORIAL RECIENTE',
                       style: TextStyle(
                         color: muted,
                         fontSize: 10,
@@ -194,32 +194,30 @@ class _RefereeTerminalScreenState extends ConsumerState<RefereeTerminalScreen> {
                       ),
                     ),
                     if (refAvg != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: _ratingColor(refAvg).withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          'Prom. árbitro: ${refAvg.toStringAsFixed(1)}',
-                          style: TextStyle(
-                            color: _ratingColor(refAvg),
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                          ),
+                      Text(
+                        'Promedio: ${refAvg.toStringAsFixed(1)}',
+                        style: TextStyle(
+                          color: _ratingColor(refAvg),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                   ],
                 ),
                 const SizedBox(height: 10),
-                ...evals.map((e) => _MatchHistoryCard(eval: e, isDark: isDark)),
+                SizedBox(
+                  height: 120,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: evals.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 12),
+                    itemBuilder: (ctx, i) => _MatchHistoryMiniCard(eval: evals[i], isDark: isDark),
+                  ),
+                ),
                 const SizedBox(height: 24),
               ],
 
-              // Tarjeta del jugador a evaluar
+              // Tarjeta del jugador a evaluar con selector
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -227,38 +225,49 @@ class _RefereeTerminalScreenState extends ConsumerState<RefereeTerminalScreen> {
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: border),
                 ),
-                child: Row(
+                child: Column(
                   children: [
-                    Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: bg,
-                        border: Border.all(color: border),
-                      ),
-                      child: Icon(Icons.sports_soccer, color: muted, size: 28),
-                    ),
-                    const SizedBox(width: 16),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    Row(
                       children: [
-                        Text(
-                          _playerName,
-                          style: TextStyle(
-                            color: text,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
+                        Container(
+                          width: 56,
+                          height: 56,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: bg,
+                            border: Border.all(color: border),
+                          ),
+                          child: Icon(Icons.sports_soccer, color: muted, size: 28),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _playerName,
+                                style: TextStyle(
+                                  color: text,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'ID: $_playerId · $_playerPos',
+                                style: TextStyle(
+                                  color: muted,
+                                  fontSize: 12,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'ID: $_playerId · $_playerPos',
-                          style: TextStyle(
-                            color: muted,
-                            fontSize: 12,
-                            letterSpacing: 0.5,
-                          ),
+                        IconButton(
+                          onPressed: () => _showSearchDialog(context, allPlayers, isDark),
+                          icon: Icon(Icons.search, color: AppColors.accent),
+                          tooltip: 'Cambiar Jugador',
                         ),
                       ],
                     ),
@@ -270,7 +279,7 @@ class _RefereeTerminalScreenState extends ConsumerState<RefereeTerminalScreen> {
 
               // Sliders de evaluación
               Text(
-                'EVALUACIÓN — ESTE PARTIDO',
+                'EVALUACIÓN DE CAMPO',
                 style: TextStyle(
                   color: muted,
                   fontSize: 10,
@@ -308,12 +317,12 @@ class _RefereeTerminalScreenState extends ConsumerState<RefereeTerminalScreen> {
 
               const SizedBox(height: 24),
 
-              // Rating calculado en tiempo real
+              // Rating calculado
               Center(
                 child: Column(
                   children: [
                     Text(
-                      'RATING ESTE PARTIDO',
+                      'RATING PARTIDO',
                       style: TextStyle(
                         color: muted,
                         fontSize: 9,
@@ -333,13 +342,6 @@ class _RefereeTerminalScreenState extends ConsumerState<RefereeTerminalScreen> {
                         letterSpacing: -2,
                       ),
                     ),
-                    if (evals.isNotEmpty && refAvg != null) ...[
-                      const SizedBox(height: 6),
-                      Text(
-                        'Nuevo promedio estimado: ${_newAvgPreview(evals, refAvg).toStringAsFixed(1)}',
-                        style: TextStyle(color: muted, fontSize: 11),
-                      ),
-                    ],
                   ],
                 ),
               ),
@@ -366,10 +368,10 @@ class _RefereeTerminalScreenState extends ConsumerState<RefereeTerminalScreen> {
                             children: [
                               Icon(Icons.lock_outline, size: 16, color: muted),
                               const SizedBox(width: 8),
-                              Text(
-                                'EVALUACIÓN INMUTABLE',
+                              const Text(
+                                'EVALUACIÓN SELLADA',
                                 style: TextStyle(
-                                  color: muted,
+                                  color: Colors.white38,
                                   fontSize: 13,
                                   letterSpacing: 1.5,
                                   fontWeight: FontWeight.w600,
@@ -378,7 +380,7 @@ class _RefereeTerminalScreenState extends ConsumerState<RefereeTerminalScreen> {
                             ],
                           )
                         : Text(
-                            'SELLAR Y REGISTRAR',
+                            'SELLAR EVALUACIÓN',
                             style: TextStyle(
                               color: AppColors.buttonFg(isDark),
                               fontSize: 15,
@@ -393,12 +395,76 @@ class _RefereeTerminalScreenState extends ConsumerState<RefereeTerminalScreen> {
               Center(
                 child: Text(
                   _isSealed
-                      ? 'Evaluación registrada · Afecta al Athletic-CV del jugador'
-                      : '1 SC = €0.0092 · Rating afectará al Athletic-CV',
+                      ? 'Inmutable · Sincronizado con SportLink Core'
+                      : 'El rating afectará permanentemente al Athletic-CV',
                   style: TextStyle(color: muted, fontSize: 11),
                 ),
               ),
               const SizedBox(height: 40),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showSearchDialog(BuildContext context, List<PlayerData> players, bool isDark) {
+    final ctrl = TextEditingController();
+    List<PlayerData> filtered = players;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) => AlertDialog(
+          backgroundColor: AppColors.surface(isDark),
+          title: const Text('Buscar Jugador', style: TextStyle(fontWeight: FontWeight.bold)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: ctrl,
+                style: TextStyle(color: AppColors.text(isDark)),
+                decoration: InputDecoration(
+                  hintText: 'Nombre o ID...',
+                  prefixIcon: Icon(Icons.search, color: AppColors.textMuted(isDark)),
+                ),
+                onChanged: (v) {
+                  setState(() {
+                    filtered = players.where((p) => 
+                      p.user.name.toLowerCase().contains(v.toLowerCase()) || 
+                      p.user.uniqueId.toLowerCase().contains(v.toLowerCase())
+                    ).toList();
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                height: 250,
+                width: double.maxFinite,
+                child: ListView.builder(
+                  itemCount: filtered.length,
+                  itemBuilder: (ctx, i) {
+                    final p = filtered[i];
+                    return ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: AppColors.bg(isDark),
+                        child: Text(p.user.name[0]),
+                      ),
+                      title: Text(p.user.name, style: TextStyle(color: AppColors.text(isDark))),
+                      subtitle: Text(p.user.uniqueId, style: TextStyle(color: AppColors.textMuted(isDark), fontSize: 11)),
+                      onTap: () {
+                        this.setState(() {
+                          _playerId = p.user.uniqueId;
+                          _playerName = p.user.name;
+                          _playerPos = p.user.position ?? 'ND';
+                          _isSealed = false; // Reset seal for new player
+                        });
+                        Navigator.pop(ctx);
+                      },
+                    );
+                  },
+                ),
+              ),
             ],
           ),
         ),
@@ -420,22 +486,10 @@ class _RefereeTerminalScreenState extends ConsumerState<RefereeTerminalScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              label,
-              style: TextStyle(
-                color: muted,
-                fontSize: 13,
-                letterSpacing: 1,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
+            Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
             Text(
               value.toStringAsFixed(1),
-              style: TextStyle(
-                color: _ratingColor(value),
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
-              ),
+              style: TextStyle(color: _ratingColor(value), fontSize: 24, fontWeight: FontWeight.w700),
             ),
           ],
         ),
@@ -445,15 +499,11 @@ class _RefereeTerminalScreenState extends ConsumerState<RefereeTerminalScreen> {
             activeTrackColor: _ratingColor(value),
             inactiveTrackColor: border,
             thumbColor: _ratingColor(value),
-            overlayColor: _ratingColor(value).withValues(alpha: 0.1),
             trackHeight: 2.5,
-            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
           ),
           child: Slider(
             value: value,
-            min: 0,
-            max: 10,
-            divisions: 20,
+            min: 0, max: 10, divisions: 20,
             onChanged: _isSealed ? null : onChanged,
           ),
         ),
@@ -467,26 +517,9 @@ class _RefereeTerminalScreenState extends ConsumerState<RefereeTerminalScreen> {
     return const Color(0xFFFF3B30);
   }
 
-  double _newAvgPreview(List<MatchEvaluation> evals, double currentAvg) {
-    // Simula cómo quedaría el promedio si se añade esta evaluación
-    final thisRating = (_tecnica + _resistencia + _fairPlay) / 3;
-    final n = evals.length + 1;
-    // Peso del nuevo partido = n (el más reciente), los anteriores bajan un peso
-    double total = 0, sumW = 0;
-    for (int i = 0; i < evals.length; i++) {
-      final w = (n - 1 - i).toDouble();
-      sumW += w;
-      total += evals[i].matchRating * w;
-    }
-    sumW += n.toDouble();
-    total += thisRating * n;
-    return total / sumW;
-  }
-
   void _seal(BuildContext context) {
     setState(() => _isSealed = true);
-
-    final mId = widget.matchId ?? 'M${DateTime.now().millisecondsSinceEpoch}';
+    final mId = 'M${DateTime.now().millisecondsSinceEpoch}';
     final eval = MatchEvaluation(
       matchId: mId,
       matchName: _matchName,
@@ -497,110 +530,201 @@ class _RefereeTerminalScreenState extends ConsumerState<RefereeTerminalScreen> {
       resistencia: _resistencia,
       fairPlay: _fairPlay,
       source: EvaluationSource.referee,
-      signature: MatchEvaluation.generateSeal(
-        mId,
-        _playerId,
-        _tecnica,
-        _resistencia,
-        _fairPlay,
-        EvaluationSource.referee,
-      ),
+      signature: MatchEvaluation.generateSeal(mId, _playerId, _tecnica, _resistencia, _fairPlay, EvaluationSource.referee),
     );
     
-    final isOnline = ref.read(connectivityProvider);
-    if (isOnline) {
+    if (ref.read(connectivityProvider)) {
       ref.read(matchEvaluationsProvider.notifier).addEvaluation(eval);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('✓ Evaluación sellada · Rating: ${eval.matchRating.toStringAsFixed(1)} · Athletic-CV actualizado'),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('✓ Evaluación sincronizada con SportLink Core')));
     } else {
       ref.read(offlineQueueProvider.notifier).queue(eval);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('⚠️ Evaluación encriptada guardada localmente (Drift/Hive cache)'),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('⚠️ Guardado localmente (Sin conexión)')));
     }
   }
 }
 
-// ── Tarjeta de historial de partidos ─────────────────────────────────────────
-class _MatchHistoryCard extends StatelessWidget {
+class _MatchHistoryMiniCard extends StatelessWidget {
   final MatchEvaluation eval;
   final bool isDark;
-  const _MatchHistoryCard({required this.eval, required this.isDark});
-
-  Color _c(double v) {
-    if (v >= 8.5) return const Color(0xFF34C759);
-    if (v >= 7.0) return const Color(0xFFFF9F0A);
-    return const Color(0xFFFF3B30);
-  }
+  const _MatchHistoryMiniCard({required this.eval, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
-    final muted = AppColors.textMuted(isDark);
     final surface = AppColors.surface(isDark);
     final border = AppColors.border(isDark);
-    final text = AppColors.text(isDark);
     final rating = eval.matchRating;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      width: 140,
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: surface,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: border),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  eval.matchName,
-                  style: TextStyle(
-                    color: text,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'TEC ${eval.tecnica} · RES ${eval.resistencia} · FPL ${eval.fairPlay}',
-                  style: TextStyle(
-                    color: muted,
-                    fontSize: 10,
-                    letterSpacing: 0.3,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: _c(rating).withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(20),
-            ),
+          Text(eval.matchName, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          Center(
             child: Text(
               rating.toStringAsFixed(1),
               style: TextStyle(
-                color: _c(rating),
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
+                color: rating >= 8.5 ? const Color(0xFF34C759) : (rating >= 7 ? const Color(0xFFFF9F0A) : const Color(0xFFFF3B30)),
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
               ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Center(
+            child: Text(
+              '${eval.date.day}/${eval.date.month}',
+              style: TextStyle(color: AppColors.textMuted(isDark), fontSize: 9),
             ),
           ),
         ],
       ),
+    );
+  }
+}
+class _RefereeCredentialCard extends StatelessWidget {
+  final String name, id;
+  final bool isDark;
+
+  const _RefereeCredentialCard({required this.name, required this.id, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final surface = AppColors.surface(isDark);
+    final border = AppColors.border(isDark);
+    final text = AppColors.text(isDark);
+    final muted = AppColors.textMuted(isDark);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isDark 
+            ? [surface, surface.withValues(alpha: 0.8)] 
+            : [Colors.white, Colors.grey.shade50],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        name.toUpperCase(),
+                        style: TextStyle(
+                          color: text,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Icon(Icons.verified, color: Colors.blue, size: 16),
+                    ],
+                  ),
+                  Text(
+                    id,
+                    style: TextStyle(
+                      color: AppColors.buttonBg(isDark),
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                ],
+              ),
+              Icon(Icons.sports, color: text.withValues(alpha: 0.2), size: 40),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _RefStat(label: 'PARTIDOS', value: '142', isDark: isDark),
+              _RefStat(label: 'RATING DADO', value: '7.8', isDark: isDark),
+              _RefStat(label: 'COLEGIADO', value: 'MAD', isDark: isDark),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: text.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.qr_code, size: 14, color: muted),
+                const SizedBox(width: 8),
+                Text(
+                  'ID DIGITAL VERIFICADO',
+                  style: TextStyle(color: muted, fontSize: 9, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RefStat extends StatelessWidget {
+  final String label, value;
+  final bool isDark;
+  const _RefStat({required this.label, required this.value, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: AppColors.textMuted(isDark),
+            fontSize: 9,
+            letterSpacing: 1,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: TextStyle(
+            color: AppColors.text(isDark),
+            fontSize: 18,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ],
     );
   }
 }

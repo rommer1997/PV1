@@ -17,6 +17,7 @@ import '../providers/theme_provider.dart';
 import '../services/user_storage_service.dart';
 import '../screens/shared/explore_hub_screen.dart';
 import '../screens/shared/settings_screen.dart';
+import '../screens/referee_terminal_screen.dart';
 
 class RoleShell extends ConsumerStatefulWidget {
   final UserRole role;
@@ -53,8 +54,9 @@ class _RoleShellState extends ConsumerState<RoleShell> {
           const _NavItem(Icons.account_balance_wallet_outlined, 'Wallet', WalletScreen()),
         ];
       case UserRole.referee:
-        // ⚖️ Árbitro: Usa la Agenda para seleccionar el partido y al jugador a evaluar.
         return [
+          const _NavItem(Icons.sports_soccer_outlined, 'Terminal', RefereeTerminalScreen()),
+          const _NavItem(Icons.history_outlined, 'Historial', ExploreHubScreen()), // Placeholder para Historial
           const _NavItem(Icons.explore_outlined, 'Explorar', ExploreHubScreen()),
         ];
       case UserRole.scout:

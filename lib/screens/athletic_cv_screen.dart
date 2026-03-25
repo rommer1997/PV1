@@ -12,6 +12,7 @@ import 'shared/settings_screen.dart';
 import '../widgets/video_highlight_card.dart';
 import '../widgets/totw_player_card.dart';
 import '../widgets/endorsement_panel.dart';
+import '../providers/players_provider.dart';
 
 // ── Paleta semáforo por rendimiento ──────────────────────────────────────────
 Color _statColor(double v) {
@@ -25,7 +26,7 @@ Color _statColor(double v) {
 // VEL, FUE, TÁC son evaluaciones privadas del entrenador (pendiente integración).
 
 // ── Widget Perfil Hero (Minimalista) ──────────────────────────────────────────────
-class _ProfileHeroClean extends StatelessWidget {
+class _ProfileHeroClean extends ConsumerWidget {
   final AppUser? user;
   final Map<String, double> stats;
   final bool isDark;
@@ -37,7 +38,7 @@ class _ProfileHeroClean extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // Calcular Overall (OVR)
     final avg = stats.values.reduce((a, b) => a + b) / stats.length;
     final ovr = (avg * 10).round();
@@ -115,28 +116,48 @@ class _ProfileHeroClean extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 24),
-              GestureDetector(
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const ProfileEditScreen(),
+              Stack(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const ProfileEditScreen(),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      width: 90,
+                      height: 90,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isDark ? const Color(0xFF2C2C2C) : const Color(0xFFE0E0E0),
+                        border: Border.all(color: border, width: 2),
+                      ),
+                      child: Icon(
+                        Icons.person_rounded,
+                        size: 50,
+                        color: muted.withValues(alpha: 0.5),
+                      ),
                     ),
-                  );
-                },
-                child: Container(
-                  width: 90,
-                  height: 90,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: isDark ? const Color(0xFF2C2C2C) : const Color(0xFFE0E0E0),
-                    border: Border.all(color: border, width: 2),
                   ),
-                  child: Icon(
-                    Icons.person_rounded,
-                    size: 50,
-                    color: muted.withValues(alpha: 0.5),
+                  Positioned(
+                    right: 0,
+                    bottom: 0,
+                    child: GestureDetector(
+                      onTap: () => _showQRCode(context, user?.uniqueId ?? 'SLP-UNK'),
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF007AFF),
+                          shape: BoxShape.circle,
+                          border: Border.all(color: AppColors.bg(isDark), width: 2),
+                        ),
+                        child: const Icon(Icons.qr_code_2, color: Colors.white, size: 16),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ],
           ),
@@ -151,12 +172,23 @@ class _ProfileHeroClean extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          Text(
-            'ST • 🇪🇸',
-            style: TextStyle(
-              color: muted,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
+          GestureDetector(
+            onTap: () => _showPositionPicker(context, ref),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF4CA25).withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                '${user?.position ?? 'ST'} • 🇪🇸',
+                style: const TextStyle(
+                  color: Color(0xFFF4CA25),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1,
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 32),
@@ -172,6 +204,73 @@ class _ProfileHeroClean extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  void _showQRCode(BuildContext context, String uid) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'TU CREDENCIAL SLP',
+              style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1),
+            ),
+            const SizedBox(height: 24),
+            QrImageView(
+              data: 'https://sportlink.pro/cv/$uid',
+              version: QrVersions.auto,
+              size: 200.0,
+              foregroundColor: Colors.black,
+            ),
+            const SizedBox(height: 16),
+            Text(uid, style: const TextStyle(fontFamily: 'Courier', fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            const Text(
+              'Escanea para ver el CV dinámico',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showPositionPicker(BuildContext context, WidgetRef ref) {
+    final positions = ['POR', 'DF', 'MC', 'DEL', 'EXT', 'MCO'];
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(topLeft: Radius.circular(24), topRight: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 16),
+            const Text('SELECCIONA TU POSICIÓN', style: TextStyle(fontWeight: FontWeight.w800)),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 12,
+              children: positions.map((p) => ChoiceChip(
+                label: Text(p),
+                selected: user?.position == p,
+                onSelected: (_) {
+                  // En un caso real aquí llamaríamos a un método en el provider
+                  Navigator.pop(context);
+                },
+              )).toList(),
+            ),
+            const SizedBox(height: 32),
+          ],
+        ),
       ),
     );
   }
@@ -710,6 +809,48 @@ class AthleticCVScreen extends ConsumerWidget {
                   ),
                 ),
 
+                const SizedBox(height: 16),
+
+                // ── Scout Interest Metric ──
+                _FadeSlide(
+                  delay: 90,
+                  child: Center(
+                    child: Consumer(
+                      builder: (ctx, ref, _) {
+                        final players = ref.watch(playersProvider);
+                        final pData = players.where((p) => p.user.id == user?.id || p.user.uniqueId == user?.uniqueId).firstOrNull;
+                        final count = pData?.scoutWatchlistIds.length ?? 0;
+                        
+                        if (count == 0) return const SizedBox.shrink();
+                        
+                        return Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF4CA25).withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: const Color(0xFFF4CA25).withValues(alpha: 0.3)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.star, color: Color(0xFFF4CA25), size: 14),
+                              const SizedBox(width: 8),
+                              Text(
+                                '$count scouts siguiendo tu progreso',
+                                style: const TextStyle(
+                                  color: Color(0xFFF4CA25),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+
                 const SizedBox(height: 32),
 
                 // ── Presentación del Jugador (Bio) ─────────────────────────
@@ -771,10 +912,27 @@ class AthleticCVScreen extends ConsumerWidget {
                   delay: 160,
                   child: Center(
                     child: _ProfileHeroClean(
-                      user: user,
+                      user: viewedUser,
                       stats: stats,
                       isDark: isDark,
                     ),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // ── Métrica de Interés (Engagement) ──
+                _FadeSlide(
+                  delay: 180,
+                  child: Consumer(
+                    builder: (context, ref, _) {
+                      final players = ref.watch(playersProvider);
+                      final pData = players.where((p) => p.user.id == targetPlayerId).firstOrNull;
+                      return _InterestMetricCard(
+                        count: pData?.scoutWatchlistIds.length ?? 0,
+                        isDark: isDark,
+                      );
+                    },
                   ),
                 ),
 
@@ -788,6 +946,22 @@ class AthleticCVScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 48),
+
+                // 🚀 SECCIÓN TUTOR: Solo visible para el tutor legal
+                if (rawUser?.role == UserRole.tutor) ...[
+                  _FadeSlide(
+                    delay: 250,
+                    child: _TutorSection(
+                      user: user!,
+                      isDark: isDark,
+                      surface: surface,
+                      border: border,
+                      muted: muted,
+                      text: text,
+                    ),
+                  ),
+                  const SizedBox(height: 48),
+                ],
 
                 // ── Insignias / Logros ─────────────────────────────────────
                 _FadeSlide(
@@ -876,6 +1050,17 @@ class AthleticCVScreen extends ConsumerWidget {
 
                 const SizedBox(height: 36),
 
+                // ── Carrusel de Logros ──
+                _FadeSlide(
+                  delay: 500,
+                  child: _AchievementsCarousel(
+                    badges: viewedUser?.achievements ?? [],
+                    isDark: isDark,
+                  ),
+                ),
+
+                const SizedBox(height: 36),
+
                 // ── Info certificación ─────────────────────────────────────
                 _FadeSlide(
                   delay: 640,
@@ -936,6 +1121,22 @@ class AthleticCVScreen extends ConsumerWidget {
 
                 const SizedBox(height: 36),
 
+                // ── Gráfico de Progresión ──
+                _FadeSlide(
+                  delay: 680,
+                  child: Consumer(
+                    builder: (context, ref, _) {
+                      final history = ref.watch(playerOvrHistoryProvider(targetPlayerId));
+                      return _OvrProgressionChart(
+                        history: history,
+                        isDark: isDark,
+                      );
+                    },
+                  ),
+                ),
+
+                const SizedBox(height: 36),
+
                 // ── Historial de Partidos ──────────────────────────────────
                 _FadeSlide(
                   delay: 720,
@@ -979,6 +1180,15 @@ class AthleticCVScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 50),
                 ],
+
+                // ── Nueva Sección: Ofertas y Contratos (Loop Scout -> Player) ──
+                if (isCurrentUser)
+                  _FadeSlide(
+                    delay: 900,
+                    child: _OffersSection(playerId: targetPlayerId, isDark: isDark),
+                  ),
+                
+                const SizedBox(height: 50),
               ],
             ),
           ),
@@ -2022,6 +2232,622 @@ class _MatchHistorySection extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ── Sección de Ofertas Recibidas ───────────────────────────────────────────
+class _OffersSection extends ConsumerWidget {
+  final String playerId;
+  final bool isDark;
+
+  const _OffersSection({required this.playerId, required this.isDark});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final players = ref.watch(playersProvider);
+    final pData = players.where((p) => p.user.uniqueId == playerId || p.user.id == playerId).firstOrNull;
+    final offers = pData?.pendingOffers ?? [];
+
+    final surface = AppColors.surface(isDark);
+    final text = AppColors.text(isDark);
+    final muted = AppColors.textMuted(isDark);
+    final border = AppColors.border(isDark);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'OFERTAS Y CONTRATOS',
+              style: TextStyle(
+                color: muted,
+                fontSize: 11,
+                letterSpacing: 2,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            if (offers.isNotEmpty)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.red,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  '${offers.length} NUEVAS',
+                  style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        if (offers.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: surface,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: border, style: BorderStyle.solid),
+            ),
+            child: Column(
+              children: [
+                Icon(Icons.assignment_outlined, color: muted.withValues(alpha: 0.3), size: 40),
+                const SizedBox(height: 12),
+                Text(
+                  'No tienes ofertas pendientes',
+                  style: TextStyle(color: muted, fontSize: 13),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Sigue mejorando tu OVR para llamar la atención',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: muted.withValues(alpha: 0.5), fontSize: 11),
+                ),
+              ],
+            ),
+          )
+        else
+          ...offers.map((offer) => Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: surface,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: const Color(0xFFF4CA25).withValues(alpha: 0.5)),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFF4CA25).withValues(alpha: 0.05),
+                  blurRadius: 15,
+                  offset: const Offset(0, 5),
+                )
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: const Color(0xFFF4CA25).withValues(alpha: 0.1),
+                      child: const Icon(Icons.business, color: Color(0xFFF4CA25), size: 18),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            offer['club'] ?? 'Club Interesado',
+                            style: TextStyle(color: text, fontWeight: FontWeight.bold, fontSize: 15),
+                          ),
+                          Text(
+                            'Enviada por: ${offer['scout'] ?? 'Scout de SportLink'}',
+                            style: TextStyle(color: muted, fontSize: 11),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.arrow_forward_ios, size: 12, color: Colors.grey),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                const Divider(height: 1),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('TIPO DE CONTRATO', style: TextStyle(color: muted, fontSize: 9, letterSpacing: 1)),
+                        const SizedBox(height: 4),
+                        Text(offer['type'] ?? 'Becas Deportivas', style: TextStyle(color: text, fontWeight: FontWeight.w600, fontSize: 13)),
+                      ],
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF34C759),
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      onPressed: () {},
+                      child: const Text('Ver Detalles', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          )),
+      ],
+    );
+  }
+}
+
+// ── Gráfico de Progresión de OVR (Premium Custom Paint) ─────────────────────
+class _OvrProgressionChart extends StatelessWidget {
+  final List<MapEntry<DateTime, double>> history;
+  final bool isDark;
+
+  const _OvrProgressionChart({required this.history, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    if (history.length < 2) return const SizedBox.shrink();
+
+    final text = AppColors.text(isDark);
+    final muted = AppColors.textMuted(isDark);
+    final accent = const Color(0xFF007AFF);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'PROGRESIÓN DE RENDIMIENTO',
+          style: TextStyle(
+            color: muted,
+            fontSize: 11,
+            letterSpacing: 2,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          height: 180,
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.surface(isDark),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: AppColors.border(isDark)),
+          ),
+          child: Column(
+            children: [
+              Expanded(
+                child: CustomPaint(
+                  size: Size.infinite,
+                  painter: _ChartPainter(history: history, isDark: isDark, accent: accent),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Ene', style: TextStyle(color: muted, fontSize: 10)),
+                  Text('Feb', style: TextStyle(color: muted, fontSize: 10)),
+                  Text('Mar', style: TextStyle(color: text, fontSize: 10, fontWeight: FontWeight.bold)),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ChartPainter extends CustomPainter {
+  final List<MapEntry<DateTime, double>> history;
+  final bool isDark;
+  final Color accent;
+
+  _ChartPainter({required this.history, required this.isDark, required this.accent});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = accent
+      ..strokeWidth = 3
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    final fillPaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [accent.withValues(alpha: 0.3), accent.withValues(alpha: 0.0)],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+
+    final path = Path();
+    final fillPath = Path();
+
+    final minOvr = history.map((e) => e.value).reduce(math.min) - 5;
+    final maxOvr = history.map((e) => e.value).reduce(math.max) + 5;
+    final range = maxOvr - minOvr;
+
+    for (int i = 0; i < history.length; i++) {
+      final x = (size.width / (history.length - 1)) * i;
+      final y = size.height - ((history[i].value - minOvr) / range) * size.height;
+
+      if (i == 0) {
+        path.moveTo(x, y);
+        fillPath.moveTo(x, size.height);
+        fillPath.lineTo(x, y);
+      } else {
+        path.lineTo(x, y);
+        fillPath.lineTo(x, y);
+      }
+      
+      if (i == history.length - 1) {
+        fillPath.lineTo(x, size.height);
+        fillPath.close();
+      }
+    }
+
+    canvas.drawPath(fillPath, fillPaint);
+    canvas.drawPath(path, paint);
+
+    // Puntos
+    final dotPaint = Paint()..color = accent;
+    final dotOuterPaint = Paint()..color = Colors.white;
+    for (int i = 0; i < history.length; i++) {
+      final x = (size.width / (history.length - 1)) * i;
+      final y = size.height - ((history[i].value - minOvr) / range) * size.height;
+      canvas.drawCircle(Offset(x, y), 5, dotOuterPaint);
+      canvas.drawCircle(Offset(x, y), 3, dotPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+// ── Carrusel de Logros (Badges) ──────────────────────────────────────────────
+class _AchievementsCarousel extends StatelessWidget {
+  final List<String> badges;
+  final bool isDark;
+
+  const _AchievementsCarousel({required this.badges, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final muted = AppColors.textMuted(isDark);
+    
+    // Mock badges if empty for pitch
+    final displayBadges = badges.isEmpty 
+      ? ['Primer Match', 'OVR +75', 'Verificado', 'Scout Interest'] 
+      : badges;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'LOGROS Y RECONOCIMIENTOS',
+          style: TextStyle(
+            color: muted,
+            fontSize: 11,
+            letterSpacing: 2,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 16),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          clipBehavior: Clip.none,
+          child: Row(
+            children: displayBadges.map((b) => _BadgeItem(label: b, isDark: isDark)).toList(),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _BadgeItem extends StatelessWidget {
+  final String label;
+  final bool isDark;
+
+  const _BadgeItem({required this.label, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final isPro = label == 'Verificado';
+    return Container(
+      margin: const EdgeInsets.only(right: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: isPro ? const Color(0xFFF4CA25) : AppColors.border(isDark)),
+        boxShadow: [
+          if (isPro)
+            BoxShadow(color: const Color(0xFFF4CA25).withValues(alpha: 0.1), blurRadius: 10)
+        ],
+      ),
+      child: Row(
+        children: [
+          Icon(isPro ? Icons.verified : Icons.workspace_premium, 
+               color: isPro ? const Color(0xFFF4CA25) : Colors.grey, size: 18),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: TextStyle(
+              color: AppColors.text(isDark),
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Métrica de Interés Global (Anónima) ─────────────────────────────────────
+class _InterestMetricCard extends StatelessWidget {
+  final int count;
+  final bool isDark;
+
+  const _InterestMetricCard({required this.count, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final surface = AppColors.surface(isDark);
+    final text = AppColors.text(isDark);
+    final muted = AppColors.textMuted(isDark);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.border(isDark)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.blue.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.remove_red_eye_outlined, color: Colors.blue, size: 24),
+          ),
+          const SizedBox(width: 20),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'INTERÉS RECIBIDO',
+                  style: TextStyle(color: muted, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '$count Scouts te tienen en Watchlist',
+                  style: TextStyle(color: text, fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  'Tu visibilidad ha subido un 12% esta semana',
+                  style: TextStyle(color: Colors.green, fontSize: 11, fontWeight: FontWeight.w500),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+class _TutorSection extends StatelessWidget {
+  final AppUser user;
+  final bool isDark;
+  final Color surface, border, muted, text;
+
+  const _TutorSection({
+    required this.user,
+    required this.isDark,
+    required this.surface,
+    required this.border,
+    required this.muted,
+    required this.text,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.family_restroom, color: AppColors.buttonBg(isDark), size: 20),
+            const SizedBox(width: 12),
+            Text(
+              'PANEL DEL TUTOR',
+              style: TextStyle(
+                color: muted,
+                fontSize: 10,
+                letterSpacing: 2.5,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        
+        // Timeline de Hitos
+        Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: surface,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: border),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Cronología de Hitos',
+                style: TextStyle(color: text, fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              const SizedBox(height: 16),
+              _MilestoneItem(
+                date: 'Hoy',
+                title: 'OVR subió a 78.4',
+                desc: 'Progreso destacado en Técnica individual.',
+                isLast: false,
+                isDark: isDark,
+              ),
+              _MilestoneItem(
+                date: '24 Mar',
+                title: 'Primer Acta Sellada',
+                desc: 'Partido validado por árbitro colegiado.',
+                isLast: false,
+                isDark: isDark,
+              ),
+              _MilestoneItem(
+                date: '20 Mar',
+                title: 'Registro en SportLink',
+                desc: 'Inicio del historial deportivo digital.',
+                isLast: true,
+                isDark: isDark,
+              ),
+            ],
+          ),
+        ),
+        
+        const SizedBox(height: 20),
+        
+        // Control de Privacidad
+        Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: surface,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: border),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Seguridad y Privacidad',
+                style: TextStyle(color: text, fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              const SizedBox(height: 12),
+              _PrivacySwitch(
+                label: 'Visibilidad en Mercado de Talentos',
+                value: user.privacySettings['scoutVisible'] ?? true,
+                isDark: isDark,
+              ),
+              _PrivacySwitch(
+                label: 'Permitir Contacto de Clubes',
+                value: user.privacySettings['contactEnabled'] ?? false,
+                isDark: isDark,
+              ),
+              _PrivacySwitch(
+                label: 'Ocultar Localización Exacta',
+                value: user.privacySettings['hideLocation'] ?? true,
+                isDark: isDark,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _MilestoneItem extends StatelessWidget {
+  final String date, title, desc;
+  final bool isLast, isDark;
+  const _MilestoneItem({required this.date, required this.title, required this.desc, required this.isLast, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final muted = AppColors.textMuted(isDark);
+    final text = AppColors.text(isDark);
+    
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Column(
+          children: [
+            Container(
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(
+                color: AppColors.buttonBg(isDark),
+                shape: BoxShape.circle,
+              ),
+            ),
+            if (!isLast)
+              Container(
+                width: 1,
+                height: 40,
+                color: AppColors.border(isDark),
+              ),
+          ],
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(date, style: TextStyle(color: muted, fontSize: 10, fontWeight: FontWeight.bold)),
+                  const SizedBox(width: 8),
+                  Text(title, style: TextStyle(color: text, fontSize: 13, fontWeight: FontWeight.w700)),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(desc, style: TextStyle(color: muted, fontSize: 11, height: 1.4)),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PrivacySwitch extends StatelessWidget {
+  final String label;
+  final bool value;
+  final bool isDark;
+  const _PrivacySwitch({required this.label, required this.value, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(child: Text(label, style: TextStyle(color: AppColors.text(isDark), fontSize: 13))),
+          Switch(
+            value: value,
+            onChanged: (v) {},
+            activeColor: AppColors.buttonBg(isDark),
+          ),
+        ],
+      ),
     );
   }
 }

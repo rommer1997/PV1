@@ -18,6 +18,11 @@ class AppUser {
   final String? bio;
   final String? ageGroup;
   final String? position;
+  final List<String> achievements;
+  final Map<String, double> ovrHistory; // ISO Date -> OVR
+  final Map<String, String> privateNotes; // PlayerID -> Note (Coach only)
+  final List<Map<String, dynamic>> scoutingReports; // Professional reports
+  final Map<String, bool> privacySettings; // Feature -> Enabled
 
   const AppUser({
     required this.id,
@@ -36,6 +41,16 @@ class AppUser {
     this.bio,
     this.ageGroup,
     this.position,
+    this.achievements = const [],
+    this.ovrHistory = const {},
+    this.privateNotes = const {},
+    this.scoutingReports = const [],
+    this.privacySettings = const {
+      'showRealName': true,
+      'showExactOVR': true,
+      'showTeamName': true,
+      'allowMessages': true,
+    },
   });
 
   /// Sanitiza los datos sensibles según la relación con el visor.
@@ -61,6 +76,59 @@ class AppUser {
       bio: null,
       ageGroup: ageGroup,
       position: null,
+      achievements: achievements,
+      ovrHistory: ovrHistory,
+      privateNotes: const {}, // Nunca compartir notas privadas
+      scoutingReports: const [], // Informes profesionales son privados
+      privacySettings: privacySettings,
+    );
+  }
+
+  AppUser copyWith({
+    String? id,
+    String? uniqueId,
+    UserRole? role,
+    String? name,
+    String? teamName,
+    double? sportcoins,
+    bool? isMinor,
+    int? dailyLoginStreak,
+    bool? isPubliclyVisible,
+    int? followersCount,
+    int? followingCount,
+    bool? isVerified,
+    String? location,
+    String? bio,
+    String? ageGroup,
+    String? position,
+    List<String>? achievements,
+    Map<String, double>? ovrHistory,
+    Map<String, String>? privateNotes,
+    List<Map<String, dynamic>>? scoutingReports,
+    Map<String, bool>? privacySettings,
+  }) {
+    return AppUser(
+      id: id ?? this.id,
+      uniqueId: uniqueId ?? this.uniqueId,
+      role: role ?? this.role,
+      name: name ?? this.name,
+      teamName: teamName ?? this.teamName,
+      sportcoins: sportcoins ?? this.sportcoins,
+      isMinor: isMinor ?? this.isMinor,
+      dailyLoginStreak: dailyLoginStreak ?? this.dailyLoginStreak,
+      isPubliclyVisible: isPubliclyVisible ?? this.isPubliclyVisible,
+      followersCount: followersCount ?? this.followersCount,
+      followingCount: followingCount ?? this.followingCount,
+      isVerified: isVerified ?? this.isVerified,
+      location: location ?? this.location,
+      bio: bio ?? this.bio,
+      ageGroup: ageGroup ?? this.ageGroup,
+      position: position ?? this.position,
+      achievements: achievements ?? this.achievements,
+      ovrHistory: ovrHistory ?? this.ovrHistory,
+      privateNotes: privateNotes ?? this.privateNotes,
+      scoutingReports: scoutingReports ?? this.scoutingReports,
+      privacySettings: privacySettings ?? this.privacySettings,
     );
   }
 }
@@ -165,6 +233,11 @@ class SessionNotifier extends Notifier<AppUser?> {
         bio: state!.bio,
         ageGroup: state!.ageGroup,
         position: state!.position,
+        achievements: state!.achievements,
+        ovrHistory: state!.ovrHistory,
+        privateNotes: state!.privateNotes,
+        scoutingReports: state!.scoutingReports,
+        privacySettings: state!.privacySettings,
       );
     }
   }
