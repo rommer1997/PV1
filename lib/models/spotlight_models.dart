@@ -186,11 +186,12 @@ final endorsementsProvider = NotifierProvider<EndorsementsNotifier, Map<SkillTag
   () => EndorsementsNotifier(),
 );
 
-// MVP votes de la semana
+// Votos MVP de la semana (con peso opcional para roles premium)
 class MvpVotesNotifier extends Notifier<int> {
   @override
-  int build() => 3; // Marco tiene 3 votos MVP esta semana
-  void addVote() => state = state + 1;
+  int build() => 3; // Marco tiene 3 puntos MVP esta semana
+  
+  void addVote({int weight = 1}) => state = state + weight;
 }
 
 final mvpVotesProvider = NotifierProvider<MvpVotesNotifier, int>(

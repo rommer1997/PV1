@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/theme_provider.dart';
 import '../../widgets/glow_button.dart';
+import '../../models/spotlight_models.dart';
 
 // ── Modelos ───────────────────────────────────────────────────────────────────
 class PlayerData {
@@ -391,6 +393,103 @@ class CoachDashboardScreen extends ConsumerWidget {
                 ],
               ),
             ),
+
+            // ── Votación Once de la Semana (Voto Coach x5) ────────────────────
+            if (team != null)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(28, 0, 28, 20),
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: isDark 
+                          ? [const Color(0xFF1A1A1A), const Color(0xFF0D0D0D)]
+                          : [const Color(0xFFF9F9F9), Colors.white],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AppColors.buttonBg(isDark).withValues(alpha: 0.2)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Text('⭐', style: TextStyle(fontSize: 18)),
+                            const SizedBox(width: 8),
+                            Text(
+                              'RANKING SEMANAL',
+                              style: TextStyle(
+                                color: AppColors.buttonBg(isDark),
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 1.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Tu voto vale x5',
+                          style: TextStyle(
+                            color: text,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Elige al jugador que merece estar en el Once de la Semana de SportLink.',
+                          style: TextStyle(color: muted, fontSize: 11, height: 1.4),
+                        ),
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          height: 50,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: team.players.length,
+                            separatorBuilder: (_, __) => const SizedBox(width: 8),
+                            itemBuilder: (ctx, i) {
+                              final p = team.players[i];
+                              return GestureDetector(
+                                onTap: () {
+                                  HapticFeedback.mediumImpact();
+                                  ref.read(mvpVotesProvider.notifier).addVote(weight: 5);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('✓ Has votado por ${p.name} (+5 puntos MVP)'),
+                                      backgroundColor: AppColors.buttonBg(isDark),
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.bg(isDark),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: border),
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    p.name.split(' ').first,
+                                    style: TextStyle(
+                                      color: text,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
 
             // ── Solicitudes Pendientes ─────────
             if (team != null) ...[

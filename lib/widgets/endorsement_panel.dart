@@ -66,7 +66,7 @@ class EndorsementPanel extends ConsumerWidget {
                   Icon(Icons.military_tech_rounded, color: Colors.amber, size: 16),
                   const SizedBox(width: 4),
                   Text(
-                    '$mvpVotes MVP esta semana',
+                    '$mvpVotes Votos MVP esta semana',
                     style: TextStyle(
                       color: Colors.amber,
                       fontSize: 11,

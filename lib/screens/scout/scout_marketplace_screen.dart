@@ -4,6 +4,8 @@ import '../../providers/theme_provider.dart';
 import '../../providers/match_evaluations_provider.dart';
 import '../../models/app_user.dart';
 import '../../widgets/convocatorias_feed.dart';
+import '../../widgets/glow_button.dart';
+import 'create_convocatoria_screen.dart';
 
 // Watchlist notification (mock)
 class WatchlistNotifier extends Notifier<List<String>> {
@@ -189,7 +191,7 @@ class _ScoutMarketplaceScreenState
                   ),
                   const SizedBox(width: 10),
                   _ScoutTabBtn(
-                    label: '⭐ Watchlist (${watchlist.length})',
+                    label: '⭐ Seguimiento (${watchlist.length})',
                     sel: _tab == _ScoutTab.watchlist,
                     isDark: isDark,
                     onTap: () => setState(() => _tab = _ScoutTab.watchlist),
@@ -383,6 +385,21 @@ class _ScoutMarketplaceScreenState
                                     fontSize: 11,
                                     height: 1.4),
                               ),
+                            ),
+                            const SizedBox(width: 12),
+                            GlowButton(
+                              label: '+ Publicar',
+                              selected: true,
+                              isDark: isDark,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const CreateConvocatoriaScreen(),
+                                  ),
+                                );
+                              },
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                             ),
                           ],
                         ),

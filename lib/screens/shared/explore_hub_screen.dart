@@ -79,7 +79,7 @@ class ExploreHubScreen extends ConsumerWidget {
           backgroundColor: const Color(0xFFE2F163),
           icon: const Icon(Icons.smart_toy_outlined, color: Colors.black),
           label: const Text(
-            'Scout AI',
+            'Asistente IA',
             style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
           ),
         ),

@@ -60,7 +60,7 @@ class OnceSemanaWidget extends ConsumerWidget {
 
         const SizedBox(height: 6),
         Text(
-          'Calculado con rating, avales y votos MVP de tus compañeros',
+          'Calculado con valoración global, avales y votos MVP de tus compañeros',
           style: TextStyle(color: muted, fontSize: 11),
         ),
         const SizedBox(height: 14),

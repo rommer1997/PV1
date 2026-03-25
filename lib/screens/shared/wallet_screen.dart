@@ -213,6 +213,67 @@ class WalletScreen extends ConsumerWidget {
                 ],
               ),
 
+              const SizedBox(height: 32),
+
+              // ── SLP PRO Subscription ──────────────────────────────────────
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF6366F1), Color(0xFFA855F7)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(28),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFA855F7).withValues(alpha: 0.3),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    )
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'SPORTLINK PRO',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.5,
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Text(
+                            'ACTIVO',
+                            style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Disfrutas de beneficios exclusivos:',
+                      style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
+                    ),
+                    const SizedBox(height: 12),
+                    _ProBenefit(icon: Icons.filter_list_alt, text: 'Filtros de scouting avanzados'),
+                    _ProBenefit(icon: Icons.remove_red_eye_outlined, text: 'Visibilidad total de visitas'),
+                    _ProBenefit(icon: Icons.bolt_rounded, text: 'Prioridad en Algoritmo Spotlight'),
+                  ],
+                ),
+              ),
+
               const SizedBox(height: 48),
 
               Text(
@@ -594,6 +655,26 @@ class _SmartEscrowCard extends StatelessWidget {
               Text('2/3 firmas', style: TextStyle(color: highlight, fontSize: 11, fontWeight: FontWeight.w700)),
             ],
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProBenefit extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  const _ProBenefit({required this.icon, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.white, size: 16),
+          const SizedBox(width: 8),
+          Expanded(child: Text(text, style: const TextStyle(color: Colors.white, fontSize: 12))),
         ],
       ),
     );
