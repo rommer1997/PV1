@@ -198,7 +198,7 @@ class _JournalistScreenState extends ConsumerState<JournalistScreen> {
 
               const SizedBox(height: 36),
               Text(
-                'RECURSOS DE VIDEO (SLP VEO)',
+                'RECURSOS DE VIDEO (Cantera VEO)',
                 style: TextStyle(
                   color: muted,
                   fontSize: 10,

@@ -127,7 +127,7 @@ class _OnboardingWelcomeOverlayState
                         ),
                         const SizedBox(height: 32),
                         const Text(
-                          '¡Bienvenido a SportLink!',
+                          '¡Bienvenido a Cantera!',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Colors.white,

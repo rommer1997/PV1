@@ -6,7 +6,7 @@ import '../../widgets/convocatorias_feed.dart';
 import 'global_search_screen.dart';
 import 'agenda_screen.dart';
 import '../matches/match_discovery_screen.dart';
-import 'sportlink_ai_screen.dart';
+import 'cantera_ai_screen.dart';
 import '../scout/scout_dashboard_screen.dart';
 
 class ExploreHubScreen extends ConsumerWidget {
@@ -73,7 +73,7 @@ class ExploreHubScreen extends ConsumerWidget {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const SportLinkAIScreen()),
+              MaterialPageRoute(builder: (_) => const CanteraAIScreen()),
             );
           },
           backgroundColor: const Color(0xFFE2F163),

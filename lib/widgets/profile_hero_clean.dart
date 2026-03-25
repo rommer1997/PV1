@@ -4,6 +4,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../models/app_user.dart';
 import '../providers/theme_provider.dart';
 import '../providers/players_provider.dart';
+import '../theme/cantera_premium_styles.dart';
 import 'interest_metric_card.dart';
 import 'totw_player_card.dart';
 import '../screens/shared/profile_edit_screen.dart';
@@ -33,18 +34,14 @@ class ProfileHeroClean extends ConsumerWidget {
     final def = ((stats['RES'] ?? 0) * 10).round();
     final phy = ((stats['FUE'] ?? 0) * 10).round();
 
-    final bg = AppColors.surface(isDark);
     final text = AppColors.text(isDark);
     final muted = AppColors.textMuted(isDark);
-    final border = AppColors.border(isDark);
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-      decoration: BoxDecoration(
-        color: bg,
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: CanteraSpacing.k10),
+      decoration: CanteraPremiumColors.glass(color: isDark ? Colors.white : Colors.black).copyWith(
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: border),
       ),
       child: Column(
         children: [
@@ -70,10 +67,8 @@ class ProfileHeroClean extends ConsumerWidget {
                 },
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF1A1A1A) : const Color(0xFFF5F5F5),
+                  decoration: CanteraPremiumColors.glass(color: CanteraPremiumColors.neonCyan).copyWith(
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: border),
                   ),
                   child: Column(
                     children: [
@@ -114,8 +109,9 @@ class ProfileHeroClean extends ConsumerWidget {
                       height: 90,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: isDark ? const Color(0xFF2C2C2C) : const Color(0xFFE0E0E0),
-                        border: Border.all(color: border, width: 2),
+                        color: CanteraPremiumColors.surface,
+                        border: Border.all(color: CanteraPremiumColors.neonCyan.withOpacity(0.5), width: 1.5),
+                        boxShadow: CanteraEffects.neonGlow(CanteraPremiumColors.neonCyan.withOpacity(0.2)),
                       ),
                       child: Icon(
                         Icons.person_rounded,
@@ -128,13 +124,13 @@ class ProfileHeroClean extends ConsumerWidget {
                     right: 0,
                     bottom: 0,
                     child: GestureDetector(
-                      onTap: () => _showQRCode(context, user?.uniqueId ?? 'SLP-UNK'),
+                      onTap: () => _showQRCode(context, user?.uniqueId ?? 'Cantera-UNK'),
                       child: Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF007AFF),
+                          color: CanteraPremiumColors.neonCyan,
                           shape: BoxShape.circle,
-                          border: Border.all(color: AppColors.bg(isDark), width: 2),
+                          border: Border.all(color: CanteraPremiumColors.background, width: 2),
                         ),
                         child: const Icon(Icons.qr_code_2, color: Colors.white, size: 16),
                       ),
@@ -160,16 +156,16 @@ class ProfileHeroClean extends ConsumerWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
-                color: const Color(0xFFF4CA25).withValues(alpha: 0.1),
+                gradient: CanteraPremiumColors.neonGas(CanteraPremiumColors.premiumGold, opacity: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                '${user?.position ?? 'ST'} • 🇪🇸',
+                '${user?.position ?? 'ST'} • SPAIN',
                 style: const TextStyle(
-                  color: Color(0xFFF4CA25),
+                  color: CanteraPremiumColors.premiumGold,
                   fontSize: 13,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 2,
                 ),
               ),
             ),
@@ -213,12 +209,12 @@ class ProfileHeroClean extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text(
-              'TU CREDENCIAL SLP',
+              'TU CREDENCIAL Cantera',
               style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1),
             ),
             const SizedBox(height: 24),
             QrImageView(
-              data: 'https://sportlink.pro/cv/$uid',
+              data: 'https://cantera.pro/cv/$uid',
               version: QrVersions.auto,
               size: 200.0,
               foregroundColor: Colors.black,

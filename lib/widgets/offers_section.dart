@@ -139,7 +139,7 @@ class OffersSection extends ConsumerWidget {
                                 ),
                               ),
                               Text(
-                                'Enviada por: ${offer['scout'] ?? 'Scout de SportLink'}',
+                                'Enviada por: ${offer['scout'] ?? 'Scout de Cantera'}',
                                 style: TextStyle(color: muted, fontSize: 11),
                               ),
                             ],

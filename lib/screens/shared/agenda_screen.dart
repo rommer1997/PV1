@@ -522,7 +522,7 @@ class _MatchmakingModalState extends State<_MatchmakingModal> {
               const SizedBox(height: 16),
               Text('¡Partido Encontrado!', style: TextStyle(color: text, fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-              Text('Partido Oficial SLP-0442\nÁrbitro Asignado: Confirmado\nCuota de Entrada: 15 SC', textAlign: TextAlign.center, style: TextStyle(color: muted, fontSize: 13, height: 1.5)),
+              Text('Partido Oficial Cantera-0442\nÁrbitro Asignado: Confirmado\nCuota de Entrada: 15 SC', textAlign: TextAlign.center, style: TextStyle(color: muted, fontSize: 13, height: 1.5)),
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,

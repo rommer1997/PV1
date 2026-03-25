@@ -9,6 +9,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/spotlight_models.dart';
 import '../providers/theme_provider.dart';
+import '../theme/cantera_premium_styles.dart';
+import 'premium_skill_icon.dart';
 
 class EndorsementPanel extends ConsumerWidget {
   final bool isOwnProfile;
@@ -24,16 +26,12 @@ class EndorsementPanel extends ConsumerWidget {
 
     final text = AppColors.text(isDark);
     final muted = AppColors.textMuted(isDark);
-    final surface = AppColors.surface(isDark);
-    final border = AppColors.border(isDark);
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: border),
+      decoration: CanteraPremiumColors.glass(color: isDark ? Colors.white : Colors.black).copyWith(
+        borderRadius: BorderRadius.circular(24),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,17 +43,17 @@ class EndorsementPanel extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
-                  color: AppColors.buttonBg(isDark).withValues(alpha: 0.1),
+                  gradient: CanteraPremiumColors.neonGas(CanteraPremiumColors.neonCyan, opacity: 0.1),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.buttonBg(isDark).withValues(alpha: 0.3)),
+                  border: Border.all(color: CanteraPremiumColors.neonCyan.withOpacity(0.3)),
                 ),
                 child: Text(
                   'AVALADO POR COMPAÑEROS',
                   style: TextStyle(
-                    color: AppColors.buttonBg(isDark),
+                    color: CanteraPremiumColors.neonCyan,
                     fontSize: 9,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.5,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 2,
                   ),
                 ),
               ),
@@ -213,10 +211,7 @@ class EndorsementPanel extends ConsumerWidget {
                       padding: const EdgeInsets.only(bottom: 12),
                       child: Row(
                         children: [
-                          Text(
-                            entry.key.emoji,
-                            style: const TextStyle(fontSize: 18),
-                          ),
+                          Icon(entry.key.icon, color: entry.key.color, size: 20),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -265,7 +260,7 @@ class _SkillBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(skill.emoji, style: const TextStyle(fontSize: 13)),
+          PremiumSkillIcon(skill: skill, size: 18),
           const SizedBox(width: 5),
           Text(
             skill.label,
@@ -331,7 +326,7 @@ class _EndorseButton extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(skill.emoji, style: const TextStyle(fontSize: 12)),
+            PremiumSkillIcon(skill: skill, size: 18),
             const SizedBox(width: 5),
             Text(
               skill.label,

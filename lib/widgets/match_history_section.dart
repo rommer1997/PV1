@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/match_evaluations_provider.dart';
-import '../providers/theme_provider.dart';
+import '../theme/cantera_premium_styles.dart';
 
 class MatchHistorySection extends ConsumerWidget {
   final String playerId;
@@ -34,10 +34,8 @@ class MatchHistorySection extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
-    final surface = AppColors.surface(isDark);
-    final text = AppColors.text(isDark);
-    final muted = AppColors.textMuted(isDark);
-    final border = AppColors.border(isDark);
+    final text = CanteraPremiumColors.text;
+    final muted = CanteraPremiumColors.textMuted;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -53,10 +51,8 @@ class MatchHistorySection extends ConsumerWidget {
         ),
         const SizedBox(height: 16),
         Container(
-          decoration: BoxDecoration(
-            color: surface,
+          decoration: CanteraPremiumColors.glass(color: isDark ? Colors.white : Colors.black).copyWith(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: border),
           ),
           child: Column(
             children: recent.asMap().entries.map((entry) {
@@ -119,7 +115,7 @@ class MatchHistorySection extends ConsumerWidget {
                       ],
                     ),
                     subtitle: Text(
-                      'Partido SLP-${e.matchId.hashCode.abs().toString().substring(0, 4)}',
+                      'Partido Cantera-${e.matchId.hashCode.abs().toString().substring(0, 4)}',
                       style: TextStyle(color: muted, fontSize: 11),
                     ),
                     trailing: Text(
@@ -129,7 +125,7 @@ class MatchHistorySection extends ConsumerWidget {
                   ),
                   if (i < recent.length - 1)
                     Divider(
-                      color: border,
+                      color: CanteraPremiumColors.textMuted.withOpacity(0.1),
                       height: 1,
                       indent: 16,
                       endIndent: 16,

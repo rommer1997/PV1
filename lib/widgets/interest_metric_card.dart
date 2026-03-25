@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../providers/theme_provider.dart';
+import '../theme/cantera_premium_styles.dart';
 
 class InterestMetricCard extends StatelessWidget {
   final int count;
@@ -13,29 +13,26 @@ class InterestMetricCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final surface = AppColors.surface(isDark);
-    final text = AppColors.text(isDark);
-    final muted = AppColors.textMuted(isDark);
+    final text = CanteraPremiumColors.text;
+    final muted = CanteraPremiumColors.textMuted;
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: surface,
+      decoration: CanteraPremiumColors.glass(color: isDark ? Colors.white : Colors.black).copyWith(
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.border(isDark)),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.blue.withValues(alpha: 0.1),
+              gradient: CanteraPremiumColors.neonGas(CanteraPremiumColors.neonCyan, opacity: 0.1),
               shape: BoxShape.circle,
             ),
             child: const Icon(
               Icons.remove_red_eye_outlined, 
-              color: Colors.blue, 
+              color: CanteraPremiumColors.neonCyan, 
               size: 24,
             ),
           ),

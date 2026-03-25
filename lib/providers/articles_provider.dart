@@ -46,7 +46,7 @@ class ArticlesNotifier extends Notifier<List<Article>> {
       ),
       Article(
         id: '2',
-        authorName: 'SportLink News',
+        authorName: 'Cantera News',
         title: 'Nueva actualización del Mercado de Talentos',
         content: 'Ya está disponible la nueva oleada de perfiles verificados en la plataforma. Más de 500 nuevos talentos listos para ser descubiertos.',
         date: DateTime.now().subtract(const Duration(hours: 5)),

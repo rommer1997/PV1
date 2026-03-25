@@ -29,21 +29,21 @@ class _PredictScreenState extends ConsumerState<PredictScreen>
   final _candidates = [
     _MvpCandidate(
       name: 'Marco Silva',
-      id: 'SLP-0982',
+      id: 'Cantera-0982',
       position: 'Delantero',
       rating: 9.2,
       votes: 142,
     ),
     _MvpCandidate(
       name: 'Luis Peña',
-      id: 'SLP-1102',
+      id: 'Cantera-1102',
       position: 'Centrocampista',
       rating: 8.6,
       votes: 87,
     ),
     _MvpCandidate(
       name: 'Adrián Torres',
-      id: 'SLP-1341',
+      id: 'Cantera-1341',
       position: 'Defensa',
       rating: 8.1,
       votes: 53,

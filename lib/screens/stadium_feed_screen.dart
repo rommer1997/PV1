@@ -112,11 +112,11 @@ class _StadiumFeedScreenState extends ConsumerState<StadiumFeedScreen> {
                 delegate: SliverChildListDelegate([
                   if (_selectedFilter == 'Todo' || _selectedFilter == 'Fichajes') ...[
                     _PremiumFeedCard(
-                      authorName: 'SLP Transfer Market',
+                      authorName: 'Cantera Transfer Market',
                       authorRole: 'Agente Oficial',
                       category: 'FICHAJE',
                       title: 'Acuerdo Cerrado: Nuevo Talento',
-                      body: 'El contrato deportivo del jugador @SLP_0982 ha sido formalizado y emitido exitosamente mediante contrato inteligente. Otro hito validado en la red. #FichajesSLP #NextGen',
+                      body: 'El contrato deportivo del jugador @Cantera_0982 ha sido formalizado y emitido exitosamente mediante contrato inteligente. Otro hito validado en la red. #FichajesCantera #NextGen',
                       time: 'Hace 2 h',
                       likes: 124,
                       comments: 18,
@@ -174,7 +174,7 @@ class _StadiumFeedScreenState extends ConsumerState<StadiumFeedScreen> {
                   if (_selectedFilter == 'Todo' || _selectedFilter == 'VOD') ...[
                     VideoHighlightCard(
                       title: 'Las Mejores Salvadas de la Jornada 5',
-                      description: 'Revive los momentos más impresionantes de la liga. Material bruto SLP VEO para que jugadores y fans revivan el show.',
+                      description: 'Revive los momentos más impresionantes de la liga. Material bruto Cantera VEO para que jugadores y fans revivan el show.',
                       matchDate: 'Hace 4 h',
                       isDark: isDark,
                       canAdjustStats: false,
@@ -485,7 +485,7 @@ class _JournalistInteractiveCardState extends State<_JournalistInteractiveCard> 
               final latest = evals.firstOrNull;
               final msg = latest != null 
                 ? 'Impresionante exhibición de @${latest.playerId} en el ${latest.matchName}. Técnica de ${latest.tecnica.toStringAsFixed(1)} validada inmutablemente. #NextGen'
-                : 'Analizando las promesas del fútbol regional. Los datos del árbitro son la única fuente de verdad. ¿Quién será el próximo en destacar? #SportLink';
+                : 'Analizando las promesas del fútbol regional. Los datos del árbitro son la única fuente de verdad. ¿Quién será el próximo en destacar? #Cantera';
               
               return _StyledContentText(
                 text: msg,
@@ -697,7 +697,7 @@ class _BrandSponsoredCard extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          'Nike SportLink Elite',
+                          'Nike Cantera Elite',
                           style: TextStyle(color: text, fontSize: 15, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(width: 6),

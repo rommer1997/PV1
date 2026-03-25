@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/players_provider.dart';
 import '../../models/app_user.dart';
-import '../../screens/athletic_cv_screen.dart';
+import '../../screens/fish_card_screen.dart';
 
 class ScoutDashboardScreen extends ConsumerWidget {
   const ScoutDashboardScreen({super.key});
@@ -97,7 +97,7 @@ class ScoutDashboardScreen extends ConsumerWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => AthleticCVScreen(playerId: p.user.id),
+                        builder: (_) => FishCardScreen(playerId: p.user.id),
                       ),
                     );
                   },

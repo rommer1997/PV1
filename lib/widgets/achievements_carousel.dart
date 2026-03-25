@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../providers/theme_provider.dart';
+import '../theme/cantera_premium_styles.dart';
 
 class AchievementsCarousel extends StatelessWidget {
   final List<String> badges;
@@ -13,7 +13,7 @@ class AchievementsCarousel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final muted = AppColors.textMuted(isDark);
+    final muted = CanteraPremiumColors.textMuted;
     
     // Si no hay insignias, mostramos unas por defecto para el pitch
     final displayBadges = badges.isEmpty 
@@ -61,34 +61,27 @@ class _BadgeItem extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(right: 12),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: AppColors.surface(isDark),
+      decoration: CanteraPremiumColors.glass(
+        color: isSpecial ? CanteraPremiumColors.premiumGold : (isDark ? Colors.white : Colors.black),
+      ).copyWith(
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isSpecial ? const Color(0xFFF4CA25) : AppColors.border(isDark),
-        ),
-        boxShadow: [
-          if (isSpecial)
-            BoxShadow(
-              color: const Color(0xFFF4CA25).withValues(alpha: 0.1),
-              blurRadius: 10,
-            )
-        ],
+        boxShadow: isSpecial ? CanteraEffects.neonGlow(CanteraPremiumColors.premiumGold.withOpacity(0.3)) : null,
       ),
       child: Row(
         children: [
           Icon(
             isSpecial ? Icons.verified : Icons.workspace_premium, 
-            color: isSpecial ? const Color(0xFFF4CA25) : Colors.grey, 
+            color: isSpecial ? CanteraPremiumColors.premiumGold : CanteraPremiumColors.textMuted, 
             size: 18,
           ),
           const SizedBox(width: 8),
           Text(
             label,
             style: TextStyle(
-              color: AppColors.text(isDark),
+              color: isSpecial ? CanteraPremiumColors.premiumGold : CanteraPremiumColors.text,
               fontSize: 12,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1,
             ),
           ),
         ],

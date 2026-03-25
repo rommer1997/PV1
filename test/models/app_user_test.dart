@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'dart:convert';
-import 'package:sportlink_pro/models/user_role.dart';
-import 'package:sportlink_pro/services/user_storage_service.dart';
+import 'package:cantera_pro/models/user_role.dart';
+import 'package:cantera_pro/services/user_storage_service.dart';
 
 void main() {
   test('RegisteredUser.toAppUser parses extra fields correctly', () {

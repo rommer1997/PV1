@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user_role.dart';
-import '../screens/athletic_cv_screen.dart';
+import '../screens/fish_card_screen.dart';
 import '../screens/stadium_feed_screen.dart';
 import '../screens/scout/scout_marketplace_screen.dart';
 import '../screens/coach/coach_dashboard_screen.dart';
@@ -34,7 +34,7 @@ class _RoleShellState extends ConsumerState<RoleShell> {
     switch (widget.role) {
       case UserRole.player:
         return [
-          _NavItem(Icons.person_outline, 'Perfil', AthleticCVScreen()),
+          _NavItem(Icons.person_outline, 'Perfil', FishCardScreen()),
           const _NavItem(Icons.explore_outlined, 'Explorar', ExploreHubScreen()),
           const _NavItem(Icons.dynamic_feed_outlined, 'Feed', StadiumFeedScreen()),
           const _NavItem(Icons.account_balance_wallet_outlined, 'Wallet', WalletScreen()),
@@ -42,7 +42,7 @@ class _RoleShellState extends ConsumerState<RoleShell> {
       case UserRole.tutor:
         return [
           const _NavItem(Icons.approval_outlined, 'Docs', TutorApprovalsScreen()),
-          _NavItem(Icons.person_outline, 'Hijo', AthleticCVScreen()),
+          _NavItem(Icons.person_outline, 'Hijo', FishCardScreen()),
           const _NavItem(Icons.explore_outlined, 'Explorar', ExploreHubScreen()),
           const _NavItem(Icons.dynamic_feed_outlined, 'Feed', StadiumFeedScreen()),
         ];
@@ -61,7 +61,7 @@ class _RoleShellState extends ConsumerState<RoleShell> {
         ];
       case UserRole.scout:
         return [
-          _NavItem(Icons.person_outline, 'Perfil', AthleticCVScreen()),
+          _NavItem(Icons.person_outline, 'Perfil', FishCardScreen()),
           const _NavItem(Icons.explore_outlined, 'Explorar', ExploreHubScreen()),
           const _NavItem(Icons.search, 'Mercado', ScoutMarketplaceScreen()),
           const _NavItem(Icons.account_balance_wallet_outlined, 'Wallet', WalletScreen()),
@@ -169,7 +169,7 @@ class _RoleShellState extends ConsumerState<RoleShell> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // El botón QR fue movido a Athletic CV Screen
+                    // El botón QR fue movido a Fish Card Screen
                     if (widget.role != UserRole.player) ...[
                       const SizedBox(width: 8),
                       Container(

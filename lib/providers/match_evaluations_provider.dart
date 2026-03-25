@@ -58,7 +58,7 @@ class MatchEvaluationsNotifier extends Notifier<List<MatchEvaluation>> {
     MatchEvaluation(
       matchId: 'M001',
       matchName: 'Copa Sub-19 · 15 Feb',
-      playerId: 'SLP-0982',
+      playerId: '1',
       playerName: 'Marco Silva',
       date: DateTime(2026, 2, 15),
       tecnica: 8.5,
@@ -67,7 +67,7 @@ class MatchEvaluationsNotifier extends Notifier<List<MatchEvaluation>> {
       source: EvaluationSource.referee,
       signature: MatchEvaluation.generateSeal(
         'M001',
-        'SLP-0982',
+        '1',
         8.5,
         8.0,
         9.0,
@@ -77,7 +77,7 @@ class MatchEvaluationsNotifier extends Notifier<List<MatchEvaluation>> {
     MatchEvaluation(
       matchId: 'M002',
       matchName: 'Liga Juvenil · 22 Feb',
-      playerId: 'SLP-0982',
+      playerId: '1',
       playerName: 'Marco Silva',
       date: DateTime(2026, 2, 22),
       tecnica: 9.5,
@@ -86,7 +86,7 @@ class MatchEvaluationsNotifier extends Notifier<List<MatchEvaluation>> {
       source: EvaluationSource.referee,
       signature: MatchEvaluation.generateSeal(
         'M002',
-        'SLP-0982',
+        '1',
         9.5,
         8.5,
         9.5,
@@ -96,7 +96,7 @@ class MatchEvaluationsNotifier extends Notifier<List<MatchEvaluation>> {
     MatchEvaluation(
       matchId: 'M003',
       matchName: 'Amistoso Atletico · 28 Feb',
-      playerId: 'SLP-0982',
+      playerId: '1',
       playerName: 'Marco Silva',
       date: DateTime(2026, 2, 28),
       tecnica: 7.5,
@@ -105,7 +105,7 @@ class MatchEvaluationsNotifier extends Notifier<List<MatchEvaluation>> {
       source: EvaluationSource.referee,
       signature: MatchEvaluation.generateSeal(
         'M003',
-        'SLP-0982',
+        '1',
         7.5,
         9.0,
         10.0,
@@ -213,7 +213,7 @@ final playerOvrHistoryProvider =
         final subset = chronological.sublist(0, i + 1);
         // Invertimos el subset para que calcWeightedAverages funcione (espera más reciente primero)
         final stats = calcWeightedAverages(subset.reversed.toList());
-        final ovr = (stats['TEC'] ?? 0 + (stats['RES'] ?? 0) + (stats['FPL'] ?? 0)) / 3;
+        final ovr = ((stats['TEC'] ?? 0) + (stats['RES'] ?? 0) + (stats['FPL'] ?? 0)) / 3;
         
         // Evitamos duplicados de fecha en el mismo día para el gráfico (o tomamos la última)
         history.add(MapEntry(chronological[i].date, ovr));

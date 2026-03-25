@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../providers/theme_provider.dart';
+import '../theme/cantera_premium_styles.dart';
 
 class OvrProgressionChart extends StatelessWidget {
   final List<MapEntry<DateTime, double>> history;
@@ -15,17 +15,13 @@ class OvrProgressionChart extends StatelessWidget {
   Widget build(BuildContext context) {
     if (history.isEmpty) return const SizedBox.shrink();
 
-    final surface = AppColors.surface(isDark);
-    final text = AppColors.text(isDark);
-    final muted = AppColors.textMuted(isDark);
-    final border = AppColors.border(isDark);
+    final text = CanteraPremiumColors.text;
+    final muted = CanteraPremiumColors.textMuted;
 
     return Container(
       padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: surface,
+      decoration: CanteraPremiumColors.glass(color: isDark ? Colors.white : Colors.black).copyWith(
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -112,7 +108,7 @@ class _ChartPainter extends CustomPainter {
     if (data.length < 2) return;
 
     final paint = Paint()
-      ..color = const Color(0xFF007AFF)
+      ..color = CanteraPremiumColors.neonCyan
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3
       ..strokeCap = StrokeCap.round;
@@ -122,18 +118,23 @@ class _ChartPainter extends CustomPainter {
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [
-          const Color(0xFF007AFF).withValues(alpha: 0.3),
-          const Color(0xFF007AFF).withValues(alpha: 0.0),
+          CanteraPremiumColors.neonCyan.withOpacity(0.3),
+          CanteraPremiumColors.neonCyan.withOpacity(0.0),
         ],
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
 
     final path = Path();
     final fillPath = Path();
 
+    if (size.width <= 0 || size.height <= 0) return;
+
+    if (size.width <= 0 || size.height <= 0) return;
+
     final stepX = size.width / (data.length - 1);
     final minVal = data.reduce((a, b) => a < b ? a : b) - 2;
     final maxVal = data.reduce((a, b) => a > b ? a : b) + 2;
-    final range = maxVal - minVal;
+    var range = maxVal - minVal;
+    if (range <= 0) range = 1.0;
 
     double getY(double val) => size.height - ((val - minVal) / range * size.height);
 
@@ -160,8 +161,8 @@ class _ChartPainter extends CustomPainter {
     canvas.drawPath(path, paint);
 
     // Puntos
-    final dotPaint = Paint()..color = const Color(0xFF007AFF);
-    final bgPaint = Paint()..color = isDark ? const Color(0xFF1C1C1E) : Colors.white;
+    final dotPaint = Paint()..color = CanteraPremiumColors.neonCyan;
+    final bgPaint = Paint()..color = isDark ? const Color(0xFF131314) : Colors.white;
     
     for (int i = 0; i < data.length; i++) {
       final x = i * stepX;

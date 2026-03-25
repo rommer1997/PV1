@@ -75,7 +75,7 @@ class TutorSection extends StatelessWidget {
               ),
               _MilestoneItem(
                 date: '20 Mar',
-                title: 'Registro en SportLink',
+                title: 'Registro en Cantera',
                 desc: 'Inicio del historial deportivo digital.',
                 isLast: true,
                 isDark: isDark,

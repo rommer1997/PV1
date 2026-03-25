@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/spotlight_models.dart';
 import '../providers/theme_provider.dart';
+import '../theme/cantera_premium_styles.dart';
 
 // Estado de postulaciones del jugador actual
 class PostulacionesNotifier extends Notifier<Set<String>> {
@@ -67,9 +68,9 @@ class ConvocatoriasFeed extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
-                color: Colors.green.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(20),
-              ),
+              gradient: CanteraPremiumColors.neonGas(CanteraPremiumColors.neonCyan, opacity: 0.1),
+              borderRadius: BorderRadius.circular(20),
+            ),
               child: Row(
                 children: [
                   Container(
@@ -124,7 +125,6 @@ class _ConvocatoriaCardState extends ConsumerState<_ConvocatoriaCard> {
     final isDark = widget.isDark;
     final postulaciones = ref.watch(postulacionesProvider);
     final yaPostulado = postulaciones.contains(c.id);
-    final surface = AppColors.surface(isDark);
     final border = AppColors.border(isDark);
     final text = AppColors.text(isDark);
     final muted = AppColors.textMuted(isDark);
@@ -139,14 +139,11 @@ class _ConvocatoriaCardState extends ConsumerState<_ConvocatoriaCard> {
         duration: const Duration(milliseconds: 250),
         curve: Curves.easeInOut,
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: surface,
+        decoration: CanteraPremiumColors.glass(
+          color: yaPostulado ? Colors.green : (isDark ? Colors.white : Colors.black),
+        ).copyWith(
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: yaPostulado
-                ? Colors.green.withValues(alpha: 0.4)
-                : border,
-          ),
+          boxShadow: yaPostulado ? CanteraEffects.neonGlow(Colors.green.withOpacity(0.2)) : null,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -157,9 +154,9 @@ class _ConvocatoriaCardState extends ConsumerState<_ConvocatoriaCard> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: typeColor.withValues(alpha: 0.1),
+                    gradient: CanteraPremiumColors.neonGas(typeColor, opacity: 0.1),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: typeColor.withValues(alpha: 0.3)),
+                    border: Border.all(color: typeColor.withOpacity(0.3)),
                   ),
                   child: Text(
                     c.tipo == ConvocatoriaType.reto ? '⚡ RETO' : '📢 ABIERTA',
@@ -190,13 +187,21 @@ class _ConvocatoriaCardState extends ConsumerState<_ConvocatoriaCard> {
                 ),
                 const Spacer(),
                 // Días restantes
-                Text(
-                  isUrgent ? '🔴 ${daysLeft}d' : '${daysLeft}d',
-                  style: TextStyle(
-                    color: isUrgent ? Colors.red : muted,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                  ),
+                Row(
+                  children: [
+                    if (isUrgent) ...[
+                      const Icon(Icons.flash_on_rounded, color: Colors.red, size: 12),
+                      const SizedBox(width: 4),
+                    ],
+                    Text(
+                      '${daysLeft}d',
+                      style: TextStyle(
+                        color: isUrgent ? Colors.red : muted,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

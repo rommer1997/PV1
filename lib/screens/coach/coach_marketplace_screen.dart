@@ -176,7 +176,7 @@ class _CoachMarketplaceScreenState extends ConsumerState<CoachMarketplaceScreen>
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Conecta con familias · Sin comisiones · Solo publicidad SportLink',
+                    'Conecta con familias · Sin comisiones · Solo publicidad Cantera',
                     style: TextStyle(color: muted, fontSize: 12),
                   ),
                   const SizedBox(height: 20),
@@ -431,7 +431,7 @@ class _MyProfileTabState extends ConsumerState<_MyProfileTab> {
           ),
           const SizedBox(height: 12),
 
-          // Nota de SportLink
+          // Nota de Cantera
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -450,7 +450,7 @@ class _MyProfileTabState extends ConsumerState<_MyProfileTab> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'SportLink Pro incluirá publicidad propia en tu ficha. El precio y condiciones son íntegramente tuyos. Sin comisiones por contacto.',
+                    'Cantera incluirá publicidad propia en tu ficha. El precio y condiciones son íntegramente tuyos. Sin comisiones por contacto.',
                     style: TextStyle(color: muted, fontSize: 12, height: 1.5),
                   ),
                 ),
@@ -560,7 +560,7 @@ class _ExploreTab extends ConsumerWidget {
           const SizedBox(height: 12),
           Center(
             child: Text(
-              'SportLink Pro · Todos los derechos reservados',
+              'Cantera · Todos los derechos reservados',
               style: TextStyle(color: muted, fontSize: 10),
             ),
           ),

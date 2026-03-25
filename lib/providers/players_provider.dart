@@ -42,7 +42,7 @@ class PlayersNotifier extends Notifier<List<PlayerData>> {
     return [
       PlayerData(
         user: mockUsers[UserRole.player]!.copyWith(
-          achievements: ['Fiel a SportLink', 'Fair Play Bronce', 'Elite MVP'],
+          achievements: ['Fiel a Cantera', 'Fair Play Bronce', 'Elite MVP'],
           ovrHistory: {
             '2026-01-15': 71.0,
             '2026-01-30': 72.5,
@@ -56,7 +56,7 @@ class PlayersNotifier extends Notifier<List<PlayerData>> {
       const PlayerData(
         user: AppUser(
           id: '101',
-          uniqueId: 'SLP-8832',
+          uniqueId: 'Cantera-8832',
           role: UserRole.player,
           name: 'Luis Peña',
           teamName: 'Rayo Vallecano U19',
@@ -68,7 +68,7 @@ class PlayersNotifier extends Notifier<List<PlayerData>> {
       const PlayerData(
         user: AppUser(
           id: '102',
-          uniqueId: 'SLP-5541',
+          uniqueId: 'Cantera-5541',
           role: UserRole.player,
           name: 'Adrián Torres',
           teamName: 'Getafe CF U19',
@@ -80,7 +80,7 @@ class PlayersNotifier extends Notifier<List<PlayerData>> {
       const PlayerData(
         user: AppUser(
           id: '103',
-          uniqueId: 'SLP-2210',
+          uniqueId: 'Cantera-2210',
           role: UserRole.player,
           name: 'Jorge Ruiz',
           teamName: 'CD Leganés U19',

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/all_users_provider.dart';
 import '../../providers/theme_provider.dart';
-import '../athletic_cv_screen.dart';
+import '../fish_card_screen.dart';
 
 class GlobalSearchScreen extends ConsumerStatefulWidget {
   const GlobalSearchScreen({super.key});
@@ -78,7 +78,7 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => AthleticCVScreen(viewedUser: u),
+                              builder: (_) => FishCardScreen(viewedUser: u),
                             ),
                           );
                         },

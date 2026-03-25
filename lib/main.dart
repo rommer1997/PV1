@@ -20,12 +20,12 @@ void main() async {
   // Comprobar si hay sesión guardada al arrancar
   final savedUser = await UserStorageService.loadSession();
 
-  runApp(ProviderScope(child: SportLinkApp(loggedInUser: savedUser)));
+  runApp(ProviderScope(child: CanteraApp(loggedInUser: savedUser)));
 }
 
-class SportLinkApp extends ConsumerWidget {
+class CanteraApp extends ConsumerWidget {
   final RegisteredUser? loggedInUser;
-  const SportLinkApp({super.key, this.loggedInUser});
+  const CanteraApp({super.key, this.loggedInUser});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -47,7 +47,7 @@ class SportLinkApp extends ConsumerWidget {
     }
 
     return MaterialApp(
-      title: 'SportLink Pro',
+      title: 'Cantera',
       debugShowCheckedModeBanner: false,
       themeMode: themeMode,
       darkTheme: _buildDarkTheme(),

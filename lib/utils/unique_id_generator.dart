@@ -3,12 +3,12 @@ import 'dart:math';
 class UniqueIdGenerator {
   static final _random = Random();
 
-  /// Generates a unique ID in the format SLP-[ROLE]-[RANDOM]
-  /// Example: SLP-P-7281 (Player), SLP-C-9921 (Coach)
+  /// Generates a unique ID in the format Cantera-[ROLE]-[RANDOM]
+  /// Example: Cantera-P-7281 (Player), Cantera-C-9921 (Coach)
   static String generate(String rolePrefix) {
     final year = DateTime.now().year.toString().substring(2);
     final randomDigits = _random.nextInt(9000) + 1000;
-    return 'SLP-$rolePrefix$year-$randomDigits';
+    return 'Cantera-$rolePrefix$year-$randomDigits';
   }
 
   static String getPrefixForRole(String roleName) {

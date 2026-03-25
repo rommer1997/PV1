@@ -29,7 +29,7 @@ class WalletScreen extends ConsumerWidget {
             children: [
               // Header
               Text(
-                'Billetera SLP',
+                'Billetera Cantera',
                 style: TextStyle(
                   color: text,
                   fontSize: 24,

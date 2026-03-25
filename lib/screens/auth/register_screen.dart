@@ -568,7 +568,7 @@ class _FootballFieldSelector extends StatelessWidget {
 
   List<Widget> _buildPositionDot(String pos, double yFactor, double xFactor) {
     final isSelected = selectedPosition == pos;
-    final primaryColor = const Color(0xFFE2F163); // SLP Accent Lime
+    final primaryColor = const Color(0xFFE2F163); // Cantera Accent Lime
 
     return [
       Align(

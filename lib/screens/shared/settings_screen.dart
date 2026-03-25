@@ -143,7 +143,7 @@ class SettingsScreen extends ConsumerWidget {
                 builder: (ctx) => AlertDialog(
                   backgroundColor: AppColors.surface(isDark),
                   title: Text('Cerrar Sesión', style: TextStyle(color: text)),
-                  content: Text('¿Seguro que deseas salir de SportLink Pro?', style: TextStyle(color: muted)),
+                  content: Text('¿Seguro que deseas salir de Cantera?', style: TextStyle(color: muted)),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(ctx),

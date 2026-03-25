@@ -136,7 +136,7 @@ class AppUser {
 final mockUsers = <UserRole, AppUser>{
   UserRole.player: const AppUser(
     id: '1',
-    uniqueId: 'SLP-PLY-2026-1029',
+    uniqueId: 'Cantera-PLY-2026-1029',
     role: UserRole.player,
     name: 'Marco Silva',
     teamName: 'Madrid U19',
@@ -150,7 +150,7 @@ final mockUsers = <UserRole, AppUser>{
   ),
   UserRole.scout: const AppUser(
     id: '3',
-    uniqueId: 'SLP-SCO-2026-9921',
+    uniqueId: 'Cantera-SCO-2026-9921',
     role: UserRole.scout,
     name: 'David Torres',
     teamName: 'Real Madrid Academy',
@@ -159,7 +159,7 @@ final mockUsers = <UserRole, AppUser>{
   ),
   UserRole.coach: const AppUser(
     id: '4',
-    uniqueId: 'SLP-COA-2026-1122',
+    uniqueId: 'Cantera-COA-2026-1122',
     role: UserRole.coach,
     name: 'Carlos Ruiz',
     teamName: 'Madrid U19',
@@ -167,7 +167,7 @@ final mockUsers = <UserRole, AppUser>{
   ),
   UserRole.fan: const AppUser(
     id: '5',
-    uniqueId: 'SLP-FAN-2026-5544',
+    uniqueId: 'Cantera-FAN-2026-5544',
     role: UserRole.fan,
     name: 'Laura M.',
     followersCount: 23,
@@ -176,33 +176,33 @@ final mockUsers = <UserRole, AppUser>{
   ),
   UserRole.tutor: const AppUser(
     id: '6',
-    uniqueId: 'SLP-TUT-2026-7788',
+    uniqueId: 'Cantera-TUT-2026-7788',
     role: UserRole.tutor,
     name: 'Roberto Silva',
   ),
   UserRole.journalist: const AppUser(
     id: '7',
-    uniqueId: 'SLP-JOU-2026-8899',
+    uniqueId: 'Cantera-JOU-2026-8899',
     role: UserRole.journalist,
     name: 'Mario Kempes',
     followersCount: 15200,
   ),
   UserRole.brand: const AppUser(
     id: '8',
-    uniqueId: 'SLP-BRN-2026-1234',
+    uniqueId: 'Cantera-BRN-2026-1234',
     role: UserRole.brand,
     name: 'Nike Football',
     followersCount: 89000,
   ),
   UserRole.staff: const AppUser(
     id: '9',
-    uniqueId: 'SLP-STF-2026-4321',
+    uniqueId: 'Cantera-STF-2026-4321',
     role: UserRole.staff,
     name: 'Admin Staff',
   ),
   UserRole.referee: const AppUser(
     id: '10',
-    uniqueId: 'SLP-REF-2026-9999',
+    uniqueId: 'Cantera-REF-2026-9999',
     role: UserRole.referee,
     name: 'Mateu Lahoz',
     followersCount: 120,

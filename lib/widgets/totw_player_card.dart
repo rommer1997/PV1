@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/app_user.dart';
+import '../theme/cantera_premium_styles.dart';
 
 // ── Carta FIFA (TOTW) Extraída ──────────────────────────────────────────────
 class TOTWPlayerCard extends StatelessWidget {
@@ -40,22 +41,15 @@ class TOTWPlayerCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFF2C2C2C),
-            Color(0xFF0A0A0A),
-            Color(0xFF1A1A1A),
-            Color(0xFF000000),
+            Color(0xFF131314),
+            Color(0xFF1C1B1C),
+            Color(0xFF2A2A2B),
+            Color(0xFF0E0E0F),
           ],
           stops: [0.0, 0.4, 0.8, 1.0],
         ),
-        boxShadow: [
-          BoxShadow(
-            color: goldColor.withValues(alpha: 0.4),
-            blurRadius: 30,
-            spreadRadius: -5,
-            offset: const Offset(0, 10),
-          ),
-        ],
-        border: Border.all(color: goldColor.withValues(alpha: 0.9), width: 2),
+        boxShadow: CanteraEffects.neonGlow(CanteraPremiumColors.premiumGold.withOpacity(0.3)),
+        border: Border.all(color: CanteraPremiumColors.premiumGold.withOpacity(0.8), width: 1.5),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
@@ -87,16 +81,17 @@ class TOTWPlayerCard extends StatelessWidget {
             ),
 
             // Brillo superior
+            // Holographic Accent
             Positioned(
               top: -50,
-              left: -50,
+              right: -50,
               child: Container(
-                width: 150,
-                height: 150,
+                width: 200,
+                height: 200,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
-                    colors: [goldColor.withValues(alpha: 0.15), Colors.transparent],
+                    colors: [CanteraPremiumColors.neonCyan.withOpacity(0.15), Colors.transparent],
                   ),
                 ),
               ),
@@ -143,12 +138,10 @@ class TOTWPlayerCard extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(2),
                                 border: Border.all(color: darkGold, width: 0.5),
                               ),
-                              child: const Center(
-                                child: Text(
-                                  '🇪🇸',
-                                  style: TextStyle(fontSize: 12),
+                                child: const Text(
+                                  'ESP',
+                                  style: TextStyle(fontSize: 8, fontWeight: FontWeight.w900, color: Colors.black),
                                 ),
-                              ),
                             ),
                             const SizedBox(height: 8),
                             // Escudo (Placeholder)
@@ -281,11 +274,12 @@ class _CarbonFiberPainter extends CustomPainter {
     if (!size.width.isFinite || !size.height.isFinite) return;
 
     final paint = Paint()
-      ..color = Colors.white
-      ..strokeWidth = 1;
+      ..color = Colors.white.withOpacity(0.05)
+      ..strokeWidth = 2;
 
-    for (double i = 0; i < size.width + size.height; i += 8) {
-      canvas.drawLine(Offset(i, 0), Offset(0, i), paint);
+    const spacing = 6.0;
+    for (double i = -size.height; i < size.width; i += spacing) {
+      canvas.drawLine(Offset(i, 0), Offset(i + size.height, size.height), paint);
     }
   }
 

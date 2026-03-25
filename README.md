@@ -1,6 +1,6 @@
-# SportLink Pro
+# Cantera Pro
 
-SportLink Pro es un ecosistema digital diseñado para profesionalizar el fútbol base y profesional mediante una experiencia conectada y gamificada.
+Cantera Pro es un ecosistema digital diseñado para profesionalizar el fútbol base y profesional mediante una experiencia conectada y gamificada.
 
 ## Características Principales
 - **Sistema de Roles:** Interfaz y flujos que se adaptan automáticamente al perfil del usuario (Jugador, Entrenador, Ojeador, Árbitro, etc.).

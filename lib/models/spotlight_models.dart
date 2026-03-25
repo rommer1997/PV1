@@ -1,9 +1,10 @@
 // ──────────────────────────────────────────────────────────────────────────────
 // spotlight_models.dart
-// Modelos originales de SportLink Pro para las nuevas funcionalidades
+// Modelos originales de Cantera para las nuevas funcionalidades
 // sociales/profesionales: Endorsements, Convocatorias, Once de la Semana.
 // ──────────────────────────────────────────────────────────────────────────────
 
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // ── Habilidades endorsables ───────────────────────────────────────────────────
@@ -32,16 +33,29 @@ extension SkillTagLabel on SkillTag {
     }
   }
 
-  String get emoji {
+  IconData get icon {
     switch (this) {
-      case SkillTag.regate:     return '⚡';
-      case SkillTag.velocidad:  return '💨';
-      case SkillTag.finalizacion: return '🎯';
-      case SkillTag.defensa:    return '🛡';
-      case SkillTag.liderazgo:  return '👑';
-      case SkillTag.vision:     return '👁';
-      case SkillTag.remate:     return '💥';
-      case SkillTag.pase:       return '🎶';
+      case SkillTag.regate:     return Icons.bolt_rounded;
+      case SkillTag.velocidad:  return Icons.speed_rounded;
+      case SkillTag.finalizacion: return Icons.track_changes_rounded;
+      case SkillTag.defensa:    return Icons.shield_rounded;
+      case SkillTag.liderazgo:  return Icons.star_rounded;
+      case SkillTag.vision:     return Icons.visibility_rounded;
+      case SkillTag.remate:     return Icons.sports_soccer_rounded;
+      case SkillTag.pase:       return Icons.sync_alt_rounded;
+    }
+  }
+
+  Color get color {
+    switch (this) {
+      case SkillTag.regate:     return const Color(0xFF007AFF);
+      case SkillTag.velocidad:  return const Color(0xFFFF9F0A);
+      case SkillTag.finalizacion: return const Color(0xFFFF3B30);
+      case SkillTag.defensa:    return const Color(0xFF34C759);
+      case SkillTag.liderazgo:  return const Color(0xFFF4CA25);
+      case SkillTag.vision:     return const Color(0xFFAF52DE);
+      case SkillTag.remate:     return const Color(0xFFFF2D55);
+      case SkillTag.pase:       return const Color(0xFF5AC8FA);
     }
   }
 }
@@ -263,9 +277,9 @@ final convocatoriasProvider = Provider<List<Convocatoria>>((ref) => [
 
 // Once de la Semana — top 11 jugadores de la semana
 final onceSemanProvider = Provider<List<OnceSemanEntry>>((ref) => [
-  OnceSemanEntry(playerId: 'SLP-0982', playerName: 'Marco Silva', posicion: 'Delantero', region: 'Madrid', rating: 9.1, totalEndorsements: 6, mvpVotes: 3, weekNumber: 13),
-  OnceSemanEntry(playerId: 'SLP-1102', playerName: 'Luis Peña', posicion: 'Centrocampista', region: 'Madrid', rating: 8.9, totalEndorsements: 11, mvpVotes: 1, weekNumber: 13),
-  OnceSemanEntry(playerId: 'SLP-2201', playerName: 'Álvaro Mora', posicion: 'Portero', region: 'Barcelona', rating: 9.3, totalEndorsements: 8, mvpVotes: 4, weekNumber: 13),
-  OnceSemanEntry(playerId: 'SLP-3311', playerName: 'Fermín Díaz', posicion: 'Defensa', region: 'Sevilla', rating: 8.7, totalEndorsements: 5, mvpVotes: 2, weekNumber: 13),
-  OnceSemanEntry(playerId: 'SLP-4422', playerName: 'Iker Santos', posicion: 'Extremo', region: 'Bilbao', rating: 9.0, totalEndorsements: 9, mvpVotes: 3, weekNumber: 13),
+  OnceSemanEntry(playerId: '1', playerName: 'Marco Silva', posicion: 'Delantero', region: 'Madrid', rating: 9.1, totalEndorsements: 6, mvpVotes: 3, weekNumber: 13),
+  OnceSemanEntry(playerId: '101', playerName: 'Luis Peña', posicion: 'Centrocampista', region: 'Madrid', rating: 8.9, totalEndorsements: 11, mvpVotes: 1, weekNumber: 13),
+  OnceSemanEntry(playerId: '102', playerName: 'Adrián Torres', posicion: 'Defensa', region: 'Barcelona', rating: 9.3, totalEndorsements: 8, mvpVotes: 4, weekNumber: 13),
+  OnceSemanEntry(playerId: '103', playerName: 'Jorge Ruiz', posicion: 'Portero', region: 'Sevilla', rating: 8.7, totalEndorsements: 5, mvpVotes: 2, weekNumber: 13),
+  OnceSemanEntry(playerId: '105', playerName: 'Iker Santos', posicion: 'Extremo', region: 'Bilbao', rating: 9.0, totalEndorsements: 9, mvpVotes: 3, weekNumber: 13),
 ]);

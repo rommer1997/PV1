@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/theme_provider.dart';
-import '../athletic_cv_screen.dart';
+import '../fish_card_screen.dart';
 
 // ════════════════════════════════════════════════════════════════════════════
 // NOTA ARQUITECTURAL:
@@ -151,8 +151,8 @@ class _CaptainScreenState extends ConsumerState<CaptainScreen>
               child: TabBarView(
                 controller: _tab,
                 children: [
-                  // ── Tab 1: Athletic CV ──
-                  AthleticCVScreen(),
+                  // ── Tab 1: Fish Card ──
+                  FishCardScreen(),
 
                   // ── Tab 2: Diseñador de uniforme ──
                   _UniformDesigner(isDark: isDark),

@@ -52,7 +52,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
       id: 'post-${DateTime.now().millisecondsSinceEpoch}',
       authorId: user?.id ?? 'demo',
       authorName: user?.name ?? 'Jugador Demo',
-      authorUniqueId: user?.uniqueId ?? 'SLP-0000',
+      authorUniqueId: user?.uniqueId ?? 'Cantera-0000',
       type: _type,
       filePath: _mediaFile?.path,
       caption: _captionCtrl.text.trim(),
@@ -258,7 +258,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
               runSpacing: 8,
               children:
                   [
-                        '#SportLinkPro',
+                        '#CanteraPro',
                         '#TalentoCertificado',
                         '#Fútbol',
                         '#Sub19',

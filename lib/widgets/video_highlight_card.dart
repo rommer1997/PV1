@@ -95,7 +95,7 @@ class VideoHighlightCard extends ConsumerWidget {
                     children: [
                       Icon(Icons.videocam_outlined, color: Colors.white, size: 12),
                       SizedBox(width: 4),
-                      Text('SLP VEO', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                      Text('Cantera VEO', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
                     ],
                   ),
                 ),

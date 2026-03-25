@@ -33,7 +33,7 @@ class _TutorApprovalsScreenState extends ConsumerState<TutorApprovalsScreen> {
     _Offer(
       scoutName: 'David Torres',
       scoutTeam: 'Real Madrid Academy',
-      playerId: 'SLP-0982',
+      playerId: 'Cantera-0982',
       playerName: 'Marco Silva',
       terms: '2 años · Juvenil A · Sin coste de traspaso',
       playerIsMinor: true,
@@ -41,7 +41,7 @@ class _TutorApprovalsScreenState extends ConsumerState<TutorApprovalsScreen> {
     _Offer(
       scoutName: 'Álvaro Díaz',
       scoutTeam: 'Barcelona B',
-      playerId: 'SLP-0982',
+      playerId: 'Cantera-0982',
       playerName: 'Marco Silva',
       terms: '3 años · Formación · 10% SportEscrow',
       playerIsMinor: true,
@@ -273,7 +273,7 @@ class _TutorApprovalsScreenState extends ConsumerState<TutorApprovalsScreen> {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      'Marco Silva (SLP-0982) tiene permiso de juego activo para la temporada 2026/27.',
+                      'Marco Silva (Cantera-0982) tiene permiso de juego activo para la temporada 2026/27.',
                       style: TextStyle(color: muted, fontSize: 13, height: 1.5),
                     ),
                     const SizedBox(height: 16),
@@ -594,7 +594,7 @@ class _OfferItem extends StatelessWidget {
                 const Icon(Icons.verified, color: Colors.green, size: 13),
                 const SizedBox(width: 6),
                 const Text(
-                  'Firmado digitalmente · Enviado a SportLink Chain',
+                  'Firmado digitalmente · Enviado a Cantera Chain',
                   style: TextStyle(color: Colors.green, fontSize: 11),
                 ),
               ],
@@ -697,7 +697,7 @@ class _SignatureDialog extends StatelessWidget {
         ),
       ),
       content: Text(
-        'Al confirmar, otorgas permiso legal de juego a Marco Silva (SLP-0982) para la temporada 2026/27. Esta acción queda registrada en SportLink Chain.',
+        'Al confirmar, otorgas permiso legal de juego a Marco Silva (Cantera-0982) para la temporada 2026/27. Esta acción queda registrada en Cantera Chain.',
         style: TextStyle(
           color: AppColors.textMuted(isDark),
           fontSize: 13,

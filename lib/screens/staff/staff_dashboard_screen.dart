@@ -18,21 +18,21 @@ class _StaffDashboardScreenState extends ConsumerState<StaffDashboardScreen> {
   // Estado local de demo
   final List<_KycItem> _kycQueue = [
     _KycItem(
-      id: 'SLP-S001',
+      id: 'Cantera-S001',
       name: 'David Torres',
       role: 'Scout',
       doc: 'Licencia #LIC-90821',
       status: 'pendiente',
     ),
     _KycItem(
-      id: 'SLP-R002',
+      id: 'Cantera-R002',
       name: 'María López',
       role: 'Árbitro',
       doc: 'ID Árbitro #ARB-442',
       status: 'pendiente',
     ),
     _KycItem(
-      id: 'SLP-J002',
+      id: 'Cantera-J002',
       name: 'Tomás Vega',
       role: 'Periodista',
       doc: 'Medio: LaLiga News',
@@ -42,13 +42,13 @@ class _StaffDashboardScreenState extends ConsumerState<StaffDashboardScreen> {
   final List<_DisputeItem> _disputes = [
     _DisputeItem(
       id: 'D-001',
-      title: 'Disputa Fichaje SLP-0982 ↔ RM Academy',
+      title: 'Disputa Fichaje Cantera-0982 ↔ RM Academy',
       status: 'abierta',
       date: '2026-03-01',
     ),
     _DisputeItem(
       id: 'D-002',
-      title: 'Impugnación Evaluación Árbitro SLP-R001',
+      title: 'Impugnación Evaluación Árbitro Cantera-R001',
       status: 'resuelta',
       date: '2026-02-28',
     ),
@@ -622,25 +622,25 @@ class _UsersPanel extends StatefulWidget {
 class _UsersPanelState extends State<_UsersPanel> {
   final _users = [
     {
-      'id': 'SLP-0982',
+      'id': 'Cantera-0982',
       'name': 'Marco Silva',
       'role': 'Jugador',
       'status': 'activo',
     },
     {
-      'id': 'SLP-S001',
+      'id': 'Cantera-S001',
       'name': 'David Torres',
       'role': 'Scout',
       'status': 'activo',
     },
     {
-      'id': 'SLP-1102',
+      'id': 'Cantera-1102',
       'name': 'Luis Peña',
       'role': 'Jugador',
       'status': 'activo',
     },
     {
-      'id': 'SLP-J001',
+      'id': 'Cantera-J001',
       'name': 'Elena Vance',
       'role': 'Periodista',
       'status': 'activo',

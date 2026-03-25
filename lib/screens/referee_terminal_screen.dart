@@ -50,7 +50,7 @@ class _RefereeTerminalScreenState extends ConsumerState<RefereeTerminalScreen> {
   bool _isSealed = false;
 
   late String _matchName = widget.matchName ?? 'Madrid U19 Summer Cup';
-  late String _playerId = widget.playerId ?? 'SLP-0982';
+  late String _playerId = widget.playerId ?? 'Cantera-0982';
   late String _playerName = widget.playerName ?? 'Marco Silva';
   String _playerPos = 'ND';
 
@@ -395,7 +395,7 @@ class _RefereeTerminalScreenState extends ConsumerState<RefereeTerminalScreen> {
               Center(
                 child: Text(
                   _isSealed
-                      ? 'Inmutable · Sincronizado con SportLink Core'
+                      ? 'Inmutable · Sincronizado con Cantera Core'
                       : 'El rating afectará permanentemente al Athletic-CV',
                   style: TextStyle(color: muted, fontSize: 11),
                 ),
@@ -535,7 +535,7 @@ class _RefereeTerminalScreenState extends ConsumerState<RefereeTerminalScreen> {
     
     if (ref.read(connectivityProvider)) {
       ref.read(matchEvaluationsProvider.notifier).addEvaluation(eval);
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('✓ Evaluación sincronizada con SportLink Core')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('✓ Evaluación sincronizada con Cantera Core')));
     } else {
       ref.read(offlineQueueProvider.notifier).queue(eval);
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('⚠️ Guardado localmente (Sin conexión)')));

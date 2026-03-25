@@ -43,7 +43,7 @@ class _MediaFeedScreenState extends ConsumerState<MediaFeedScreen> {
                   children: [
                     Expanded(
                       child: Text(
-                        'SportLink Reels',
+                        'Cantera Reels',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 22,

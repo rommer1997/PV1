@@ -69,7 +69,7 @@ class TeamsNotifier extends Notifier<List<TeamData>> {
         ),
         const TeamMember(
           name: 'Carlos Vega',
-          id: 'SLP-0871',
+          id: 'Cantera-0871',
           pos: 'Portero',
           status: 'injured',
           rating: 7.2,
@@ -181,7 +181,7 @@ class PendingRequest {
 class PendingRequestsNotifier extends Notifier<List<PendingRequest>> {
   @override
   List<PendingRequest> build() => [
-    const PendingRequest('SLP-8832', 'Javier Gómez', 'T1'),
+    const PendingRequest('Cantera-8832', 'Javier Gómez', 'T1'),
   ];
 
   void removeRequest(String playerId) {
@@ -444,7 +444,7 @@ class CoachDashboardScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Elige al jugador que merece estar en el Once de la Semana de SportLink.',
+                          'Elige al jugador que merece estar en el Once de la Semana de Cantera.',
                           style: TextStyle(color: muted, fontSize: 11, height: 1.4),
                         ),
                         const SizedBox(height: 16),
@@ -760,7 +760,7 @@ class CoachDashboardScreen extends ConsumerWidget {
               controller: idCtrl,
               style: TextStyle(color: AppColors.text(isDark)),
               decoration: InputDecoration(
-                hintText: 'ID SportLink (ej: SLP-1234)',
+                hintText: 'ID Cantera (ej: Cantera-1234)',
                 hintStyle: TextStyle(color: AppColors.textMuted(isDark)),
               ),
             ),
@@ -787,7 +787,7 @@ class CoachDashboardScreen extends ConsumerWidget {
             onPressed: () {
               final id = idCtrl.text.trim();
               if (id.isNotEmpty) {
-                // 🔍 VALIDACIÓN: Comprobamos si el jugador existe en el sistema SportLink
+                // 🔍 VALIDACIÓN: Comprobamos si el jugador existe en el sistema Cantera
                 final players = ref.read(playersProvider);
                 final exists = players.any((p) => p.user.uniqueId == id || p.user.id == id);
                 
@@ -802,7 +802,7 @@ class CoachDashboardScreen extends ConsumerWidget {
                 } else {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     const SnackBar(
-                      content: Text('❌ ID SportLink no encontrado. El jugador debe estar registrado.'),
+                      content: Text('❌ ID Cantera no encontrado. El jugador debe estar registrado.'),
                       backgroundColor: Colors.red,
                     ),
                   );

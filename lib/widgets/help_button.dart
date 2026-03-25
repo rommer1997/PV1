@@ -30,7 +30,7 @@ class HelpSection {
 class HelpRegistry {
   static const Map<String, HelpContent> _entries = {
     'athletic_cv': HelpContent(
-      title: 'Tu Athletic CV',
+      title: 'Tu Fish Card',
       intro:
           'Esta es tu carta de presentación digital. Los scouts, periodistas y marcas la consultan para conocer tu nivel real.',
       sections: [
@@ -68,7 +68,7 @@ class HelpRegistry {
     ),
 
     'media_feed': HelpContent(
-      title: 'SportLink Reels',
+      title: 'Cantera Reels',
       intro:
           'El feed de contenido es tu escaparate público. Sube clips de tus mejores jugadas para ganar visibilidad con scouts y periodistas.',
       sections: [
@@ -166,7 +166,7 @@ class HelpRegistry {
           icon: Icons.star,
           heading: 'Tus seguidores',
           body:
-              'Los árbitros también construyen reputación en SportLink. Los jugadores, managers y fans pueden seguirte. Tu follower count aumenta con evaluaciones justas y consistentes.',
+              'Los árbitros también construyen reputación en Cantera. Los jugadores, managers y fans pueden seguirte. Tu follower count aumenta con evaluaciones justas y consistentes.',
         ),
       ],
     ),
@@ -180,7 +180,7 @@ class HelpRegistry {
           icon: Icons.article,
           heading: 'Perfiles verificados',
           body:
-              'Accedes a los Athletic CV de todos los jugadores con datos reales y firmados digitalmente. Puedes referenciar un perfil por su ID único (SLP-XXXX) en tus artículos.',
+              'Accedes a los Fish Card de todos los jugadores con datos reales y firmados digitalmente. Puedes referenciar un perfil por su ID único (Cantera-XXXX) en tus artículos.',
         ),
         HelpSection(
           icon: Icons.trending_up,
@@ -192,7 +192,7 @@ class HelpRegistry {
           icon: Icons.privacy_tip,
           heading: 'Privacidad de fuentes',
           body:
-              'Cuando accedes a un perfil de menor, los datos de contacto están protegidos. Solo ves las métricas deportivas. Toda investigación periodística debe seguir el protocolo de privacidad de SportLink.',
+              'Cuando accedes a un perfil de menor, los datos de contacto están protegidos. Solo ves las métricas deportivas. Toda investigación periodística debe seguir el protocolo de privacidad de Cantera.',
         ),
       ],
     ),
@@ -206,7 +206,7 @@ class HelpRegistry {
           icon: Icons.group,
           heading: 'Tu Plantilla',
           body:
-              'Añade jugadores a tu equipo por su ID único (SLP-XXXX). Una vez en tu plantilla, puedes evaluarlos en entrenamientos (estas evaluaciones valen 20% de su OVR).',
+              'Añade jugadores a tu equipo por su ID único (Cantera-XXXX). Una vez en tu plantilla, puedes evaluarlos en entrenamientos (estas evaluaciones valen 20% de su OVR).',
         ),
         HelpSection(
           icon: Icons.rate_review,

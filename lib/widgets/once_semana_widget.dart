@@ -1,6 +1,6 @@
 // ──────────────────────────────────────────────────────────────────────────────
 // once_semana_widget.dart
-// Carrusel semanal de los 11 jugadores destacados en SportLink Pro.
+// Carrusel semanal de los 11 jugadores destacados en Cantera.
 // Calculado a partir de rating + avales + votos MVP de la semana.
 // ──────────────────────────────────────────────────────────────────────────────
 
@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/spotlight_models.dart';
 import '../providers/theme_provider.dart';
+import '../theme/cantera_premium_styles.dart';
+import 'premium_skill_icon.dart';
 
 class OnceSemanaWidget extends ConsumerWidget {
   const OnceSemanaWidget({super.key});
@@ -20,98 +22,101 @@ class OnceSemanaWidget extends ConsumerWidget {
     final muted = AppColors.textMuted(isDark);
     final surface = AppColors.surface(isDark);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // ── Header ──────────────────────────────────────────────────────────
-        Row(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'SEMANA 13',
-                  style: TextStyle(
-                    color: muted,
-                    fontSize: 10,
-                    letterSpacing: 2.5,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Row(
-                  children: [
-                    const Text('⭐', style: TextStyle(fontSize: 16)),
-                    const SizedBox(width: 6),
-                    Text(
-                      'Once de la Semana',
-                      style: TextStyle(
-                        color: text,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-
-        const SizedBox(height: 6),
-        Text(
-          'Calculado con valoración global, avales y votos MVP de tus compañeros',
-          style: TextStyle(color: muted, fontSize: 11),
-        ),
-        const SizedBox(height: 14),
-
-        // ── Carrusel horizontal ─────────────────────────────────────────────
-        SizedBox(
-          height: 164,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: EdgeInsets.zero,
-            itemCount: once.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 10),
-            itemBuilder: (ctx, i) {
-              final player = once[i];
-              final isCurrentUser = player.playerId == 'SLP-0982';
-              return _OnceSemanaCard(
-                entry: player,
-                rank: i + 1,
-                isDark: isDark,
-                isCurrentUser: isCurrentUser,
-                surface: surface,
-                muted: muted,
-                text: text,
-              );
-            },
-          ),
-        ),
-
-        const SizedBox(height: 12),
-
-        // ── Info sobre cálculo ───────────────────────────────────────────────
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          decoration: BoxDecoration(
-            color: surface,
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: Row(
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── Header ──────────────────────────────────────────────────────────
+          Row(
             children: [
-              Icon(Icons.info_outline_rounded, color: muted, size: 14),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'El ranking se actualiza cada lunes a las 00:00. Participa en partidos y consigue avales de compañeros para aparecer.',
-                  style: TextStyle(color: muted, fontSize: 11, height: 1.4),
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'SEMANA 13',
+                    style: TextStyle(
+                      color: muted,
+                      fontSize: 10,
+                      letterSpacing: 2.5,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      const Icon(Icons.star_rounded, color: Colors.amber, size: 20),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Once de la Semana',
+                        style: TextStyle(
+                          color: text,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ],
           ),
-        ),
-      ],
+
+          const SizedBox(height: 6),
+          Text(
+            'Calculado con valoración global, avales y votos MVP de tus compañeros',
+            style: TextStyle(color: muted, fontSize: 11),
+          ),
+          const SizedBox(height: 14),
+
+          // ── Carrusel horizontal ─────────────────────────────────────────────
+          SizedBox(
+            height: 164,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: EdgeInsets.zero,
+              itemCount: once.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 10),
+              itemBuilder: (ctx, i) {
+                final player = once[i];
+                final isCurrentUser = player.playerId == '1';
+                return _OnceSemanaCard(
+                  entry: player,
+                  rank: i + 1,
+                  isDark: isDark,
+                  isCurrentUser: isCurrentUser,
+                  surface: surface,
+                  muted: muted,
+                  text: text,
+                );
+              },
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // ── Info sobre cálculo ───────────────────────────────────────────────
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: CanteraPremiumColors.glass(color: isDark ? Colors.white : Colors.black).copyWith(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            child: Row(
+              children: [
+                Icon(Icons.info_outline_rounded, color: muted, size: 14),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'El ranking se actualiza cada lunes a las 00:00. Participa en partidos y consigue avales de compañeros para aparecer.',
+                    style: TextStyle(color: muted, fontSize: 11, height: 1.4),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -144,17 +149,16 @@ class _OnceSemanaCard extends StatelessWidget {
     return Container(
       width: 130,
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: isCurrentUser
-            ? AppColors.buttonBg(isDark).withValues(alpha: 0.08)
-            : surface,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: highlightColor?.withValues(alpha: 0.4) ??
-              AppColors.border(isDark),
-          width: isCurrentUser ? 1.5 : 1.0,
+        decoration: CanteraPremiumColors.glass(
+          color: isCurrentUser ? CanteraPremiumColors.neonCyan : (isDark ? Colors.white : Colors.black),
+        ).copyWith(
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: highlightColor?.withValues(alpha: 0.4) ??
+                AppColors.border(isDark),
+            width: isCurrentUser ? 1.5 : 1.0,
+          ),
         ),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -174,9 +178,10 @@ class _OnceSemanaCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                   decoration: BoxDecoration(
-                    color: AppColors.buttonBg(isDark).withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
+                  gradient: CanteraPremiumColors.neonGas(CanteraPremiumColors.neonCyan, opacity: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: CanteraPremiumColors.neonCyan.withValues(alpha: 0.3)),
+                ),
                   child: Text(
                     'TÚ',
                     style: TextStyle(
@@ -244,9 +249,15 @@ class _OnceSemanaCard extends StatelessWidget {
                 ),
               ),
               const Spacer(),
-              Text(
-                '${entry.totalEndorsements}⭐',
-                style: TextStyle(color: muted, fontSize: 10),
+              Row(
+                children: [
+                  PremiumSkillIcon(skill: SkillTag.liderazgo, size: 10),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${entry.totalEndorsements}',
+                    style: TextStyle(color: muted, fontSize: 10),
+                  ),
+                ],
               ),
             ],
           ),
