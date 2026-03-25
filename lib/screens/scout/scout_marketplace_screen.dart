@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/match_evaluations_provider.dart';
 import '../../models/app_user.dart';
+import '../../widgets/convocatorias_feed.dart';
 
 // Watchlist notification (mock)
 class WatchlistNotifier extends Notifier<List<String>> {
@@ -84,7 +85,7 @@ class ScoutMarketplaceScreen extends ConsumerStatefulWidget {
       _ScoutMarketplaceScreenState();
 }
 
-enum _ScoutTab { search, watchlist }
+enum _ScoutTab { search, watchlist, convocatorias }
 
 class _ScoutMarketplaceScreenState
     extends ConsumerState<ScoutMarketplaceScreen> {
@@ -92,6 +93,9 @@ class _ScoutMarketplaceScreenState
   String _posFilter = 'Todos';
   _ScoutTab _tab = _ScoutTab.search;
   double _minRating = 7.0;
+  int _minEndorsements = 0;
+  bool _soloConVideo = false;
+  String _disponibilidad = 'Todos'; // Todos, Libre, Amateur, Contrato
 
   @override
   Widget build(BuildContext context) {
@@ -117,7 +121,15 @@ class _ScoutMarketplaceScreenState
       final matchPos = _posFilter == 'Todos' || p['pos'] == _posFilter;
       final matchRating = (p['rating'] as double) >= _minRating;
       final onlyValidated = (p['validated'] as bool);
-      return matchSearch && matchPos && matchRating && onlyValidated;
+      // Filtros avanzados
+      final matchEndorsements = _minEndorsements == 0 ||
+          ((p['endorsements'] as int? ?? 0) >= _minEndorsements);
+      final matchVideo = !_soloConVideo ||
+          (p['hasVideo'] as bool? ?? false);
+      final matchDisponibilidad = _disponibilidad == 'Todos' ||
+          (p['disponibilidad'] as String? ?? 'Libre') == _disponibilidad;
+      return matchSearch && matchPos && matchRating && onlyValidated &&
+          matchEndorsements && matchVideo && matchDisponibilidad;
     }).toList();
 
     final watchlistPlayers = all
@@ -181,6 +193,13 @@ class _ScoutMarketplaceScreenState
                     sel: _tab == _ScoutTab.watchlist,
                     isDark: isDark,
                     onTap: () => setState(() => _tab = _ScoutTab.watchlist),
+                  ),
+                  const SizedBox(width: 10),
+                  _ScoutTabBtn(
+                    label: '📢 Convocatorias',
+                    sel: _tab == _ScoutTab.convocatorias,
+                    isDark: isDark,
+                    onTap: () => setState(() => _tab = _ScoutTab.convocatorias),
                   ),
                 ],
               ),
@@ -316,7 +335,7 @@ class _ScoutMarketplaceScreenState
                         ),
                       ),
               ),
-            ] else ...[
+            ] else if (_tab == _ScoutTab.watchlist) ...[
               // Watchlist
               Expanded(
                 child: watchlistPlayers.isEmpty
@@ -335,6 +354,44 @@ class _ScoutMarketplaceScreenState
                           isDark: isDark,
                         ),
                       ),
+              ),
+            ] else ...[
+              // Convocatorias
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 4),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: surface,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: border),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.info_outline_rounded,
+                                color: muted, size: 14),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Como scout verificado puedes publicar convocatorias y retos a jugadores. En desarrollo.',
+                                style: TextStyle(
+                                    color: muted,
+                                    fontSize: 11,
+                                    height: 1.4),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      const ConvocatoriasFeed(),
+                    ],
+                  ),
+                ),
               ),
             ],
           ],

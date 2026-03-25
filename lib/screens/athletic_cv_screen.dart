@@ -11,6 +11,7 @@ import 'shared/profile_edit_screen.dart';
 import 'shared/settings_screen.dart';
 import '../widgets/video_highlight_card.dart';
 import '../widgets/totw_player_card.dart';
+import '../widgets/endorsement_panel.dart';
 
 // ── Paleta semáforo por rendimiento ──────────────────────────────────────────
 Color _statColor(double v) {
@@ -757,6 +758,14 @@ class AthleticCVScreen extends ConsumerWidget {
                     ),
                   ),
 
+                // ── Reconocimiento entre Compañeros ────────────────────
+                _FadeSlide(
+                  delay: 120,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 24),
+                    child: EndorsementPanel(isOwnProfile: isCurrentUser),
+                  ),
+                ),
 
                 _FadeSlide(
                   delay: 160,
